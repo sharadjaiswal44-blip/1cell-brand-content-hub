@@ -2070,5 +2070,10 @@ body.authenticated .login-overlay {
   color: var(--text-secondary);
 }
 
+.input-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 2px rgba(190, 30, 45, 0.15) !important;
+}
+
 
 

@@ -173,6 +173,16 @@ function init() {
 
   // Authentication Event Listeners
   if (loginForm) {
+    const emailInput = document.getElementById('loginEmail');
+    const errorMsg = document.getElementById('loginErrorMessage');
+
+    if (emailInput) {
+      emailInput.addEventListener('input', () => {
+        emailInput.classList.remove('input-error');
+        if (errorMsg) errorMsg.style.display = 'none';
+      });
+    }
+
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = document.getElementById('loginName').value.trim();
@@ -181,6 +191,8 @@ function init() {
 
       // Email domain validation
       if (!email.toLowerCase().endsWith('@1cell.ai')) {
+        if (emailInput) emailInput.classList.add('input-error');
+        if (errorMsg) errorMsg.style.display = 'flex';
         showToast("Access denied: Only official @1cell.ai email domains are authorized.");
         return;
       }
