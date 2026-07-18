@@ -915,7 +915,7 @@ window.switchProductTab = function(event, prodId, tabName) {
     container.innerHTML = `
       <div class="assets-grid">
         ${videos.map(vid => `
-          <div class="doc-card" onclick="window.previewDocument('doc-016')">
+          <div class="doc-card" onclick="window.open('${vid.videoUrl}', '_blank')" style="cursor:pointer;">
             <div class="video-card-thumbnail">
               <div class="video-play-icon">▶</div>
               <span class="video-duration">${vid.duration}</span>
@@ -967,8 +967,8 @@ function renderCaseLibrary() {
             </div>
           </div>
           <div class="card-actions-bar">
-            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.previewDocument('doc-007')">Preview Case</button>
-            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.triggerDownload('${c.title}')">Download PDF</button>
+            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
+            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.open('${c.readMoreUrl}', '_blank')">Read Case Study</button>
           </div>
         </div>
       `).join('')}
@@ -999,8 +999,8 @@ function renderPublications() {
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 12px;">
             <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
             <div style="display:flex; gap:8px;">
-              <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="window.previewDocument('doc-004')">Preview Publication</button>
-              <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.triggerDownload('${pub.title}')">Download PDF</button>
+              <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${pub.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
+              <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.open('${pub.link}', '_blank')">Read Publication</button>
             </div>
           </div>
         </div>
@@ -1094,14 +1094,17 @@ function renderVideoLibrary() {
     </div>
     
     <div class="assets-grid">
-      ${db.videos.map(vid => `
-        <div class="doc-card" onclick="window.previewDocument('doc-016')">
+      ${db.videos.map(vid => {
+        const productObj = db.products.find(p => p.id === vid.product);
+        const productName = productObj ? productObj.name : 'Corporate';
+        return `
+        <div class="doc-card" onclick="window.open('${vid.videoUrl}', '_blank')" style="cursor:pointer;">
           <div class="video-card-thumbnail">
             <div class="video-play-icon">▶</div>
             <span class="video-duration">${vid.duration}</span>
           </div>
           <div class="card-body" style="padding:16px;">
-            <span class="badge badge-prod" style="align-self: flex-start; margin-bottom:8px;">${db.products.find(p => p.id === vid.product).name}</span>
+            <span class="badge badge-prod" style="align-self: flex-start; margin-bottom:8px;">${productName}</span>
             <h3 style="font-size:14px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
             <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-tertiary); margin-top:auto;">
               <span>Speaker: ${vid.speaker}</span>
@@ -1109,7 +1112,8 @@ function renderVideoLibrary() {
             </div>
           </div>
         </div>
-      `).join('')}
+        `;
+      }).join('')}
     </div>
   `;
 }
@@ -1188,7 +1192,8 @@ function renderBrandGuidelines() {
               </div>
             </div>
           </div>
-          <div class="card-actions-bar" style="justify-content: flex-end;">
+          <div class="card-actions-bar" style="justify-content: space-between;">
+            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.open('${asset.downloadUrl}', '_blank')">Open Link</button>
             <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.triggerDownload('${asset.title}')">Download Asset</button>
           </div>
         </div>
@@ -1239,7 +1244,8 @@ function renderTemplates() {
               </div>
             </div>
           </div>
-          <div class="card-actions-bar" style="justify-content: flex-end;">
+          <div class="card-actions-bar" style="justify-content: space-between;">
+            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.open('${temp.downloadUrl}', '_blank')">SharePoint</button>
             <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.triggerDownload('${temp.title}')">Download Template</button>
           </div>
         </div>

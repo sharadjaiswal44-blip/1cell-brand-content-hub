@@ -1281,9 +1281,61 @@ const db = {
     }
   ],
 
-  videos: [
-    { id: "vid-001", title: "Redefining Precision Oncology: Insights from Dr. Razelle Kurzrock on the Future of Cancer Care", duration: "45:12", views: "1.2k", product: "oncoindx", videoUrl: "https://1cell.ai/redefining-precision-oncology-insights-from-dr-razelle-kurzrock-on-the-future-of-cancer-care/" },
-    { id: "vid-002", title: "Artificial Intelligence Redefining Patient's Eligibility for Immunotherapy - Indian Cancer Congress 2023", duration: "18:40", views: "840", product: "oncoindx", videoUrl: "https://1cell.ai/artificial-intelligence-redefining-patients-eligibility-for-immunotherapy-2/" }
+    videos: [
+    {
+      id: "vid-001",
+      title: "Voices in Precision Oncology - Physician Interviews",
+      duration: "32:15",
+      speaker: "Dr. Sandhay Iyer & Panel",
+      type: "Interview",
+      product: "oncoindx",
+      videoUrl: "https://www.youtube.com/@1CellAi"
+    },
+    {
+      id: "vid-002",
+      title: "Mastering CTC Sample Collection & Technical Guidelines",
+      duration: "08:45",
+      speaker: "Clinical Operations",
+      type: "Technical Guide",
+      product: "primeplus",
+      videoUrl: "https://www.youtube.com/@1CellAi"
+    },
+    {
+      id: "vid-003",
+      title: "Best Practices for Blood Draws for Next-Generation Sequencing (NGS)",
+      duration: "06:12",
+      speaker: "Informatics Operations",
+      type: "Technical Guide",
+      product: "oncoindx",
+      videoUrl: "https://www.youtube.com/@1CellAi"
+    },
+    {
+      id: "vid-004",
+      title: "Highlights from Precision Oncology Leadership Summit (POLES)",
+      duration: "15:40",
+      speaker: "Mohan Uttarwar & Guests",
+      type: "Summit Highlights",
+      product: "oncoindx",
+      videoUrl: "https://www.youtube.com/@1CellAi"
+    },
+    {
+      id: "vid-005",
+      title: "Introduction to 1Cell.Ai Precision Diagnostics",
+      duration: "04:30",
+      speaker: "Mohan Uttarwar (CEO)",
+      type: "Corporate Overview",
+      product: null,
+      videoUrl: "https://www.youtube.com/@1CellAi"
+    },
+    {
+      id: "vid-006",
+      title: "AI-Powered Digital Pathology: Biomarker Quantification",
+      duration: "12:50",
+      speaker: "Dr. Gowhar Shafi",
+      type: "Scientific Symposium",
+      product: "oncopredikt",
+      videoUrl: "https://www.youtube.com/@1CellAi"
+    }
   ],
 
   brandAssets: [
