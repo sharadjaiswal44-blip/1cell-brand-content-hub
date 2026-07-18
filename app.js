@@ -1139,8 +1139,16 @@ function renderSpeakerProfiles() {
             <div class="speaker-relations">
               <span style="font-size:10px; font-weight:700; color:var(--text-tertiary); text-transform:uppercase;">Linked Resources:</span>
               <div style="margin-top:6px;">
-                ${spk.publications.map(p => `<div class="relation-item"><span>📄</span> <span style="cursor:pointer;" onclick="window.previewDocument('doc-004')">${p}</span></div>`).join('')}
-                ${spk.presentations.map(p => `<div class="relation-item"><span>📊</span> <span style="cursor:pointer;" onclick="window.previewDocument('doc-002')">${p}</span></div>`).join('')}
+                ${spk.publications.map(p => {
+                  const doc = db.documents.find(d => d.title.toLowerCase().includes(p.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(p.toLowerCase().substring(0, 15)));
+                  const docId = doc ? doc.id : 'doc-001';
+                  return `<div class="relation-item"><span>📄</span> <span style="cursor:pointer;" onclick="window.previewDocument('${docId}')">${p}</span></div>`;
+                }).join('')}
+                ${spk.presentations.map(p => {
+                  const doc = db.documents.find(d => d.title.toLowerCase().includes(p.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(p.toLowerCase().substring(0, 15)));
+                  const docId = doc ? doc.id : 'doc-001';
+                  return `<div class="relation-item"><span>📊</span> <span style="cursor:pointer;" onclick="window.previewDocument('${docId}')">${p}</span></div>`;
+                }).join('')}
               </div>
             </div>
           </div>

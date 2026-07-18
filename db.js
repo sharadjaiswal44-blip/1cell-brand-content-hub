@@ -1040,6 +1040,151 @@ const db = {
     }
   ],
 
+  speakers: [
+    {
+      id: "spk-001",
+      name: "Dr. Gowhar Shafi",
+      specialization: "Head of Computational Biology & Informatics",
+      hospital: "1Cell.Ai R&D Division",
+      contact: "gowhar.shafi@1cell.ai",
+      photo: "https://www.w3schools.com/howto/img_avatar.png",
+      publications: [
+        "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer",
+        "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images"
+      ],
+      presentations: [
+        "OncoPredikt® Product Details & Presentation"
+      ]
+    },
+    {
+      id: "spk-002",
+      name: "Dr. Sandhay Iyer",
+      specialization: "Director of Medical Affairs & Translation Oncology",
+      hospital: "1Cell.Ai Clinical Laboratory",
+      contact: "sandhay.iyer@1cell.ai",
+      photo: "https://www.w3schools.com/howto/img_avatar2.png",
+      publications: [
+        "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology",
+        "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers"
+      ],
+      presentations: [
+        "OncoIndx® Product Details & Presentation"
+      ]
+    },
+    {
+      id: "spk-003",
+      name: "Dr. Aarti Ramesh",
+      specialization: "Consultant Medical Oncologist & Clinical Advisor",
+      hospital: "Tata Memorial Centre / 1Cell.Ai Advisor",
+      contact: "aarti.ramesh@1cell.ai",
+      photo: "https://www.w3schools.com/howto/img_avatar2.png",
+      publications: [
+        "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients",
+        "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population"
+      ],
+      presentations: [
+        "OncoHRD® Product Details & Presentation"
+      ]
+    },
+    {
+      id: "spk-004",
+      name: "Yashodhara Bhattacharya",
+      specialization: "Lead Genomic Curation & Informatics Specialist",
+      hospital: "1Cell.Ai Curation & Reporting Team",
+      contact: "yashodhara.b@1cell.ai",
+      photo: "https://www.w3schools.com/howto/img_avatar2.png",
+      publications: [
+        "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics",
+        "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response"
+      ],
+      presentations: [
+        "iCore® Product Details & Presentation"
+      ]
+    },
+    {
+      id: "spk-005",
+      name: "Santoshi Iyer",
+      specialization: "Senior Product Manager - Precision Oncology Platforms",
+      hospital: "1Cell.Ai Product Management",
+      contact: "santoshi.iyer@1cell.ai",
+      photo: "https://www.w3schools.com/howto/img_avatar2.png",
+      publications: [
+        "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients",
+        "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease"
+      ],
+      presentations: [
+        "OncoMonitor® Product Details & Presentation"
+      ]
+    }
+  ],
+
+  quizzes: [
+    {
+      id: "quiz-001",
+      title: "OncoIndx® Clinical Utility Quiz",
+      description: "Test your knowledge on comprehensive genomic profiling guidelines, Solid Tumor classifications, and testing parameters.",
+      questions: [
+        {
+          question: "Which guideline strongly recommends broad-panel Next-Generation Sequencing (NGS) for solid tumors?",
+          options: [
+            "WHO Classification Guidelines",
+            "NCCN Clinical Practice Guidelines",
+            "ASCO Annual Reporting Standards",
+            "FDA Device Classification"
+          ],
+          answer: 1
+        },
+        {
+          question: "What is the primary clinical benefit of combining live circulating tumor cell (CTC) sequencing with matched cell-free DNA (cfDNA)?",
+          options: [
+            "It reduces laboratory instrument turnaround times.",
+            "It resolves tumor heterogeneity and uncovers resistance mutations missed by cfDNA alone.",
+            "It lowers the overall testing cost.",
+            "It eliminates the need for any blood samples."
+          ],
+          answer: 1
+        },
+        {
+          question: "What solid tumor classification is OncoIndx 360 Endometrium aligned with?",
+          options: [
+            "AJCC Staging classifications",
+            "WHO Molecular Classification models",
+            "CAP/NABL standard checklist",
+            "ESMO Tumor Biology scale"
+          ],
+          answer: 1
+        }
+      ]
+    },
+    {
+      id: "quiz-002",
+      title: "OncoHRD® Testing & PARP Inhibitors Quiz",
+      description: "Test your understanding of Homologous Recombination Deficiency algorithm metrics and therapeutic selections.",
+      questions: [
+        {
+          question: "What clinical indicator is computed by OncoHRD to assess genomic instability?",
+          options: [
+            "Tumor Mutational Burden (TMB)",
+            "Homologous Recombination Deficiency (HRD) Score",
+            "Microsatellite Instability (MSI) status",
+            "Variant Allele Frequency (VAF)"
+          ],
+          answer: 1
+        },
+        {
+          question: "Which class of therapies is specifically guided by a positive HRD status in ovarian and breast cancer patients?",
+          options: [
+            "Immune Checkpoint Inhibitors",
+            "PARP Inhibitors",
+            "Monoclonal Antibodies",
+            "Tyrosine Kinase Inhibitors"
+          ],
+          answer: 1
+        }
+      ]
+    }
+  ],
+
   leaderboard: [
     { rank: 1, name: "Rajesh Kumar", points: 240, attempted: 6 },
     { rank: 2, name: "Sarah Jenkins", points: 200, attempted: 5 },
