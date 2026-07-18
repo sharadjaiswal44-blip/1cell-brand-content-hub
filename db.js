@@ -1002,12 +1002,12 @@ const db = {
   ],
 
   leaderboard: [
-    { rank: 1, name: "Rajesh Kumar", points: 240, attempted: 6, region: "North India" },
-    { rank: 2, name: "Sarah Jenkins", points: 200, attempted: 5, region: "US East" },
-    { rank: 3, name: "Dr. Amanda Ross", points: 180, attempted: 4, region: "US West" },
-    { rank: 4, name: "Devin Thorne", points: 140, attempted: 3, region: "UK & Europe" },
-    { rank: 5, name: "Emily Chen", points: 100, attempted: 2, region: "APAC Central" },
-    { rank: 6, name: "Suresh Pillai", points: 80, attempted: 2, region: "South India" }
+    { rank: 1, name: "Rajesh Kumar", points: 240, attempted: 6 },
+    { rank: 2, name: "Sarah Jenkins", points: 200, attempted: 5 },
+    { rank: 3, name: "Dr. Amanda Ross", points: 180, attempted: 4 },
+    { rank: 4, name: "Devin Thorne", points: 140, attempted: 3 },
+    { rank: 5, name: "Emily Chen", points: 100, attempted: 2 },
+    { rank: 6, name: "Suresh Pillai", points: 80, attempted: 2 }
   ]
 };
 export default db;

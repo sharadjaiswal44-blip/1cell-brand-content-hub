@@ -2271,7 +2271,6 @@ function renderLeaderboardView(container) {
           <span class="rank-badge ${rankBadgeClass}">${row.rank}</span>
         </td>
         <td style="font-weight:600; font-family:'Outfit', sans-serif;">${row.name}</td>
-        <td>${row.region}</td>
         <td style="text-align:center; font-weight:600;">${row.attempted}</td>
         <td style="text-align:right; font-weight:700; color:var(--accent-color); font-family:'Outfit', sans-serif; font-size:15.5px;">${row.points} pts</td>
       </tr>
@@ -2285,7 +2284,6 @@ function renderLeaderboardView(container) {
           <tr>
             <th style="width:70px; text-align:center;">Rank</th>
             <th>ASM Member Name</th>
-            <th>Region</th>
             <th style="text-align:center; width:120px;">Quizzes Played</th>
             <th style="text-align:right; width:120px;">Total Points</th>
           </tr>
@@ -2369,8 +2367,7 @@ window.submitQuizAnswers = function() {
       rank: db.leaderboard.length + 1,
       name: loggedInName,
       points: earnedPoints,
-      attempted: 1,
-      region: "Global HQ"
+      attempted: 1
     });
   }
 
