@@ -465,6 +465,74 @@ function renderDashboardProductDocs(productName) {
 }
 
 // 1. Dashboard View
+
+// Register New Asset Modal Trigger with Category Presets
+window.triggerRegisterAssetModal = function(routeName) {
+  const uploadForm = document.getElementById('uploadForm');
+  if (uploadForm) {
+    uploadForm.reset();
+  }
+  
+  const categorySelect = document.getElementById('formCategory');
+  if (categorySelect) {
+    if (routeName === 'dashboard' || routeName === 'favorites') {
+      categorySelect.value = 'company-assets';
+    } else {
+      categorySelect.value = routeName;
+    }
+  }
+
+  // Pre-fill department based on user department
+  const authDept = sessionStorage.getItem("authDept");
+  const deptSelect = document.getElementById('formDept');
+  if (deptSelect && authDept) {
+    if (["Marketing", "Medical", "Product", "Scientific", "Sales", "HR", "Corporate"].includes(authDept)) {
+      deptSelect.value = authDept;
+    }
+  }
+
+  const uploadModal = document.getElementById('uploadModal');
+  if (uploadModal) {
+    openModal(uploadModal);
+  }
+};
+
+// Category Header Generator with Register Asset Button
+window.renderCategoryHeader = function(title, subtitle, routeName) {
+  const authDept = sessionStorage.getItem("authDept");
+  let dept = authDept;
+  if (!dept) {
+    if (currentRole === 'marketing_admin') dept = 'Marketing';
+    else if (currentRole === 'sales') dept = 'Sales';
+    else if (currentRole === 'medical') dept = 'Genomic Scientist';
+    else if (currentRole === 'leadership') dept = 'Leadership';
+  }
+
+  let actionsHtml = '';
+  if (dept === 'Marketing' || dept === 'Leadership') {
+    actionsHtml = `
+      <button class="btn-primary" onclick="window.triggerRegisterAssetModal('${routeName}')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;margin-right:8px;display:inline-block;vertical-align:middle;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span style="vertical-align:middle;">Register New Asset</span>
+      </button>
+    `;
+  }
+
+  return `
+    <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+      <div>
+        <h1 class="welcome-title">${title}</h1>
+        <p class="welcome-subtitle">${subtitle}</p>
+      </div>
+      <div class="welcome-banner-actions">
+        ${actionsHtml}
+      </div>
+    </div>
+  `;
+};
+
 function renderDashboard() {
   let actionsHtml = '';
 
@@ -481,7 +549,7 @@ function renderDashboard() {
   // Conditionally render Admin uploads based on department: only Marketing and Leadership
   if (dept === 'Marketing' || dept === 'Leadership') {
     actionsHtml = `
-      <button class="btn-primary" id="dashUploadBtn">
+      <button class="btn-primary" id="dashUploadBtn" onclick="window.triggerRegisterAssetModal('dashboard')">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
@@ -591,8 +659,7 @@ function renderDashboard() {
   const dashUploadBtn = document.getElementById('dashUploadBtn');
   if (dashUploadBtn) {
     dashUploadBtn.addEventListener('click', () => {
-      uploadForm.reset();
-      openModal(uploadModal);
+      window.triggerRegisterAssetModal('dashboard');
     });
   }
 
@@ -937,12 +1004,7 @@ window.switchProductTab = function(event, prodId, tabName) {
 // 4. Case Library Route
 function renderCaseLibrary() {
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
-      <div>
-        <h1 class="welcome-title">Clinical Case Library</h1>
-        <p class="welcome-subtitle">Search real-world medical responses and genomics validation summaries.</p>
-      </div>
-    </div>
+${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medical responses and genomics validation summaries.', 'case-library')}
     
     <div class="assets-grid">
       ${db.cases.map(c => `
@@ -979,12 +1041,7 @@ function renderCaseLibrary() {
 // 5. Publications Route
 function renderPublications() {
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
-      <div>
-        <h1 class="welcome-title">Peer-Reviewed Publications</h1>
-        <p class="welcome-subtitle">A library of clinical validity studies, poster presentations, and journal abstracts.</p>
-      </div>
-    </div>
+${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinical validity studies, poster presentations, and journal abstracts.', 'publications')}
     
     <div>
       ${db.publications.map(pub => `
@@ -1086,12 +1143,7 @@ function renderSalesEnablement() {
 // 7. Video Library Route
 function renderVideoLibrary() {
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
-      <div>
-        <h1 class="welcome-title">1Cell.Ai Digital Video Library</h1>
-        <p class="welcome-subtitle">Browse doctor interviews, webinars, and genomics sequencing demo clips.</p>
-      </div>
-    </div>
+${window.renderCategoryHeader('1Cell.Ai Digital Video Library', 'Browse doctor interviews, webinars, and genomics sequencing demo clips.', 'videos')}
     
     <div class="assets-grid">
       ${db.videos.map(vid => {
@@ -1165,12 +1217,7 @@ function renderSpeakerProfiles() {
 // 9. Brand Guidelines Route
 function renderBrandGuidelines() {
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
-      <div>
-        <h1 class="welcome-title">Corporate Brand Assets & Guidelines</h1>
-        <p class="welcome-subtitle">Core logos, fonts, templates, and corporate identities managed for external branding.</p>
-      </div>
-    </div>
+${window.renderCategoryHeader('Corporate Brand Assets & Guidelines', 'Core logos, fonts, templates, and corporate identities managed for external branding.', 'brand-assets')}
     
     <div class="assets-grid">
       ${db.brandAssets.map(asset => `
@@ -1205,12 +1252,7 @@ function renderBrandGuidelines() {
 // Newsletters Route
 function renderNewsletters() {
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
-      <div>
-        <h1 class="welcome-title">1Cell.Ai Corporate Newsletters</h1>
-        <p class="welcome-subtitle">Browse monthly announcements, scientific highlights, and sales cycle briefs.</p>
-      </div>
-    </div>
+${window.renderCategoryHeader('1Cell.Ai Corporate Newsletters', 'Browse monthly announcements, scientific highlights, and sales cycle briefs.', 'newsletters')}
     
     <div class="assets-grid">
       ${db.newsletters.map(news => renderDocumentCard(news)).join('')}
@@ -1221,12 +1263,7 @@ function renderNewsletters() {
 // 10. Templates Route
 function renderTemplates() {
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
-      <div>
-        <h1 class="welcome-title">Document Templates & Outlines</h1>
-        <p class="welcome-subtitle">Pre-approved layouts for presentations, cases, publications, and creatives.</p>
-      </div>
-    </div>
+${window.renderCategoryHeader('Document Templates & Outlines', 'Pre-approved layouts for presentations, cases, publications, and creatives.', 'templates')}
     
     <div class="assets-grid">
       ${db.templates.map(temp => `
@@ -2076,6 +2113,7 @@ function handleMockUpload(e) {
   
   const title = document.getElementById('formTitle').value.trim();
   const description = document.getElementById('formDesc').value.trim() || 'No description provided.';
+  const category = document.getElementById('formCategory').value;
   const department = document.getElementById('formDept').value;
   const product = document.getElementById('formProduct').value || null;
   const contentType = document.getElementById('formContentType').value;
@@ -2099,6 +2137,7 @@ function handleMockUpload(e) {
     id: newDocId,
     title,
     description,
+    category,
     department,
     product,
     cancerType,
@@ -2123,6 +2162,75 @@ function handleMockUpload(e) {
 
   // Push to local database
   db.documents.unshift(newDoc);
+
+  // Sync to respective sub-array to ensure rendering works instantly in specific categories:
+  if (category === 'case-library') {
+    db.cases.unshift({
+      id: `case-${Date.now()}`,
+      title,
+      doctor: author,
+      hospital: department,
+      relatedProduct: product || 'oncoindx',
+      biomarker: biomarker || 'CGP',
+      cancerType,
+      outcome: 'Guided Therapy',
+      summary: description,
+      readMoreUrl: sharePointUrl
+    });
+  } else if (category === 'publications') {
+    db.publications.unshift({
+      id: `pub-${Date.now()}`,
+      title,
+      journal: '1Cell.Ai Research',
+      publishedDate: '2026',
+      relatedProduct: product || 'oncoindx',
+      authors: author,
+      abstract: description,
+      citation: `1Cell.Ai 2026; Abstract #${Date.now().toString().slice(-4)}`,
+      link: sharePointUrl
+    });
+  } else if (category === 'videos') {
+    db.videos.unshift({
+      id: `vid-${Date.now()}`,
+      title,
+      duration: '10:00',
+      speaker: author,
+      type: contentType,
+      product: product,
+      videoUrl: sharePointUrl
+    });
+  } else if (category === 'brand-assets') {
+    db.brandAssets.unshift({
+      id: `brand-${Date.now()}`,
+      title,
+      category: 'Brand Guidelines',
+      fileType: 'PDF',
+      downloadUrl: sharePointUrl
+    });
+  } else if (category === 'templates') {
+    db.templates.unshift({
+      id: `temp-${Date.now()}`,
+      title,
+      category: department,
+      fileType: 'DOCX',
+      downloadUrl: sharePointUrl
+    });
+  } else if (category === 'newsletters') {
+    db.newsletters.unshift({
+      id: `news-${Date.now()}`,
+      title,
+      description,
+      department,
+      product,
+      contentType: 'Newsletter',
+      status: 'Approved',
+      version,
+      updatedDate: new Date().toISOString().split('T')[0],
+      owner: author,
+      sharePointUrl,
+      folderPath: `Shared Documents/${department}`
+    });
+  }
   
   // Update analytics telemetry
   db.analytics.totalAssets++;
