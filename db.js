@@ -226,7 +226,7 @@ const db = {
       owner: "Marketing Admin",
       createdDate: "2025-01-10",
       updatedDate: "2025-05-12",
-      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoIndx/OncoIndx_Brochure_2025_v2.3.pdf",
+      sharePointUrl: "https://1cell.ai/wp-content/uploads/2026/05/OncoIndx-360-EC-Sample-Report.pdf",
       folderPath: "Shared Documents/OncoIndx",
       size: "4.8 MB",
       downloadCount: 342,
@@ -376,7 +376,7 @@ const db = {
       owner: "Medical Affairs Coordinator",
       createdDate: "2025-03-10",
       updatedDate: "2025-05-24",
-      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoMonitor/OncoMonitor_Lung_Recurrence_Case.pdf",
+      sharePointUrl: "https://1cell.ai/circulating-tumor-cell-ctc-analysis-identifies-actionable-dna-repair-deficiency-in-advanced-nsclc-undetected-by-ctdna/",
       folderPath: "Shared Documents/OncoMonitor",
       size: "1.9 MB",
       downloadCount: 165,
@@ -624,7 +624,7 @@ const db = {
       outcome: "Achieved sustained complete molecular and radiological response for over 18 months, with tolerable side-effects.",
       relatedProduct: "oncohrd",
       presentationUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/OncoHRD_Ovarian_Presentation.pptx",
-      pdfUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Medical/OncoHRD_Ovarian_CaseReport.pdf",
+      pdfUrl: "https://1cell.ai/wp-content/uploads/2026/05/Onco-Index-360-EC-Visual-Case-Study-1.pdf",
       supportingPublication: "OncoHRD Ovarian Cancer Clinical Evidence Paper"
     },
     {
@@ -1001,11 +1001,11 @@ const db = {
     }
   ],
 
-  newsletters: [
+    newsletters: [
     {
       id: "news-001",
-      title: "1Cell.Ai Monthly Pulse - June 2026",
-      description: "June newsletter highlighting OncoIndx regional launch updates, global executive hires, and upcoming scientific summits.",
+      title: "1Cell ERA Newsletter | June 2026",
+      description: "ASCO 2026 delivered a defining moment for precision oncology, and the 1Cell.Ai June 2026 Edition Newsletter captures why. From landmark trial data reshaping treatment sequencing to a deeper understanding of how tumours evolve resistance in real time, this month's research...",
       department: "Marketing",
       product: "oncoindx",
       contentType: "Newsletter",
@@ -1013,36 +1013,92 @@ const db = {
       version: "v1.0",
       updatedDate: "2026-06-30",
       owner: "Marketing Operations",
-      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Marketing/1Cell_Monthly_Pulse_June_2026.pdf",
-      folderPath: "Shared Documents/Marketing"
+      sharePointUrl: "https://1cell.ai/1cell-era-newsletter-june-2026/",
+      folderPath: "Newsletters/June"
     },
     {
       id: "news-002",
-      title: "Scientific breakthroughs & OncoHRD updates - May 2026",
-      description: "Summary of new clinical validations for OncoHRD assays in ovarian cancer, abstracts from ESMO, and team milestones.",
-      department: "Medical",
-      product: "oncohrd",
+      title: "1Cell ERA Newsletter | May 2026",
+      description: "The fast-moving world of precision oncology demands an operational engine that is just as sophisticated as the science behind it. In the May 2026 edition of the 1Cell.Ai newsletter, CEO Mohan Uttarwar introduces a purposeful organizational transformation. Led by industry...",
+      department: "Corporate",
+      product: null,
       contentType: "Newsletter",
       status: "Approved",
-      version: "v1.1",
+      version: "v1.0",
       updatedDate: "2026-05-31",
-      owner: "Scientific Team",
-      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoHRD/1Cell_Scientific_Pulse_May_2026.pdf",
-      folderPath: "Shared Documents/OncoHRD"
+      owner: "Corporate Relations",
+      sharePointUrl: "https://1cell.ai/1cell-era-newsletter-may-2026/",
+      folderPath: "Newsletters/May"
     },
     {
       id: "news-003",
-      title: "Sales Pitch Pulse & ASM Wins - April 2026",
-      description: "Celebrating record-breaking sales cycles for OncoMonitor MRD assays, doctor feedback profiles, and pitching strategies.",
-      department: "Sales",
-      product: "oncomonitor",
+      title: "1Cell ERA Newsletter | April 2026",
+      description: "Cancer care is not just about reports, scans, and treatments. It is also about the long journey patients, caregivers, and doctors go through every single day. In this edition of the 1Cell.Ai April Newsletter, we explore how technology and precision...",
+      department: "Medical",
+      product: "oncoindx",
       contentType: "Newsletter",
       status: "Approved",
       version: "v1.0",
       updatedDate: "2026-04-30",
-      owner: "Sales Enablement",
-      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Sales/1Cell_Sales_Pulse_April_2026.pdf",
-      folderPath: "Shared Documents/Sales"
+      owner: "Medical Affairs",
+      sharePointUrl: "https://1cell.ai/1cell-era-newsletter-april-2026/",
+      folderPath: "Newsletters/April"
+    },
+    {
+      id: "news-004",
+      title: "1Cell ERA Newsletter | March 2026",
+      description: "The March edition of the 1Cell.Ai Newsletter takes a closer look at how AI is changing the future of oncology, with a focus on machine learning clinical predictions...",
+      department: "Scientific",
+      product: "oncopredikt",
+      contentType: "Newsletter",
+      status: "Approved",
+      version: "v1.0",
+      updatedDate: "2026-03-31",
+      owner: "Informatics Team",
+      sharePointUrl: "https://1cell.ai/1cell-era-newsletter-march-2026/",
+      folderPath: "Newsletters/March"
+    },
+    {
+      id: "news-005",
+      title: "1Cell ERA Newsletter | February 2026",
+      description: "The February edition of the 1Cell.Ai Newsletter brings together some of the most important conversations shaping the future of single-cell multiomics and biomarker discovery...",
+      department: "Medical",
+      product: "oncohrd",
+      contentType: "Newsletter",
+      status: "Approved",
+      version: "v1.0",
+      updatedDate: "2026-02-28",
+      owner: "Scientific Team",
+      sharePointUrl: "https://1cell.ai/1cell-era-newsletter-february-2026/",
+      folderPath: "Newsletters/February"
+    },
+    {
+      id: "news-006",
+      title: "1Cell ERA Newsletter | January 2026",
+      description: "Cancer care is not just about reports. The January edition kicks off 2026 with clinical review templates, lab accreditations, and new liquid biopsy indications...",
+      department: "Marketing",
+      product: "oncomonitor",
+      contentType: "Newsletter",
+      status: "Approved",
+      version: "v1.0",
+      updatedDate: "2026-01-31",
+      owner: "Marketing Operations",
+      sharePointUrl: "https://1cell.ai/1cell-era-newsletter-january-2026/",
+      folderPath: "Newsletters/January"
+    },
+    {
+      id: "news-007",
+      title: "1Cell ERA Newsletter | December 2025",
+      description: "The December 2025 edition of the 1Cell.Ai Newsletter reflects on a year that brought major changes in precision oncology and plans for U.S. expansion...",
+      department: "Corporate",
+      product: null,
+      contentType: "Newsletter",
+      status: "Approved",
+      version: "v1.0",
+      updatedDate: "2025-12-31",
+      owner: "Corporate Relations",
+      sharePointUrl: "https://1cell.ai/1cell-era-newsletter-december-2025-2/",
+      folderPath: "Newsletters/December"
     }
   ],
 
