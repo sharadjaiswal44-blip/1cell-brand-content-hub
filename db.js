@@ -894,33 +894,391 @@ const db = {
     }
   ],
 
-  cases: [
-    { id: "case-001", title: "Tissue Genomic Profiling in a Case of Endometrioid Adenocarcinoma of the Endometrium", physician: "Oncology Team", product: "oncoindx", disease: "Endometrioid Carcinoma", details: "Diagnostic histopathology profiling and surgical metastasectomy treatment choices.", readMoreUrl: "https://1cell.ai/tissue-genomic-profiling-in-a-case-of-endometrioid-adenocarcinoma-of-the-endometrium/" },
-    { id: "case-002", title: "High-Risk Endometrial Carcinosarcoma in a Heavily Pretreated Breast Cancer Survivor: Molecular Insights Guiding Targeted Strategies", physician: "Precision Oncology Panel", product: "oncoindx", disease: "Carcinosarcoma", details: "Genomic reclassification of metastatic cancer providing targets for hormone therapies.", readMoreUrl: "https://1cell.ai/high-risk-endometrial-carcinosarcoma-in-a-heavily-pretreated-breast-cancer-survivor-molecular-insights-guiding-targeted-strategies/" },
-    { id: "case-003", title: "Comprehensive Tissue Genomic Profiling Reveals ALK-EML4 Fusion and TP53 Splice-Site Mutation in Metastatic Lung Adenocarcinoma", physician: "Pulmonary Oncology Specialist", product: "oncotarget", disease: "Lung Adenocarcinoma", details: "Targeting ALK-EML4 mutation loops with Osimertinib sequences.", readMoreUrl: "https://1cell.ai/comprehensive-tissue-genomic-profiling-reveals-alk-eml4-fusionand-tp53-splice-site-mutation-in-metastatic-lung-adenocarcinoma-2/" },
-    { id: "case-004", title: "Liquid Biopsy Reveals ERBB3-PIK3CA Activation and MYC Amplification Driving Resistance in Metastatic Cervical Cancer", physician: "Gynecologic Oncologist", product: "oncomonitor", disease: "Cervical Cancer", details: "Detecting subclonal resistance markers driving post-chemotherapy recurrences.", readMoreUrl: "https://1cell.ai/liquid-biopsy-reveals-erbb3-pik3ca-activation-and-myc-amplification-driving-resistance-in-metastatic-cervical-cancer/" },
-    { id: "case-005", title: "Comprehensive Liquid Biopsy Profiling Reveals Dual PIK3CA and ESR1 Mutations in Hormone Receptor–Positive Metastatic Breast Carcinoma", physician: "Breast Cancer Specialist", product: "oncomonitor", disease: "Luminal B Breast Cancer", details: "Tracking ESR1 mutations and endocrine resistance lines using blood panels.", readMoreUrl: "https://1cell.ai/comprehensive-liquid-biopsy-profiling-reveals-dual-pik3ca-and-esr1-mutations-in-hormone-receptor-positive-metastatic-breast-carcinoma-2/" },
-    { id: "case-006", title: "Molecular Drivers of Tumorigenesis and Metastasis in Squamous Cell Lung Carcinoma", physician: "Clinical Pathologist", product: "oncoindx", disease: "Squamous Lung Carcinoma", details: "Genomic profiles of left scapular lesions matching targeted clinical trials.", readMoreUrl: "https://1cell.ai/molecular-drivers-of-tumorigenesis-and-metastasis-in-squamous-cell-lung-carcinoma/" },
-    { id: "case-007", title: "A Tale of Two Primaries: Hepatocellular and Pancreatic Carcinomas Integrating Tissue and Liquid Biopsy Insights", physician: "Gastrointestinal Oncologist", product: "oncoindx", disease: "Dual Primaries (HCC & Pancreatic)", details: "De-convoluting dual primary signals using matched tissue and blood sequencing.", readMoreUrl: "https://1cell.ai/a-tale-of-two-primaries-hepatocellular-and-pancreatic-carcinomas-integrating-tissue-and-liquid-biopsy-insights/" },
-    { id: "case-008", title: "From Fragmented Results to Precision Care: An Endometrial Cancer Case Study", physician: "Medical Oncology Board", product: "oncoindx", disease: "Endometrial Carcinoma", details: "Streamlining biomarker analysis to design postmenopausal bleeding appeal protocols.", readMoreUrl: "https://1cell.ai/from-fragmented-results-to-precision-carean-endometrial-cancer-case-study/" },
-    { id: "case-009", title: "Circulating Tumor Cell (CTC) Analysis Identifies Actionable DNA Repair Deficiency in Advanced NSCLC Undetected by ctDNA", physician: "Thoracic Oncology Panel", product: "oncomonitor", disease: "Metastatic NSCLC", details: "Detecting genomic mutations in single CTC cells missed by plasma cell-free DNA.", readMoreUrl: "https://1cell.ai/circulating-tumor-cell-ctc-analysis-identifies-actionable-dna-repair-deficiency-in-advanced-nsclc-undetected-by-ctdna/" }
+    cases: [
+    {
+      id: "case-001",
+      title: "Tissue Genomic Profiling in a Case of Endometrioid Adenocarcinoma of the Endometrium",
+      physician: "Medical Oncology Board",
+      product: "oncoindx",
+      disease: "Endometrioid Adenocarcinoma",
+      details: "Hysterectomy findings and clinical sequencing matching treatment protocols.",
+      readMoreUrl: "https://1cell.ai/tissue-genomic-profiling-in-a-case-of-endometrioid-adenocarcinoma-of-the-endometrium/"
+    },
+    {
+      id: "case-002",
+      title: "High-Risk Endometrial Carcinosarcoma in a Heavily Pretreated Breast Cancer Survivor: Molecular Insights Guiding Targeted Strategies",
+      physician: "Translational Tumor Board",
+      product: "oncoindx",
+      disease: "Endometrial Carcinosarcoma",
+      details: "A 74-year-old female patient diagnosed with metastatic endometrioid carcinoma molecular risk reclassification.",
+      readMoreUrl: "https://1cell.ai/high-risk-endometrial-carcinosarcoma-in-a-heavily-pretreated-breast-cancer-survivor-molecular-insights-guiding-targeted-strategies/"
+    },
+    {
+      id: "case-003",
+      title: "Comprehensive Tissue Genomic Profiling Reveals ALK-EML4 Fusion and TP53 Splice-Site Mutation in Metastatic Lung Adenocarcinoma",
+      physician: "Pulmonary Oncology Specialist",
+      product: "oncotarget",
+      disease: "Metastatic Lung Adenocarcinoma",
+      details: "Identifying Osimertinib sensitivity mutations in solid tumor samples.",
+      readMoreUrl: "https://1cell.ai/comprehensive-tissue-genomic-profiling-reveals-alk-eml4-fusionand-tp53-splice-site-mutation-in-metastatic-lung-adenocarcinoma-2/"
+    },
+    {
+      id: "case-004",
+      title: "Liquid Biopsy Reveals ERBB3-PIK3CA Activation and MYC Amplification Driving Resistance in Metastatic Cervical Cancer",
+      physician: "Gynecologic Oncology Group",
+      product: "oncomonitor",
+      disease: "Metastatic Cervical Cancer",
+      details: "A 50-year-old female patient with poorly differentiated squamous cell carcinoma of the cervix.",
+      readMoreUrl: "https://1cell.ai/liquid-biopsy-reveals-erbb3-pik3ca-activation-and-myc-amplification-driving-resistance-in-metastatic-cervical-cancer/"
+    },
+    {
+      id: "case-005",
+      title: "Comprehensive Liquid Biopsy Profiling Reveals Dual PIK3CA and ESR1 Mutations in Hormone Receptor–Positive Metastatic Breast Carcinoma",
+      physician: "Breast Oncology Board",
+      product: "oncomonitor",
+      disease: "Metastatic Breast Carcinoma",
+      details: "73-year-old female patient with invasive ductal carcinoma (IDC) and endocrine therapy resistance markers.",
+      readMoreUrl: "https://1cell.ai/comprehensive-liquid-biopsy-profiling-reveals-dual-pik3ca-and-esr1-mutations-in-hormone-receptor-positive-metastatic-breast-carcinoma-2/"
+    },
+    {
+      id: "case-006",
+      title: "Molecular Drivers of Tumorigenesis and Metastasis in Squamous Cell Lung Carcinoma",
+      physician: "Thoracic Oncology Panel",
+      product: "oncoindx",
+      disease: "Squamous Cell Lung Carcinoma",
+      details: "50-year-old male with scapular metastases profiling molecular drivers.",
+      readMoreUrl: "https://1cell.ai/molecular-drivers-of-tumorigenesis-and-metastasis-in-squamous-cell-lung-carcinoma/"
+    },
+    {
+      id: "case-007",
+      title: "A Tale of Two Primaries: Hepatocellular and Pancreatic Carcinomas Integrating Tissue and Liquid Biopsy Insights",
+      physician: "Gastrointestinal Oncology Specialists",
+      product: "oncoindx",
+      disease: "HCC & Pancreatic Carcinoma",
+      details: "De-convoluting dual primary signals using matched tissue and blood sequencing.",
+      readMoreUrl: "https://1cell.ai/a-tale-of-two-primaries-hepatocellular-and-pancreatic-carcinomas-integrating-tissue-and-liquid-biopsy-insights/"
+    },
+    {
+      id: "case-008",
+      title: "From Fragmented Results to Precision Care: An Endometrial Cancer Case Study",
+      physician: "Gynecology Oncology Board",
+      product: "oncoindx",
+      disease: "Endometrial Cancer",
+      details: "Resolving diagnostic ambiguity in postmenopausal bleeding cases.",
+      readMoreUrl: "https://1cell.ai/from-fragmented-results-to-precision-carean-endometrial-cancer-case-study/"
+    },
+    {
+      id: "case-009",
+      title: "Circulating Tumor Cell (CTC) Analysis Identifies Actionable DNA Repair Deficiency in Advanced NSCLC Undetected by ctDNA",
+      physician: "Lung Cancer Study Group",
+      product: "oncomonitor",
+      disease: "Advanced NSCLC",
+      details: "67-year-old male with Stage IV NSCLC resolving DNA repair deficiency variants.",
+      readMoreUrl: "https://1cell.ai/circulating-tumor-cell-ctc-analysis-identifies-actionable-dna-repair-deficiency-in-advanced-nsclc-undetected-by-ctdna/"
+    },
+    {
+      id: "case-010",
+      title: "Rare or Uncommon Cancers: Where tissue-specific guidelines are limited and broad genomic insight is critical",
+      physician: "Specialized Tumor Board",
+      product: "oncoindx",
+      disease: "Rare Hepatocellular Carcinoma",
+      details: "66-year-old male with chronic hepatitis B and rare presentation of tumor biology.",
+      readMoreUrl: "https://1cell.ai/rare-or-uncommon-cancers-where-tissue-specific-guidelines-are-limited-and-broad-genomic-insight-is-critical/"
+    },
+    {
+      id: "case-011",
+      title: "Uncovering Tumor Evolution in Multi-Treated Breast Cancer Using Liquid Biopsy and Longitudinal NGS",
+      physician: "Breast Cancer Center",
+      product: "oncomonitor",
+      disease: "Longitudinal Breast Cancer",
+      details: "52-year-old pre-menopausal woman tracking somatic mutation updates.",
+      readMoreUrl: "https://1cell.ai/uncovering-tumor-evolution-in-multi-treated-breast-cancer-using-liquid-biopsy-and-longitudinal-ngs/"
+    },
+    {
+      id: "case-012",
+      title: "Genomic Profiling of Rapidly Dedifferentiating MSI-High Endometrial Carcinoma",
+      physician: "Gynecology Oncology Team",
+      product: "oncoindx",
+      disease: "MSI-High Endometrial Carcinoma",
+      details: "64-year-old female Grade 3 Endometrioid adenocarcinoma response monitoring.",
+      readMoreUrl: "https://1cell.ai/genomic-profiling-of-rapidly-dedifferentiating-msi-highendometrial-carcinoma/"
+    },
+    {
+      id: "case-013",
+      title: "Multi-Omics Insights Driving Personalized Therapy in Breast Cancer",
+      physician: "Precision Breast Program",
+      product: "oncoindx",
+      disease: "Personalized Breast Cancer",
+      details: "55-year-old female neoadjuvant therapy response profiling.",
+      readMoreUrl: "https://1cell.ai/multi-omics-insights-driving-personalized-therapy-in-breast-cancer/"
+    },
+    {
+      id: "case-014",
+      title: "Molecular Risk Reclassification in Stage II Endometrial Carcinoma - When Biology Redefines Prognosis",
+      physician: "Molecular Pathology Team",
+      product: "oncoindx",
+      disease: "Stage II Endometrial Carcinoma",
+      details: "64-year-old female patient high-grade molecular reclassification.",
+      readMoreUrl: "https://1cell.ai/molecular-risk-reclassification-in-stage-ii-endometrialcarcinoma-when-biology-redefines-prognosis/"
+    },
+    {
+      id: "case-015",
+      title: "Metastatic Prostate Adenocarcinoma with TMPRSS2-ERG Fusion and MSI-High Immunogenic Profile",
+      physician: "Urology Oncology Board",
+      product: "oncoindx",
+      disease: "Metastatic Prostate Adenocarcinoma",
+      details: "70-year-old male with Gleason 9 prostate carcinoma immunotherapy response.",
+      readMoreUrl: "https://1cell.ai/metastatic-prostate-adenocarcinoma-withtmprss2-erg-fusion-and-msi-high-immunogenic-profile/"
+    },
+    {
+      id: "case-016",
+      title: "From Genomics to Therapy: A Precision Medicine Approach in Advanced Endometrial Cancer",
+      physician: "Medical Oncology Board",
+      product: "oncoindx",
+      disease: "Advanced Endometrial Cancer",
+      details: "Hysterectomy genomic profiles guiding target selections.",
+      readMoreUrl: "https://1cell.ai/from-genomics-to-therapy-a-precision-medicine-approachin-advanced-endometrial-cancer/"
+    },
+    {
+      id: "case-017",
+      title: "Concurrent Tissue–Liquid–Normal Matched Multi-Omics Analysis Enables Precision Targeting in Advanced Lung Cancer",
+      physician: "Thoracic Precision Board",
+      product: "oncomonitor",
+      disease: "Advanced Lung Cancer",
+      details: "Matching solid biopsy genomic alterations to cell-free DNA signals.",
+      readMoreUrl: "https://1cell.ai/case-study-05-lung-cancer-2/"
+    },
+    {
+      id: "case-018",
+      title: "Therapy resistance detected in colorectal cancer by single circulating tumor cell genomics",
+      physician: "Colorectal Study Group",
+      product: "primeplus",
+      disease: "Therapy Resistant Colorectal Cancer",
+      details: "Tracing therapy-resistance markers in CTCs missed by plasma DNA assays.",
+      readMoreUrl: "https://1cell.ai/therapy-resistance-detected-in-colorectal-cancer-by-single-circulating-tumor-cell-genomics/"
+    },
+    {
+      id: "case-019",
+      title: "Single-Cell Genomics Reveals Resistance Signatures in Colorectal Cancer",
+      physician: "ESMO Congress 2024 Team",
+      product: "primeplus",
+      disease: "Metastatic Colorectal Cancer",
+      details: "Abstract presentation on single circulating tumor cell genomics.",
+      readMoreUrl: "https://1cell.ai/single-cell-genomics-reveals-resistance-signatures-in-colorectal-cancer-2/"
+    }
   ],
 
-  publications: [
-    { id: "pub-001", title: "Potential of urine liquid biopsy in detecting of clinically relevant genomic alterations in advanced genitourinary cancers", journal: "Journal of Liquid Biopsy", date: "2026", product: "oncomonitor", authors: "Khandare et al.", abstract: "Detecting genitourinary biomarkers from non-invasive urine samples as a surrogate for plasma assays.", link: "https://1cell.ai/potential-of-urine-liquid-biopsy-in-detecting-of-clinically-relevant-genomic-alterations-in-advanced-genitourinary-cancers/" },
-    { id: "pub-002", title: "Single-Cell Circulating Tumor Cell Genomics Reveals KRAS-Independent Oncogenic Sub-Populations and Longitudinal Clonal Evolution in Metastatic Pancreatic Adenocarcinoma", journal: "Translational Oncology", date: "2026", product: "primeplus", authors: "Shafi et al.", abstract: "Elucidating tumor heterogeneity and treatment resistance pathways using single circulating cells.", link: "https://1cell.ai/single-cell-circulating-tumor-cell-genomics-reveals-kras-independent-oncogenic-sub-populations-and-longitudinal-clonal-evolution-in-metastatic-pancreatic-adenocarcinoma/" },
-    { id: "pub-003", title: "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology", journal: "Molecular Cancer Diagnostics", date: "2026", product: "oncoindx", authors: "Uttarwar et al.", abstract: "Validating clinical accuracy and pipeline throughput of a comprehensive 1080-gene profiling test.", link: "https://1cell.ai/analytical-validation-and-clinical-implementation-of-a-1080-gene-comprehensive-genomic-profiling-assay-with-integrated-cloud-based-analysis-for-solid-tumor-molecular-oncology/" },
-    { id: "pub-004", title: "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images", journal: "AACR Annual Meeting", date: "2026", product: "oncopredikt", authors: "Dr. Gowhar Shafi et al.", abstract: "Deep learning models classifying whole-slide pathology images to predict biomarker boundaries.", link: "https://1cell.ai/abstract-78-9-aacr-annual-meeting-2026/" },
-    { id: "pub-005", title: "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers", journal: "AACR Annual Meeting", date: "2026", product: "oncoindx", authors: "Shafi et al.", abstract: "Real-world study connecting TP53 mutation classes to wider genomic instability profiles.", link: "https://1cell.ai/abstract-lb118-5-aacr-annual-meeting-2026/" },
-    { id: "pub-006", title: "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease", journal: "AACR Annual Meeting", date: "2026", product: "oncomonitor", authors: "Informatics Panel", abstract: "A cell-free DNA methylation trace algorithm improving sensitivity limits of post-surgery MRD assays.", link: "https://1cell.ai/mirage-a-ctdna-methylation-driven-computational-algorithm/" },
-    { id: "pub-007", title: "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics", journal: "AACR Annual Meeting", date: "2026", product: "icore", authors: "Clinical Curation Board", abstract: "Using aggregated variant classifiers to resolve variant of uncertain significance (VUS) statuses.", link: "https://1cell.ai/abstract-6272-2-aacr-annual-meeting-2026/" },
-    { id: "pub-008", title: "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response", journal: "AACR Annual Meeting", date: "2026", product: "icore", authors: "Genomic Informatics Team", abstract: "Tracking host pharmacogenomic alleles to predict toxicities and drug clearance dynamics.", link: "https://1cell.ai/abstract-3141-9-aacr-annual-meeting-2026/" },
-    { id: "pub-009", title: "Comprehensive Genomic Profiling Drives Precision Oncology and Expands Accessibility to Targeted Therapies in Uzbek Populations", journal: "AACR Annual Meeting", date: "2026", product: "oncoindx", authors: "Clinical Research Team", abstract: "Demonstrating clinical utility and treatment modifications using CGP panels in Central Asia.", link: "https://1cell.ai/abstract-2510-17-aacr-annual-meeting-2026/" },
-    { id: "pub-010", title: "OncoAlibrex: Ultrasensitive cfDNA Fragmentomics Assay for Early Treatment Response Assessment in Solid Tumors", journal: "AACR Annual Meeting", date: "2026", product: "oncomonitor", authors: "Fragmentomics Group", abstract: "Tracing cell-free DNA size distribution dynamics to predict early responder states.", link: "https://1cell.ai/abstract-1035-3-aacr-annual-meeting-2026/" },
-    { id: "pub-011", title: "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients", journal: "Liquid Biopsy Congress", date: "2025", product: "primeplus", authors: "Khandare et al.", abstract: "Capturing intact CTC profiles revealing homologous recombination pathway mutations in breast patients.", link: "https://1cell.ai/live-ctc-genomic-profile-pik3ca-hrr-breast/" },
-    { id: "pub-012", title: "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer", journal: "Journal of Clinical Oncology", date: "2025", product: "oncopredikt", authors: "Informatics Team", abstract: "AI-based inference model calculating HRD scores from standard slide images.", link: "https://1cell.ai/ai-hrd-prediction-histopathology-breast-ovarian-cancer/" },
-    { id: "pub-013", title: "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population", journal: "SABCS Annual Meeting", date: "2025", product: "primeplus", authors: "Actorius Group", abstract: "Demonstrating high-purity single-cell CTC capture systems from raw blood samples.", link: "https://1cell.ai/live-single-ctc-capture-multiomics-cancer/" },
-    { id: "pub-014", title: "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients", journal: "ISLB Annual Congress", date: "2024", product: "oncomonitor", authors: "Shafi et al.", abstract: "Tracking EGFR resistance patterns to predict disease progression.", link: "https://1cell.ai/longitudinal-ctdna-egfr-nsclc-prognosis/" }
+    publications: [
+    {
+      id: "pub-001",
+      title: "Potential of urine liquid biopsy in detecting of clinically relevant genomic alterations in advanced genitourinary cancers",
+      journal: "Journal of Liquid Biopsy",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Khandare et al.",
+      abstract: "Detecting genitourinary biomarkers from non-invasive urine samples as a surrogate for plasma assays.",
+      link: "https://1cell.ai/potential-of-urine-liquid-biopsy-in-detecting-of-clinically-relevant-genomic-alterations-in-advanced-genitourinary-cancers/"
+    },
+    {
+      id: "pub-002",
+      title: "Single-Cell Circulating Tumor Cell Genomics Reveals KRAS-Independent Oncogenic Sub-Populations and Longitudinal Clonal Evolution in Metastatic Pancreatic Adenocarcinoma",
+      journal: "Translational Oncology",
+      date: "2026",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Elucidating tumor heterogeneity and treatment resistance pathways using single circulating cells.",
+      link: "https://1cell.ai/single-cell-circulating-tumor-cell-genomics-reveals-kras-independent-oncogenic-sub-populations-and-longitudinal-clonal-evolution-in-metastatic-pancreatic-adenocarcinoma/"
+    },
+    {
+      id: "pub-003",
+      title: "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology",
+      journal: "Molecular Cancer Diagnostics",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Uttarwar et al.",
+      abstract: "Validating clinical accuracy and pipeline throughput of a comprehensive 1080-gene profiling test.",
+      link: "https://1cell.ai/analytical-validation-and-clinical-implementation-of-a-1080-gene-comprehensive-genomic-profiling-assay-with-integrated-cloud-based-analysis-for-solid-tumor-molecular-oncology/"
+    },
+    {
+      id: "pub-004",
+      title: "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncopredikt",
+      authors: "Dr. Gowhar Shafi et al.",
+      abstract: "Deep learning models classifying whole-slide pathology images to predict biomarker boundaries.",
+      link: "https://1cell.ai/abstract-78-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-005",
+      title: "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Shafi et al.",
+      abstract: "Real-world study connecting TP53 mutation classes to wider genomic instability profiles.",
+      link: "https://1cell.ai/abstract-lb118-5-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-006",
+      title: "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Informatics Panel",
+      abstract: "A cell-free DNA methylation trace algorithm improving sensitivity limits of post-surgery MRD assays.",
+      link: "https://1cell.ai/mirage-a-ctdna-methylation-driven-computational-algorithm/"
+    },
+    {
+      id: "pub-007",
+      title: "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Clinical Curation Board",
+      abstract: "Using aggregated variant classifiers to resolve variant of uncertain significance (VUS) statuses.",
+      link: "https://1cell.ai/abstract-6272-2-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-008",
+      title: "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Genomic Informatics Team",
+      abstract: "Tracking host pharmacogenomic alleles to predict toxicities and drug clearance dynamics.",
+      link: "https://1cell.ai/abstract-3141-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-009",
+      title: "Comprehensive Genomic Profiling Drives Precision Oncology and Expands Accessibility to Targeted Therapies in Uzbek Populations",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Clinical Research Team",
+      abstract: "Demonstrating clinical utility and treatment modifications using CGP panels in Central Asia.",
+      link: "https://1cell.ai/abstract-2510-17-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-010",
+      title: "OncoAlibrex: Ultrasensitive cfDNA Fragmentomics Assay for Early Treatment Response Assessment in Solid Tumors",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Fragmentomics Group",
+      abstract: "Tracing cell-free DNA size distribution dynamics to predict early responder states.",
+      link: "https://1cell.ai/abstract-1035-3-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-011",
+      title: "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients",
+      journal: "Liquid Biopsy Congress",
+      date: "2025",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Capturing intact CTC profiles revealing homologous recombination pathway mutations in breast patients.",
+      link: "https://1cell.ai/live-ctc-genomic-profile-pik3ca-hrr-breast/"
+    },
+    {
+      id: "pub-012",
+      title: "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer",
+      journal: "Journal of Clinical Oncology",
+      date: "2025",
+      product: "oncopredikt",
+      authors: "Informatics Team",
+      abstract: "AI-based inference model calculating HRD scores from standard slide images.",
+      link: "https://1cell.ai/ai-hrd-prediction-histopathology-breast-ovarian-cancer/"
+    },
+    {
+      id: "pub-013",
+      title: "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population",
+      journal: "SABCS Annual Meeting",
+      date: "2025",
+      product: "primeplus",
+      authors: "Actorius Group",
+      abstract: "Demonstrating high-purity single-cell CTC capture systems from raw blood samples.",
+      link: "https://1cell.ai/live-single-ctc-capture-multiomics-cancer/"
+    },
+    {
+      id: "pub-014",
+      title: "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients",
+      journal: "ISLB Annual Congress",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Shafi et al.",
+      abstract: "Tracking EGFR resistance patterns to predict disease progression.",
+      link: "https://1cell.ai/longitudinal-ctdna-egfr-nsclc-prognosis/"
+    },
+    {
+      id: "pub-015",
+      title: "Circulating tumor cells and clusters exhibiting PD-L1 expression in colorectal cancer patients",
+      journal: "Journal of Colorectal Cancer Research",
+      date: "2024",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Examining diagnostic PD-L1 thresholds on intact circulating tumor cells and microclusters.",
+      link: "https://1cell.ai/circulating-tumor-cells-and-clusters-exhibiting-pd-l1-expression-in-colorectal-cancer-patients/"
+    },
+    {
+      id: "pub-016",
+      title: "ctDNA-based clinicogenomic analysis of advanced head and neck cancer patients treated with immune checkpoint inhibitors",
+      journal: "Journal of Precision Medicine",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Uttarwar et al.",
+      abstract: "Serial monitoring of tumor mutations in blood to guide immunotherapy durations.",
+      link: "https://1cell.ai/ctdna-based-clinicogenomic-analysis-of-advanced-head-and-neck-cancer-patients-treated-with-immune-checkpoint-inhibitors/"
+    },
+    {
+      id: "pub-017",
+      title: "Using a dynamic blood flow device with affinity ligands to capture circulating tumor cells in cancer patients",
+      journal: "Rare Rare Cell Research Journal",
+      date: "2023",
+      product: "primeplus",
+      authors: "Actorius Research Group",
+      abstract: "Validation of microfluidic flow cells capturing viable tumor cells using custom affinity tags.",
+      link: "https://1cell.ai/using-a-dynamic-blood-flow-device-with-affinity-ligands-to-capture-circulating-tumor-cells-in-cancer-patients/"
+    },
+    {
+      id: "pub-018",
+      title: "Circulating tumor cell distribution and PD-L1 expression across cancer types: insights from 5,935 patients",
+      journal: "ASCO Poster Presentation",
+      date: "2023",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Large-cohort statistical trace verifying circulating tumor cell ranges across solid cancer lineages.",
+      link: "https://1cell.ai/circulating-tumor-cell-distribution-and-pd-l1-expression-across-cancer-types-insights-from-5935-patients/"
+    },
+    {
+      id: "pub-019",
+      title: "PD-L1 expression on circulating tumor cells and CTC clusters as minimal cellular residual disease in breast cancer patients",
+      journal: "Breast Cancer Research",
+      date: "2023",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Correlating residual circulating cells expressing checkpoint targets to relapse timelines.",
+      link: "https://1cell.ai/pd-l1-expression-on-circulating-tumor-cells-and-ctc-clusters-as-minimal-cellular-residual-disease-in-breast-cancer-patients/"
+    },
+    {
+      id: "pub-020",
+      title: "Effect of cell proliferation pathway on accessibility to targeted therapeutics in the spectrum of co-occurring prognostic cellular pathways in pan-cancers",
+      journal: "Translational Oncology Reports",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Informatics Team",
+      abstract: "Mapping downstream pathway overlaps to predict targeted treatment synergies.",
+      link: "https://1cell.ai/effect-of-cell-proliferation-pathway-on-accessibility-to-targeted-therapeutics-in-the-spectrum-of-co-occurring-prognostic-cellular-pathways-in-pan-cancers/"
+    },
+    {
+      id: "pub-021",
+      title: "Mutational spectrum of cell proliferation genes as early predictive markers for aggressive disease in endometrial cancers",
+      journal: "Journal of Molecular Oncology",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Genomics Panel",
+      abstract: "Predicting aggressive endometrial tumor growth lines using early gene panel analysis.",
+      link: "https://1cell.ai/mutational-spectrum-of-cell-proliferation-genes-as-early-predictive-markers-for-aggressive-disease-in-endometrial-cancers/"
+    }
   ],
 
   videos: [
@@ -1048,10 +1406,218 @@ const db = {
       hospital: "1Cell.Ai R&D Division",
       contact: "gowhar.shafi@1cell.ai",
       photo: "https://www.w3schools.com/howto/img_avatar.png",
-      publications: [
-        "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer",
-        "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images"
-      ],
+        publications: [
+    {
+      id: "pub-001",
+      title: "Potential of urine liquid biopsy in detecting of clinically relevant genomic alterations in advanced genitourinary cancers",
+      journal: "Journal of Liquid Biopsy",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Khandare et al.",
+      abstract: "Detecting genitourinary biomarkers from non-invasive urine samples as a surrogate for plasma assays.",
+      link: "https://1cell.ai/potential-of-urine-liquid-biopsy-in-detecting-of-clinically-relevant-genomic-alterations-in-advanced-genitourinary-cancers/"
+    },
+    {
+      id: "pub-002",
+      title: "Single-Cell Circulating Tumor Cell Genomics Reveals KRAS-Independent Oncogenic Sub-Populations and Longitudinal Clonal Evolution in Metastatic Pancreatic Adenocarcinoma",
+      journal: "Translational Oncology",
+      date: "2026",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Elucidating tumor heterogeneity and treatment resistance pathways using single circulating cells.",
+      link: "https://1cell.ai/single-cell-circulating-tumor-cell-genomics-reveals-kras-independent-oncogenic-sub-populations-and-longitudinal-clonal-evolution-in-metastatic-pancreatic-adenocarcinoma/"
+    },
+    {
+      id: "pub-003",
+      title: "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology",
+      journal: "Molecular Cancer Diagnostics",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Uttarwar et al.",
+      abstract: "Validating clinical accuracy and pipeline throughput of a comprehensive 1080-gene profiling test.",
+      link: "https://1cell.ai/analytical-validation-and-clinical-implementation-of-a-1080-gene-comprehensive-genomic-profiling-assay-with-integrated-cloud-based-analysis-for-solid-tumor-molecular-oncology/"
+    },
+    {
+      id: "pub-004",
+      title: "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncopredikt",
+      authors: "Dr. Gowhar Shafi et al.",
+      abstract: "Deep learning models classifying whole-slide pathology images to predict biomarker boundaries.",
+      link: "https://1cell.ai/abstract-78-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-005",
+      title: "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Shafi et al.",
+      abstract: "Real-world study connecting TP53 mutation classes to wider genomic instability profiles.",
+      link: "https://1cell.ai/abstract-lb118-5-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-006",
+      title: "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Informatics Panel",
+      abstract: "A cell-free DNA methylation trace algorithm improving sensitivity limits of post-surgery MRD assays.",
+      link: "https://1cell.ai/mirage-a-ctdna-methylation-driven-computational-algorithm/"
+    },
+    {
+      id: "pub-007",
+      title: "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Clinical Curation Board",
+      abstract: "Using aggregated variant classifiers to resolve variant of uncertain significance (VUS) statuses.",
+      link: "https://1cell.ai/abstract-6272-2-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-008",
+      title: "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Genomic Informatics Team",
+      abstract: "Tracking host pharmacogenomic alleles to predict toxicities and drug clearance dynamics.",
+      link: "https://1cell.ai/abstract-3141-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-009",
+      title: "Comprehensive Genomic Profiling Drives Precision Oncology and Expands Accessibility to Targeted Therapies in Uzbek Populations",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Clinical Research Team",
+      abstract: "Demonstrating clinical utility and treatment modifications using CGP panels in Central Asia.",
+      link: "https://1cell.ai/abstract-2510-17-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-010",
+      title: "OncoAlibrex: Ultrasensitive cfDNA Fragmentomics Assay for Early Treatment Response Assessment in Solid Tumors",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Fragmentomics Group",
+      abstract: "Tracing cell-free DNA size distribution dynamics to predict early responder states.",
+      link: "https://1cell.ai/abstract-1035-3-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-011",
+      title: "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients",
+      journal: "Liquid Biopsy Congress",
+      date: "2025",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Capturing intact CTC profiles revealing homologous recombination pathway mutations in breast patients.",
+      link: "https://1cell.ai/live-ctc-genomic-profile-pik3ca-hrr-breast/"
+    },
+    {
+      id: "pub-012",
+      title: "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer",
+      journal: "Journal of Clinical Oncology",
+      date: "2025",
+      product: "oncopredikt",
+      authors: "Informatics Team",
+      abstract: "AI-based inference model calculating HRD scores from standard slide images.",
+      link: "https://1cell.ai/ai-hrd-prediction-histopathology-breast-ovarian-cancer/"
+    },
+    {
+      id: "pub-013",
+      title: "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population",
+      journal: "SABCS Annual Meeting",
+      date: "2025",
+      product: "primeplus",
+      authors: "Actorius Group",
+      abstract: "Demonstrating high-purity single-cell CTC capture systems from raw blood samples.",
+      link: "https://1cell.ai/live-single-ctc-capture-multiomics-cancer/"
+    },
+    {
+      id: "pub-014",
+      title: "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients",
+      journal: "ISLB Annual Congress",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Shafi et al.",
+      abstract: "Tracking EGFR resistance patterns to predict disease progression.",
+      link: "https://1cell.ai/longitudinal-ctdna-egfr-nsclc-prognosis/"
+    },
+    {
+      id: "pub-015",
+      title: "Circulating tumor cells and clusters exhibiting PD-L1 expression in colorectal cancer patients",
+      journal: "Journal of Colorectal Cancer Research",
+      date: "2024",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Examining diagnostic PD-L1 thresholds on intact circulating tumor cells and microclusters.",
+      link: "https://1cell.ai/circulating-tumor-cells-and-clusters-exhibiting-pd-l1-expression-in-colorectal-cancer-patients/"
+    },
+    {
+      id: "pub-016",
+      title: "ctDNA-based clinicogenomic analysis of advanced head and neck cancer patients treated with immune checkpoint inhibitors",
+      journal: "Journal of Precision Medicine",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Uttarwar et al.",
+      abstract: "Serial monitoring of tumor mutations in blood to guide immunotherapy durations.",
+      link: "https://1cell.ai/ctdna-based-clinicogenomic-analysis-of-advanced-head-and-neck-cancer-patients-treated-with-immune-checkpoint-inhibitors/"
+    },
+    {
+      id: "pub-017",
+      title: "Using a dynamic blood flow device with affinity ligands to capture circulating tumor cells in cancer patients",
+      journal: "Rare Rare Cell Research Journal",
+      date: "2023",
+      product: "primeplus",
+      authors: "Actorius Research Group",
+      abstract: "Validation of microfluidic flow cells capturing viable tumor cells using custom affinity tags.",
+      link: "https://1cell.ai/using-a-dynamic-blood-flow-device-with-affinity-ligands-to-capture-circulating-tumor-cells-in-cancer-patients/"
+    },
+    {
+      id: "pub-018",
+      title: "Circulating tumor cell distribution and PD-L1 expression across cancer types: insights from 5,935 patients",
+      journal: "ASCO Poster Presentation",
+      date: "2023",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Large-cohort statistical trace verifying circulating tumor cell ranges across solid cancer lineages.",
+      link: "https://1cell.ai/circulating-tumor-cell-distribution-and-pd-l1-expression-across-cancer-types-insights-from-5935-patients/"
+    },
+    {
+      id: "pub-019",
+      title: "PD-L1 expression on circulating tumor cells and CTC clusters as minimal cellular residual disease in breast cancer patients",
+      journal: "Breast Cancer Research",
+      date: "2023",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Correlating residual circulating cells expressing checkpoint targets to relapse timelines.",
+      link: "https://1cell.ai/pd-l1-expression-on-circulating-tumor-cells-and-ctc-clusters-as-minimal-cellular-residual-disease-in-breast-cancer-patients/"
+    },
+    {
+      id: "pub-020",
+      title: "Effect of cell proliferation pathway on accessibility to targeted therapeutics in the spectrum of co-occurring prognostic cellular pathways in pan-cancers",
+      journal: "Translational Oncology Reports",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Informatics Team",
+      abstract: "Mapping downstream pathway overlaps to predict targeted treatment synergies.",
+      link: "https://1cell.ai/effect-of-cell-proliferation-pathway-on-accessibility-to-targeted-therapeutics-in-the-spectrum-of-co-occurring-prognostic-cellular-pathways-in-pan-cancers/"
+    },
+    {
+      id: "pub-021",
+      title: "Mutational spectrum of cell proliferation genes as early predictive markers for aggressive disease in endometrial cancers",
+      journal: "Journal of Molecular Oncology",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Genomics Panel",
+      abstract: "Predicting aggressive endometrial tumor growth lines using early gene panel analysis.",
+      link: "https://1cell.ai/mutational-spectrum-of-cell-proliferation-genes-as-early-predictive-markers-for-aggressive-disease-in-endometrial-cancers/"
+    }
+  ],
       presentations: [
         "OncoPredikt® Product Details & Presentation"
       ]
@@ -1063,10 +1629,218 @@ const db = {
       hospital: "1Cell.Ai Clinical Laboratory",
       contact: "sandhay.iyer@1cell.ai",
       photo: "https://www.w3schools.com/howto/img_avatar2.png",
-      publications: [
-        "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology",
-        "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers"
-      ],
+        publications: [
+    {
+      id: "pub-001",
+      title: "Potential of urine liquid biopsy in detecting of clinically relevant genomic alterations in advanced genitourinary cancers",
+      journal: "Journal of Liquid Biopsy",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Khandare et al.",
+      abstract: "Detecting genitourinary biomarkers from non-invasive urine samples as a surrogate for plasma assays.",
+      link: "https://1cell.ai/potential-of-urine-liquid-biopsy-in-detecting-of-clinically-relevant-genomic-alterations-in-advanced-genitourinary-cancers/"
+    },
+    {
+      id: "pub-002",
+      title: "Single-Cell Circulating Tumor Cell Genomics Reveals KRAS-Independent Oncogenic Sub-Populations and Longitudinal Clonal Evolution in Metastatic Pancreatic Adenocarcinoma",
+      journal: "Translational Oncology",
+      date: "2026",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Elucidating tumor heterogeneity and treatment resistance pathways using single circulating cells.",
+      link: "https://1cell.ai/single-cell-circulating-tumor-cell-genomics-reveals-kras-independent-oncogenic-sub-populations-and-longitudinal-clonal-evolution-in-metastatic-pancreatic-adenocarcinoma/"
+    },
+    {
+      id: "pub-003",
+      title: "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology",
+      journal: "Molecular Cancer Diagnostics",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Uttarwar et al.",
+      abstract: "Validating clinical accuracy and pipeline throughput of a comprehensive 1080-gene profiling test.",
+      link: "https://1cell.ai/analytical-validation-and-clinical-implementation-of-a-1080-gene-comprehensive-genomic-profiling-assay-with-integrated-cloud-based-analysis-for-solid-tumor-molecular-oncology/"
+    },
+    {
+      id: "pub-004",
+      title: "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncopredikt",
+      authors: "Dr. Gowhar Shafi et al.",
+      abstract: "Deep learning models classifying whole-slide pathology images to predict biomarker boundaries.",
+      link: "https://1cell.ai/abstract-78-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-005",
+      title: "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Shafi et al.",
+      abstract: "Real-world study connecting TP53 mutation classes to wider genomic instability profiles.",
+      link: "https://1cell.ai/abstract-lb118-5-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-006",
+      title: "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Informatics Panel",
+      abstract: "A cell-free DNA methylation trace algorithm improving sensitivity limits of post-surgery MRD assays.",
+      link: "https://1cell.ai/mirage-a-ctdna-methylation-driven-computational-algorithm/"
+    },
+    {
+      id: "pub-007",
+      title: "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Clinical Curation Board",
+      abstract: "Using aggregated variant classifiers to resolve variant of uncertain significance (VUS) statuses.",
+      link: "https://1cell.ai/abstract-6272-2-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-008",
+      title: "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Genomic Informatics Team",
+      abstract: "Tracking host pharmacogenomic alleles to predict toxicities and drug clearance dynamics.",
+      link: "https://1cell.ai/abstract-3141-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-009",
+      title: "Comprehensive Genomic Profiling Drives Precision Oncology and Expands Accessibility to Targeted Therapies in Uzbek Populations",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Clinical Research Team",
+      abstract: "Demonstrating clinical utility and treatment modifications using CGP panels in Central Asia.",
+      link: "https://1cell.ai/abstract-2510-17-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-010",
+      title: "OncoAlibrex: Ultrasensitive cfDNA Fragmentomics Assay for Early Treatment Response Assessment in Solid Tumors",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Fragmentomics Group",
+      abstract: "Tracing cell-free DNA size distribution dynamics to predict early responder states.",
+      link: "https://1cell.ai/abstract-1035-3-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-011",
+      title: "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients",
+      journal: "Liquid Biopsy Congress",
+      date: "2025",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Capturing intact CTC profiles revealing homologous recombination pathway mutations in breast patients.",
+      link: "https://1cell.ai/live-ctc-genomic-profile-pik3ca-hrr-breast/"
+    },
+    {
+      id: "pub-012",
+      title: "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer",
+      journal: "Journal of Clinical Oncology",
+      date: "2025",
+      product: "oncopredikt",
+      authors: "Informatics Team",
+      abstract: "AI-based inference model calculating HRD scores from standard slide images.",
+      link: "https://1cell.ai/ai-hrd-prediction-histopathology-breast-ovarian-cancer/"
+    },
+    {
+      id: "pub-013",
+      title: "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population",
+      journal: "SABCS Annual Meeting",
+      date: "2025",
+      product: "primeplus",
+      authors: "Actorius Group",
+      abstract: "Demonstrating high-purity single-cell CTC capture systems from raw blood samples.",
+      link: "https://1cell.ai/live-single-ctc-capture-multiomics-cancer/"
+    },
+    {
+      id: "pub-014",
+      title: "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients",
+      journal: "ISLB Annual Congress",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Shafi et al.",
+      abstract: "Tracking EGFR resistance patterns to predict disease progression.",
+      link: "https://1cell.ai/longitudinal-ctdna-egfr-nsclc-prognosis/"
+    },
+    {
+      id: "pub-015",
+      title: "Circulating tumor cells and clusters exhibiting PD-L1 expression in colorectal cancer patients",
+      journal: "Journal of Colorectal Cancer Research",
+      date: "2024",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Examining diagnostic PD-L1 thresholds on intact circulating tumor cells and microclusters.",
+      link: "https://1cell.ai/circulating-tumor-cells-and-clusters-exhibiting-pd-l1-expression-in-colorectal-cancer-patients/"
+    },
+    {
+      id: "pub-016",
+      title: "ctDNA-based clinicogenomic analysis of advanced head and neck cancer patients treated with immune checkpoint inhibitors",
+      journal: "Journal of Precision Medicine",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Uttarwar et al.",
+      abstract: "Serial monitoring of tumor mutations in blood to guide immunotherapy durations.",
+      link: "https://1cell.ai/ctdna-based-clinicogenomic-analysis-of-advanced-head-and-neck-cancer-patients-treated-with-immune-checkpoint-inhibitors/"
+    },
+    {
+      id: "pub-017",
+      title: "Using a dynamic blood flow device with affinity ligands to capture circulating tumor cells in cancer patients",
+      journal: "Rare Rare Cell Research Journal",
+      date: "2023",
+      product: "primeplus",
+      authors: "Actorius Research Group",
+      abstract: "Validation of microfluidic flow cells capturing viable tumor cells using custom affinity tags.",
+      link: "https://1cell.ai/using-a-dynamic-blood-flow-device-with-affinity-ligands-to-capture-circulating-tumor-cells-in-cancer-patients/"
+    },
+    {
+      id: "pub-018",
+      title: "Circulating tumor cell distribution and PD-L1 expression across cancer types: insights from 5,935 patients",
+      journal: "ASCO Poster Presentation",
+      date: "2023",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Large-cohort statistical trace verifying circulating tumor cell ranges across solid cancer lineages.",
+      link: "https://1cell.ai/circulating-tumor-cell-distribution-and-pd-l1-expression-across-cancer-types-insights-from-5935-patients/"
+    },
+    {
+      id: "pub-019",
+      title: "PD-L1 expression on circulating tumor cells and CTC clusters as minimal cellular residual disease in breast cancer patients",
+      journal: "Breast Cancer Research",
+      date: "2023",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Correlating residual circulating cells expressing checkpoint targets to relapse timelines.",
+      link: "https://1cell.ai/pd-l1-expression-on-circulating-tumor-cells-and-ctc-clusters-as-minimal-cellular-residual-disease-in-breast-cancer-patients/"
+    },
+    {
+      id: "pub-020",
+      title: "Effect of cell proliferation pathway on accessibility to targeted therapeutics in the spectrum of co-occurring prognostic cellular pathways in pan-cancers",
+      journal: "Translational Oncology Reports",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Informatics Team",
+      abstract: "Mapping downstream pathway overlaps to predict targeted treatment synergies.",
+      link: "https://1cell.ai/effect-of-cell-proliferation-pathway-on-accessibility-to-targeted-therapeutics-in-the-spectrum-of-co-occurring-prognostic-cellular-pathways-in-pan-cancers/"
+    },
+    {
+      id: "pub-021",
+      title: "Mutational spectrum of cell proliferation genes as early predictive markers for aggressive disease in endometrial cancers",
+      journal: "Journal of Molecular Oncology",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Genomics Panel",
+      abstract: "Predicting aggressive endometrial tumor growth lines using early gene panel analysis.",
+      link: "https://1cell.ai/mutational-spectrum-of-cell-proliferation-genes-as-early-predictive-markers-for-aggressive-disease-in-endometrial-cancers/"
+    }
+  ],
       presentations: [
         "OncoIndx® Product Details & Presentation"
       ]
@@ -1078,10 +1852,218 @@ const db = {
       hospital: "Tata Memorial Centre / 1Cell.Ai Advisor",
       contact: "aarti.ramesh@1cell.ai",
       photo: "https://www.w3schools.com/howto/img_avatar2.png",
-      publications: [
-        "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients",
-        "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population"
-      ],
+        publications: [
+    {
+      id: "pub-001",
+      title: "Potential of urine liquid biopsy in detecting of clinically relevant genomic alterations in advanced genitourinary cancers",
+      journal: "Journal of Liquid Biopsy",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Khandare et al.",
+      abstract: "Detecting genitourinary biomarkers from non-invasive urine samples as a surrogate for plasma assays.",
+      link: "https://1cell.ai/potential-of-urine-liquid-biopsy-in-detecting-of-clinically-relevant-genomic-alterations-in-advanced-genitourinary-cancers/"
+    },
+    {
+      id: "pub-002",
+      title: "Single-Cell Circulating Tumor Cell Genomics Reveals KRAS-Independent Oncogenic Sub-Populations and Longitudinal Clonal Evolution in Metastatic Pancreatic Adenocarcinoma",
+      journal: "Translational Oncology",
+      date: "2026",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Elucidating tumor heterogeneity and treatment resistance pathways using single circulating cells.",
+      link: "https://1cell.ai/single-cell-circulating-tumor-cell-genomics-reveals-kras-independent-oncogenic-sub-populations-and-longitudinal-clonal-evolution-in-metastatic-pancreatic-adenocarcinoma/"
+    },
+    {
+      id: "pub-003",
+      title: "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology",
+      journal: "Molecular Cancer Diagnostics",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Uttarwar et al.",
+      abstract: "Validating clinical accuracy and pipeline throughput of a comprehensive 1080-gene profiling test.",
+      link: "https://1cell.ai/analytical-validation-and-clinical-implementation-of-a-1080-gene-comprehensive-genomic-profiling-assay-with-integrated-cloud-based-analysis-for-solid-tumor-molecular-oncology/"
+    },
+    {
+      id: "pub-004",
+      title: "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncopredikt",
+      authors: "Dr. Gowhar Shafi et al.",
+      abstract: "Deep learning models classifying whole-slide pathology images to predict biomarker boundaries.",
+      link: "https://1cell.ai/abstract-78-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-005",
+      title: "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Shafi et al.",
+      abstract: "Real-world study connecting TP53 mutation classes to wider genomic instability profiles.",
+      link: "https://1cell.ai/abstract-lb118-5-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-006",
+      title: "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Informatics Panel",
+      abstract: "A cell-free DNA methylation trace algorithm improving sensitivity limits of post-surgery MRD assays.",
+      link: "https://1cell.ai/mirage-a-ctdna-methylation-driven-computational-algorithm/"
+    },
+    {
+      id: "pub-007",
+      title: "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Clinical Curation Board",
+      abstract: "Using aggregated variant classifiers to resolve variant of uncertain significance (VUS) statuses.",
+      link: "https://1cell.ai/abstract-6272-2-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-008",
+      title: "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Genomic Informatics Team",
+      abstract: "Tracking host pharmacogenomic alleles to predict toxicities and drug clearance dynamics.",
+      link: "https://1cell.ai/abstract-3141-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-009",
+      title: "Comprehensive Genomic Profiling Drives Precision Oncology and Expands Accessibility to Targeted Therapies in Uzbek Populations",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Clinical Research Team",
+      abstract: "Demonstrating clinical utility and treatment modifications using CGP panels in Central Asia.",
+      link: "https://1cell.ai/abstract-2510-17-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-010",
+      title: "OncoAlibrex: Ultrasensitive cfDNA Fragmentomics Assay for Early Treatment Response Assessment in Solid Tumors",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Fragmentomics Group",
+      abstract: "Tracing cell-free DNA size distribution dynamics to predict early responder states.",
+      link: "https://1cell.ai/abstract-1035-3-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-011",
+      title: "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients",
+      journal: "Liquid Biopsy Congress",
+      date: "2025",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Capturing intact CTC profiles revealing homologous recombination pathway mutations in breast patients.",
+      link: "https://1cell.ai/live-ctc-genomic-profile-pik3ca-hrr-breast/"
+    },
+    {
+      id: "pub-012",
+      title: "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer",
+      journal: "Journal of Clinical Oncology",
+      date: "2025",
+      product: "oncopredikt",
+      authors: "Informatics Team",
+      abstract: "AI-based inference model calculating HRD scores from standard slide images.",
+      link: "https://1cell.ai/ai-hrd-prediction-histopathology-breast-ovarian-cancer/"
+    },
+    {
+      id: "pub-013",
+      title: "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population",
+      journal: "SABCS Annual Meeting",
+      date: "2025",
+      product: "primeplus",
+      authors: "Actorius Group",
+      abstract: "Demonstrating high-purity single-cell CTC capture systems from raw blood samples.",
+      link: "https://1cell.ai/live-single-ctc-capture-multiomics-cancer/"
+    },
+    {
+      id: "pub-014",
+      title: "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients",
+      journal: "ISLB Annual Congress",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Shafi et al.",
+      abstract: "Tracking EGFR resistance patterns to predict disease progression.",
+      link: "https://1cell.ai/longitudinal-ctdna-egfr-nsclc-prognosis/"
+    },
+    {
+      id: "pub-015",
+      title: "Circulating tumor cells and clusters exhibiting PD-L1 expression in colorectal cancer patients",
+      journal: "Journal of Colorectal Cancer Research",
+      date: "2024",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Examining diagnostic PD-L1 thresholds on intact circulating tumor cells and microclusters.",
+      link: "https://1cell.ai/circulating-tumor-cells-and-clusters-exhibiting-pd-l1-expression-in-colorectal-cancer-patients/"
+    },
+    {
+      id: "pub-016",
+      title: "ctDNA-based clinicogenomic analysis of advanced head and neck cancer patients treated with immune checkpoint inhibitors",
+      journal: "Journal of Precision Medicine",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Uttarwar et al.",
+      abstract: "Serial monitoring of tumor mutations in blood to guide immunotherapy durations.",
+      link: "https://1cell.ai/ctdna-based-clinicogenomic-analysis-of-advanced-head-and-neck-cancer-patients-treated-with-immune-checkpoint-inhibitors/"
+    },
+    {
+      id: "pub-017",
+      title: "Using a dynamic blood flow device with affinity ligands to capture circulating tumor cells in cancer patients",
+      journal: "Rare Rare Cell Research Journal",
+      date: "2023",
+      product: "primeplus",
+      authors: "Actorius Research Group",
+      abstract: "Validation of microfluidic flow cells capturing viable tumor cells using custom affinity tags.",
+      link: "https://1cell.ai/using-a-dynamic-blood-flow-device-with-affinity-ligands-to-capture-circulating-tumor-cells-in-cancer-patients/"
+    },
+    {
+      id: "pub-018",
+      title: "Circulating tumor cell distribution and PD-L1 expression across cancer types: insights from 5,935 patients",
+      journal: "ASCO Poster Presentation",
+      date: "2023",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Large-cohort statistical trace verifying circulating tumor cell ranges across solid cancer lineages.",
+      link: "https://1cell.ai/circulating-tumor-cell-distribution-and-pd-l1-expression-across-cancer-types-insights-from-5935-patients/"
+    },
+    {
+      id: "pub-019",
+      title: "PD-L1 expression on circulating tumor cells and CTC clusters as minimal cellular residual disease in breast cancer patients",
+      journal: "Breast Cancer Research",
+      date: "2023",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Correlating residual circulating cells expressing checkpoint targets to relapse timelines.",
+      link: "https://1cell.ai/pd-l1-expression-on-circulating-tumor-cells-and-ctc-clusters-as-minimal-cellular-residual-disease-in-breast-cancer-patients/"
+    },
+    {
+      id: "pub-020",
+      title: "Effect of cell proliferation pathway on accessibility to targeted therapeutics in the spectrum of co-occurring prognostic cellular pathways in pan-cancers",
+      journal: "Translational Oncology Reports",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Informatics Team",
+      abstract: "Mapping downstream pathway overlaps to predict targeted treatment synergies.",
+      link: "https://1cell.ai/effect-of-cell-proliferation-pathway-on-accessibility-to-targeted-therapeutics-in-the-spectrum-of-co-occurring-prognostic-cellular-pathways-in-pan-cancers/"
+    },
+    {
+      id: "pub-021",
+      title: "Mutational spectrum of cell proliferation genes as early predictive markers for aggressive disease in endometrial cancers",
+      journal: "Journal of Molecular Oncology",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Genomics Panel",
+      abstract: "Predicting aggressive endometrial tumor growth lines using early gene panel analysis.",
+      link: "https://1cell.ai/mutational-spectrum-of-cell-proliferation-genes-as-early-predictive-markers-for-aggressive-disease-in-endometrial-cancers/"
+    }
+  ],
       presentations: [
         "OncoHRD® Product Details & Presentation"
       ]
@@ -1093,10 +2075,218 @@ const db = {
       hospital: "1Cell.Ai Curation & Reporting Team",
       contact: "yashodhara.b@1cell.ai",
       photo: "https://www.w3schools.com/howto/img_avatar2.png",
-      publications: [
-        "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics",
-        "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response"
-      ],
+        publications: [
+    {
+      id: "pub-001",
+      title: "Potential of urine liquid biopsy in detecting of clinically relevant genomic alterations in advanced genitourinary cancers",
+      journal: "Journal of Liquid Biopsy",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Khandare et al.",
+      abstract: "Detecting genitourinary biomarkers from non-invasive urine samples as a surrogate for plasma assays.",
+      link: "https://1cell.ai/potential-of-urine-liquid-biopsy-in-detecting-of-clinically-relevant-genomic-alterations-in-advanced-genitourinary-cancers/"
+    },
+    {
+      id: "pub-002",
+      title: "Single-Cell Circulating Tumor Cell Genomics Reveals KRAS-Independent Oncogenic Sub-Populations and Longitudinal Clonal Evolution in Metastatic Pancreatic Adenocarcinoma",
+      journal: "Translational Oncology",
+      date: "2026",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Elucidating tumor heterogeneity and treatment resistance pathways using single circulating cells.",
+      link: "https://1cell.ai/single-cell-circulating-tumor-cell-genomics-reveals-kras-independent-oncogenic-sub-populations-and-longitudinal-clonal-evolution-in-metastatic-pancreatic-adenocarcinoma/"
+    },
+    {
+      id: "pub-003",
+      title: "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology",
+      journal: "Molecular Cancer Diagnostics",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Uttarwar et al.",
+      abstract: "Validating clinical accuracy and pipeline throughput of a comprehensive 1080-gene profiling test.",
+      link: "https://1cell.ai/analytical-validation-and-clinical-implementation-of-a-1080-gene-comprehensive-genomic-profiling-assay-with-integrated-cloud-based-analysis-for-solid-tumor-molecular-oncology/"
+    },
+    {
+      id: "pub-004",
+      title: "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncopredikt",
+      authors: "Dr. Gowhar Shafi et al.",
+      abstract: "Deep learning models classifying whole-slide pathology images to predict biomarker boundaries.",
+      link: "https://1cell.ai/abstract-78-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-005",
+      title: "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Shafi et al.",
+      abstract: "Real-world study connecting TP53 mutation classes to wider genomic instability profiles.",
+      link: "https://1cell.ai/abstract-lb118-5-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-006",
+      title: "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Informatics Panel",
+      abstract: "A cell-free DNA methylation trace algorithm improving sensitivity limits of post-surgery MRD assays.",
+      link: "https://1cell.ai/mirage-a-ctdna-methylation-driven-computational-algorithm/"
+    },
+    {
+      id: "pub-007",
+      title: "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Clinical Curation Board",
+      abstract: "Using aggregated variant classifiers to resolve variant of uncertain significance (VUS) statuses.",
+      link: "https://1cell.ai/abstract-6272-2-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-008",
+      title: "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Genomic Informatics Team",
+      abstract: "Tracking host pharmacogenomic alleles to predict toxicities and drug clearance dynamics.",
+      link: "https://1cell.ai/abstract-3141-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-009",
+      title: "Comprehensive Genomic Profiling Drives Precision Oncology and Expands Accessibility to Targeted Therapies in Uzbek Populations",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Clinical Research Team",
+      abstract: "Demonstrating clinical utility and treatment modifications using CGP panels in Central Asia.",
+      link: "https://1cell.ai/abstract-2510-17-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-010",
+      title: "OncoAlibrex: Ultrasensitive cfDNA Fragmentomics Assay for Early Treatment Response Assessment in Solid Tumors",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Fragmentomics Group",
+      abstract: "Tracing cell-free DNA size distribution dynamics to predict early responder states.",
+      link: "https://1cell.ai/abstract-1035-3-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-011",
+      title: "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients",
+      journal: "Liquid Biopsy Congress",
+      date: "2025",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Capturing intact CTC profiles revealing homologous recombination pathway mutations in breast patients.",
+      link: "https://1cell.ai/live-ctc-genomic-profile-pik3ca-hrr-breast/"
+    },
+    {
+      id: "pub-012",
+      title: "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer",
+      journal: "Journal of Clinical Oncology",
+      date: "2025",
+      product: "oncopredikt",
+      authors: "Informatics Team",
+      abstract: "AI-based inference model calculating HRD scores from standard slide images.",
+      link: "https://1cell.ai/ai-hrd-prediction-histopathology-breast-ovarian-cancer/"
+    },
+    {
+      id: "pub-013",
+      title: "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population",
+      journal: "SABCS Annual Meeting",
+      date: "2025",
+      product: "primeplus",
+      authors: "Actorius Group",
+      abstract: "Demonstrating high-purity single-cell CTC capture systems from raw blood samples.",
+      link: "https://1cell.ai/live-single-ctc-capture-multiomics-cancer/"
+    },
+    {
+      id: "pub-014",
+      title: "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients",
+      journal: "ISLB Annual Congress",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Shafi et al.",
+      abstract: "Tracking EGFR resistance patterns to predict disease progression.",
+      link: "https://1cell.ai/longitudinal-ctdna-egfr-nsclc-prognosis/"
+    },
+    {
+      id: "pub-015",
+      title: "Circulating tumor cells and clusters exhibiting PD-L1 expression in colorectal cancer patients",
+      journal: "Journal of Colorectal Cancer Research",
+      date: "2024",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Examining diagnostic PD-L1 thresholds on intact circulating tumor cells and microclusters.",
+      link: "https://1cell.ai/circulating-tumor-cells-and-clusters-exhibiting-pd-l1-expression-in-colorectal-cancer-patients/"
+    },
+    {
+      id: "pub-016",
+      title: "ctDNA-based clinicogenomic analysis of advanced head and neck cancer patients treated with immune checkpoint inhibitors",
+      journal: "Journal of Precision Medicine",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Uttarwar et al.",
+      abstract: "Serial monitoring of tumor mutations in blood to guide immunotherapy durations.",
+      link: "https://1cell.ai/ctdna-based-clinicogenomic-analysis-of-advanced-head-and-neck-cancer-patients-treated-with-immune-checkpoint-inhibitors/"
+    },
+    {
+      id: "pub-017",
+      title: "Using a dynamic blood flow device with affinity ligands to capture circulating tumor cells in cancer patients",
+      journal: "Rare Rare Cell Research Journal",
+      date: "2023",
+      product: "primeplus",
+      authors: "Actorius Research Group",
+      abstract: "Validation of microfluidic flow cells capturing viable tumor cells using custom affinity tags.",
+      link: "https://1cell.ai/using-a-dynamic-blood-flow-device-with-affinity-ligands-to-capture-circulating-tumor-cells-in-cancer-patients/"
+    },
+    {
+      id: "pub-018",
+      title: "Circulating tumor cell distribution and PD-L1 expression across cancer types: insights from 5,935 patients",
+      journal: "ASCO Poster Presentation",
+      date: "2023",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Large-cohort statistical trace verifying circulating tumor cell ranges across solid cancer lineages.",
+      link: "https://1cell.ai/circulating-tumor-cell-distribution-and-pd-l1-expression-across-cancer-types-insights-from-5935-patients/"
+    },
+    {
+      id: "pub-019",
+      title: "PD-L1 expression on circulating tumor cells and CTC clusters as minimal cellular residual disease in breast cancer patients",
+      journal: "Breast Cancer Research",
+      date: "2023",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Correlating residual circulating cells expressing checkpoint targets to relapse timelines.",
+      link: "https://1cell.ai/pd-l1-expression-on-circulating-tumor-cells-and-ctc-clusters-as-minimal-cellular-residual-disease-in-breast-cancer-patients/"
+    },
+    {
+      id: "pub-020",
+      title: "Effect of cell proliferation pathway on accessibility to targeted therapeutics in the spectrum of co-occurring prognostic cellular pathways in pan-cancers",
+      journal: "Translational Oncology Reports",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Informatics Team",
+      abstract: "Mapping downstream pathway overlaps to predict targeted treatment synergies.",
+      link: "https://1cell.ai/effect-of-cell-proliferation-pathway-on-accessibility-to-targeted-therapeutics-in-the-spectrum-of-co-occurring-prognostic-cellular-pathways-in-pan-cancers/"
+    },
+    {
+      id: "pub-021",
+      title: "Mutational spectrum of cell proliferation genes as early predictive markers for aggressive disease in endometrial cancers",
+      journal: "Journal of Molecular Oncology",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Genomics Panel",
+      abstract: "Predicting aggressive endometrial tumor growth lines using early gene panel analysis.",
+      link: "https://1cell.ai/mutational-spectrum-of-cell-proliferation-genes-as-early-predictive-markers-for-aggressive-disease-in-endometrial-cancers/"
+    }
+  ],
       presentations: [
         "iCore® Product Details & Presentation"
       ]
@@ -1108,10 +2298,218 @@ const db = {
       hospital: "1Cell.Ai Product Management",
       contact: "santoshi.iyer@1cell.ai",
       photo: "https://www.w3schools.com/howto/img_avatar2.png",
-      publications: [
-        "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients",
-        "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease"
-      ],
+        publications: [
+    {
+      id: "pub-001",
+      title: "Potential of urine liquid biopsy in detecting of clinically relevant genomic alterations in advanced genitourinary cancers",
+      journal: "Journal of Liquid Biopsy",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Khandare et al.",
+      abstract: "Detecting genitourinary biomarkers from non-invasive urine samples as a surrogate for plasma assays.",
+      link: "https://1cell.ai/potential-of-urine-liquid-biopsy-in-detecting-of-clinically-relevant-genomic-alterations-in-advanced-genitourinary-cancers/"
+    },
+    {
+      id: "pub-002",
+      title: "Single-Cell Circulating Tumor Cell Genomics Reveals KRAS-Independent Oncogenic Sub-Populations and Longitudinal Clonal Evolution in Metastatic Pancreatic Adenocarcinoma",
+      journal: "Translational Oncology",
+      date: "2026",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Elucidating tumor heterogeneity and treatment resistance pathways using single circulating cells.",
+      link: "https://1cell.ai/single-cell-circulating-tumor-cell-genomics-reveals-kras-independent-oncogenic-sub-populations-and-longitudinal-clonal-evolution-in-metastatic-pancreatic-adenocarcinoma/"
+    },
+    {
+      id: "pub-003",
+      title: "Analytical Validation and Clinical Implementation of a 1080-Gene Comprehensive Genomic Profiling Assay with Integrated Cloud-Based Analysis for Solid Tumor Molecular Oncology",
+      journal: "Molecular Cancer Diagnostics",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Uttarwar et al.",
+      abstract: "Validating clinical accuracy and pipeline throughput of a comprehensive 1080-gene profiling test.",
+      link: "https://1cell.ai/analytical-validation-and-clinical-implementation-of-a-1080-gene-comprehensive-genomic-profiling-assay-with-integrated-cloud-based-analysis-for-solid-tumor-molecular-oncology/"
+    },
+    {
+      id: "pub-004",
+      title: "OncoPredikt: A Deep-Learning Framework for Tumor Detection and Biomarker Quantification in Breast Cancer IHC Whole-Slide Images",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncopredikt",
+      authors: "Dr. Gowhar Shafi et al.",
+      abstract: "Deep learning models classifying whole-slide pathology images to predict biomarker boundaries.",
+      link: "https://1cell.ai/abstract-78-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-005",
+      title: "Precision Profiling of TP53 Alterations in Advanced Cancers: Real-World Evidence Linking Mutation Class to Genomic Instability and Co-occurring Actionable Drivers",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Shafi et al.",
+      abstract: "Real-world study connecting TP53 mutation classes to wider genomic instability profiles.",
+      link: "https://1cell.ai/abstract-lb118-5-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-006",
+      title: "MIRAGE: A ctDNA Methylation-Driven Computational Algorithm Designed for Sensitive Detection of Minimal Residual Disease",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Informatics Panel",
+      abstract: "A cell-free DNA methylation trace algorithm improving sensitivity limits of post-surgery MRD assays.",
+      link: "https://1cell.ai/mirage-a-ctdna-methylation-driven-computational-algorithm/"
+    },
+    {
+      id: "pub-007",
+      title: "Enhancing Variant Interpretation Through Multi-Database and Systematic Variant Classification: Reducing Uncertainty in Clinical Genomics",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Clinical Curation Board",
+      abstract: "Using aggregated variant classifiers to resolve variant of uncertain significance (VUS) statuses.",
+      link: "https://1cell.ai/abstract-6272-2-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-008",
+      title: "Integrative Genomic Analysis Reveals Pharmacogenomic Determinants of Chemotherapy Response",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "icore",
+      authors: "Genomic Informatics Team",
+      abstract: "Tracking host pharmacogenomic alleles to predict toxicities and drug clearance dynamics.",
+      link: "https://1cell.ai/abstract-3141-9-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-009",
+      title: "Comprehensive Genomic Profiling Drives Precision Oncology and Expands Accessibility to Targeted Therapies in Uzbek Populations",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncoindx",
+      authors: "Clinical Research Team",
+      abstract: "Demonstrating clinical utility and treatment modifications using CGP panels in Central Asia.",
+      link: "https://1cell.ai/abstract-2510-17-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-010",
+      title: "OncoAlibrex: Ultrasensitive cfDNA Fragmentomics Assay for Early Treatment Response Assessment in Solid Tumors",
+      journal: "AACR Annual Meeting",
+      date: "2026",
+      product: "oncomonitor",
+      authors: "Fragmentomics Group",
+      abstract: "Tracing cell-free DNA size distribution dynamics to predict early responder states.",
+      link: "https://1cell.ai/abstract-1035-3-aacr-annual-meeting-2026/"
+    },
+    {
+      id: "pub-011",
+      title: "Single live circulating tumor cells capture and their genomic profile reveal enriched mutations of PIK3CA and HRR pathway in breast cancer patients",
+      journal: "Liquid Biopsy Congress",
+      date: "2025",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Capturing intact CTC profiles revealing homologous recombination pathway mutations in breast patients.",
+      link: "https://1cell.ai/live-ctc-genomic-profile-pik3ca-hrr-breast/"
+    },
+    {
+      id: "pub-012",
+      title: "AI-Powered HRD Prediction from H&E Histopathology Images in Breast and Ovarian Cancer",
+      journal: "Journal of Clinical Oncology",
+      date: "2025",
+      product: "oncopredikt",
+      authors: "Informatics Team",
+      abstract: "AI-based inference model calculating HRD scores from standard slide images.",
+      link: "https://1cell.ai/ai-hrd-prediction-histopathology-breast-ovarian-cancer/"
+    },
+    {
+      id: "pub-013",
+      title: "True live single circulating tumor cell capture with no leukocyte contaminant assay for multiomics in large cancer patient population",
+      journal: "SABCS Annual Meeting",
+      date: "2025",
+      product: "primeplus",
+      authors: "Actorius Group",
+      abstract: "Demonstrating high-purity single-cell CTC capture systems from raw blood samples.",
+      link: "https://1cell.ai/live-single-ctc-capture-multiomics-cancer/"
+    },
+    {
+      id: "pub-014",
+      title: "Longitudinal ctDNA monitoring with resistance genomic signatures show poor prognosis in EGFR-mutated advanced NSCLC patients",
+      journal: "ISLB Annual Congress",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Shafi et al.",
+      abstract: "Tracking EGFR resistance patterns to predict disease progression.",
+      link: "https://1cell.ai/longitudinal-ctdna-egfr-nsclc-prognosis/"
+    },
+    {
+      id: "pub-015",
+      title: "Circulating tumor cells and clusters exhibiting PD-L1 expression in colorectal cancer patients",
+      journal: "Journal of Colorectal Cancer Research",
+      date: "2024",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Examining diagnostic PD-L1 thresholds on intact circulating tumor cells and microclusters.",
+      link: "https://1cell.ai/circulating-tumor-cells-and-clusters-exhibiting-pd-l1-expression-in-colorectal-cancer-patients/"
+    },
+    {
+      id: "pub-016",
+      title: "ctDNA-based clinicogenomic analysis of advanced head and neck cancer patients treated with immune checkpoint inhibitors",
+      journal: "Journal of Precision Medicine",
+      date: "2024",
+      product: "oncomonitor",
+      authors: "Uttarwar et al.",
+      abstract: "Serial monitoring of tumor mutations in blood to guide immunotherapy durations.",
+      link: "https://1cell.ai/ctdna-based-clinicogenomic-analysis-of-advanced-head-and-neck-cancer-patients-treated-with-immune-checkpoint-inhibitors/"
+    },
+    {
+      id: "pub-017",
+      title: "Using a dynamic blood flow device with affinity ligands to capture circulating tumor cells in cancer patients",
+      journal: "Rare Rare Cell Research Journal",
+      date: "2023",
+      product: "primeplus",
+      authors: "Actorius Research Group",
+      abstract: "Validation of microfluidic flow cells capturing viable tumor cells using custom affinity tags.",
+      link: "https://1cell.ai/using-a-dynamic-blood-flow-device-with-affinity-ligands-to-capture-circulating-tumor-cells-in-cancer-patients/"
+    },
+    {
+      id: "pub-018",
+      title: "Circulating tumor cell distribution and PD-L1 expression across cancer types: insights from 5,935 patients",
+      journal: "ASCO Poster Presentation",
+      date: "2023",
+      product: "primeplus",
+      authors: "Khandare et al.",
+      abstract: "Large-cohort statistical trace verifying circulating tumor cell ranges across solid cancer lineages.",
+      link: "https://1cell.ai/circulating-tumor-cell-distribution-and-pd-l1-expression-across-cancer-types-insights-from-5935-patients/"
+    },
+    {
+      id: "pub-019",
+      title: "PD-L1 expression on circulating tumor cells and CTC clusters as minimal cellular residual disease in breast cancer patients",
+      journal: "Breast Cancer Research",
+      date: "2023",
+      product: "primeplus",
+      authors: "Shafi et al.",
+      abstract: "Correlating residual circulating cells expressing checkpoint targets to relapse timelines.",
+      link: "https://1cell.ai/pd-l1-expression-on-circulating-tumor-cells-and-ctc-clusters-as-minimal-cellular-residual-disease-in-breast-cancer-patients/"
+    },
+    {
+      id: "pub-020",
+      title: "Effect of cell proliferation pathway on accessibility to targeted therapeutics in the spectrum of co-occurring prognostic cellular pathways in pan-cancers",
+      journal: "Translational Oncology Reports",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Informatics Team",
+      abstract: "Mapping downstream pathway overlaps to predict targeted treatment synergies.",
+      link: "https://1cell.ai/effect-of-cell-proliferation-pathway-on-accessibility-to-targeted-therapeutics-in-the-spectrum-of-co-occurring-prognostic-cellular-pathways-in-pan-cancers/"
+    },
+    {
+      id: "pub-021",
+      title: "Mutational spectrum of cell proliferation genes as early predictive markers for aggressive disease in endometrial cancers",
+      journal: "Journal of Molecular Oncology",
+      date: "2023",
+      product: "oncoindx",
+      authors: "Genomics Panel",
+      abstract: "Predicting aggressive endometrial tumor growth lines using early gene panel analysis.",
+      link: "https://1cell.ai/mutational-spectrum-of-cell-proliferation-genes-as-early-predictive-markers-for-aggressive-disease-in-endometrial-cancers/"
+    }
+  ],
       presentations: [
         "OncoMonitor® Product Details & Presentation"
       ]
