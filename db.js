@@ -1001,6 +1001,51 @@ const db = {
     }
   ],
 
+  newsletters: [
+    {
+      id: "news-001",
+      title: "1Cell.Ai Monthly Pulse - June 2026",
+      description: "June newsletter highlighting OncoIndx regional launch updates, global executive hires, and upcoming scientific summits.",
+      department: "Marketing",
+      product: "oncoindx",
+      contentType: "Newsletter",
+      status: "Approved",
+      version: "v1.0",
+      updatedDate: "2026-06-30",
+      owner: "Marketing Operations",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Marketing/1Cell_Monthly_Pulse_June_2026.pdf",
+      folderPath: "Shared Documents/Marketing"
+    },
+    {
+      id: "news-002",
+      title: "Scientific breakthroughs & OncoHRD updates - May 2026",
+      description: "Summary of new clinical validations for OncoHRD assays in ovarian cancer, abstracts from ESMO, and team milestones.",
+      department: "Medical",
+      product: "oncohrd",
+      contentType: "Newsletter",
+      status: "Approved",
+      version: "v1.1",
+      updatedDate: "2026-05-31",
+      owner: "Scientific Team",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoHRD/1Cell_Scientific_Pulse_May_2026.pdf",
+      folderPath: "Shared Documents/OncoHRD"
+    },
+    {
+      id: "news-003",
+      title: "Sales Pitch Pulse & ASM Wins - April 2026",
+      description: "Celebrating record-breaking sales cycles for OncoMonitor MRD assays, doctor feedback profiles, and pitching strategies.",
+      department: "Sales",
+      product: "oncomonitor",
+      contentType: "Newsletter",
+      status: "Approved",
+      version: "v1.0",
+      updatedDate: "2026-04-30",
+      owner: "Sales Enablement",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Sales/1Cell_Sales_Pulse_April_2026.pdf",
+      folderPath: "Shared Documents/Sales"
+    }
+  ],
+
   leaderboard: [
     { rank: 1, name: "Rajesh Kumar", points: 240, attempted: 6 },
     { rank: 2, name: "Sarah Jenkins", points: 200, attempted: 5 },

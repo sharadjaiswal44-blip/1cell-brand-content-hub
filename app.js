@@ -381,6 +381,9 @@ function renderRoute(route) {
     case 'videos':
       renderVideoLibrary();
       break;
+    case 'newsletters':
+      renderNewsletters();
+      break;
     case 'speakers':
       renderSpeakerProfiles();
       break;
@@ -1135,6 +1138,22 @@ function renderBrandGuidelines() {
   `;
 }
 
+// Newsletters Route
+function renderNewsletters() {
+  workspaceViewport.innerHTML = `
+    <div class="welcome-banner">
+      <div>
+        <h1 class="welcome-title">1Cell.Ai Corporate Newsletters</h1>
+        <p class="welcome-subtitle">Browse monthly announcements, scientific highlights, and sales cycle briefs.</p>
+      </div>
+    </div>
+    
+    <div class="assets-grid">
+      ${db.newsletters.map(news => renderDocumentCard(news)).join('')}
+    </div>
+  `;
+}
+
 // 10. Templates Route
 function renderTemplates() {
   workspaceViewport.innerHTML = `
@@ -1627,7 +1646,8 @@ window.updateFilterState = function() {
 
   // Perform evaluation logic
   const query = activeSearchQuery.toLowerCase().trim();
-  const filtered = db.documents.filter(doc => {
+  const allAssets = [...db.documents, ...db.newsletters];
+  const filtered = allAssets.filter(doc => {
     // 1. Text Query Matching
     if (query) {
       const matchTitle = doc.title.toLowerCase().includes(query);
@@ -1703,7 +1723,8 @@ function handleSearchInput(e) {
   }
 
   // Find matches
-  const matchedDocs = db.documents.filter(doc => 
+  const allSearchable = [...db.documents, ...db.newsletters];
+  const matchedDocs = allSearchable.filter(doc => 
     doc.title.toLowerCase().includes(query) || 
     doc.department.toLowerCase().includes(query) ||
     (doc.biomarker && doc.biomarker.toLowerCase().includes(query)) ||
@@ -1767,7 +1788,7 @@ function handleSearchInput(e) {
 
 // 14. Preview Document Modal logic
 window.previewDocument = function(docId) {
-  const doc = db.documents.find(d => d.id === docId);
+  const doc = db.documents.find(d => d.id === docId) || db.newsletters.find(n => n.id === docId);
   if (!doc) return;
 
   // Track recent viewed item
@@ -1891,7 +1912,7 @@ window.previewDocument = function(docId) {
 
 // Inspect SharePoint details modal
 window.inspectSharepoint = function(docId) {
-  const doc = db.documents.find(d => d.id === docId);
+  const doc = db.documents.find(d => d.id === docId) || db.newsletters.find(n => n.id === docId);
   if (!doc) return;
 
   spMetadataDetails.innerHTML = `
