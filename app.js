@@ -1178,14 +1178,9 @@ function renderCampaignHub() {
 
 // 6.5. Sales Enablement Route
 function renderSalesEnablement() {
-  const assets = db.documents.filter(d => d.department === "Sales Enablement");
+  const assets = db.documents.filter(d => d.department === "Sales Enablement" || d.category === "sales-enablement");
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
-      <div>
-        <h1 class="welcome-title">Sales Enablement Portal</h1>
-        <p class="welcome-subtitle">Obtain sales guidelines, pitch training presentations, and competitor battlecards for the 1Cell.Ai ASM team.</p>
-      </div>
-    </div>
+${window.renderCategoryHeader('Sales Enablement Portal', 'Obtain sales guidelines, pitch training presentations, and competitor battlecards for the 1Cell.Ai ASM team.', 'sales-enablement')}
     
     <div class="dashboard-section">
       <h2 class="section-headline" style="margin-bottom: 20px;">1Cell.Ai ASM Resources & Playbooks</h2>
@@ -1229,12 +1224,7 @@ ${window.renderCategoryHeader('1Cell.Ai Digital Video Library', 'Browse doctor i
 // 8. Speaker Profiles Route
 function renderSpeakerProfiles() {
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
-      <div>
-        <h1 class="welcome-title">Speaker Profiles & Medical Experts</h1>
-        <p class="welcome-subtitle">Academic profiles and content assets linked to clinical key opinion leaders.</p>
-      </div>
-    </div>
+${window.renderCategoryHeader('Speaker Profiles & Medical Experts', 'Academic profiles and content assets linked to clinical key opinion leaders.', 'speakers')}
     
     <div class="speakers-grid">
       ${db.speakers.map(spk => `
@@ -2271,6 +2261,16 @@ function handleMockUpload(e) {
       fileType: 'DOCX',
       downloadUrl: sharePointUrl
     });
+  } else if (category === 'speakers') {
+    // If the registered asset is a speaker publication/link, let's look for doctor matching author or hospital:
+    const spk = db.speakers.find(s => s.name.toLowerCase().includes(author.toLowerCase()) || author.toLowerCase().includes(s.name.toLowerCase()));
+    if (spk) {
+      if (!spk.publications) spk.publications = [];
+      spk.publications.push({
+        title,
+        link: sharePointUrl
+      });
+    }
   } else if (category === 'newsletters') {
     db.newsletters.unshift({
       id: `news-${Date.now()}`,
