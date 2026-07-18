@@ -1241,16 +1241,28 @@ ${window.renderCategoryHeader('Speaker Profiles & Medical Experts', 'Academic pr
             <div class="speaker-relations">
               <span style="font-size:10px; font-weight:700; color:var(--text-tertiary); text-transform:uppercase;">Linked Resources:</span>
               <div style="margin-top:6px;">
-                ${spk.publications.map(p => {
-                  const doc = db.documents.find(d => d.title.toLowerCase().includes(p.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(p.toLowerCase().substring(0, 15)));
+                ${spk.publications ? spk.publications.map(p => {
+                  const title = typeof p === 'object' ? p.title : p;
+                  const doc = db.documents.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15)));
                   const docId = doc ? doc.id : 'doc-001';
-                  return `<div class="relation-item"><span>📄</span> <span style="cursor:pointer;" onclick="window.previewDocument('${docId}')">${p}</span></div>`;
-                }).join('')}
-                ${spk.presentations.map(p => {
-                  const doc = db.documents.find(d => d.title.toLowerCase().includes(p.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(p.toLowerCase().substring(0, 15)));
+                  const link = typeof p === 'object' ? (p.link || p.sharePointUrl) : '';
+                  if (link) {
+                    return `<div class="relation-item"><span>📄</span> <span style="cursor:pointer;" onclick="window.open('${link}', '_blank')">${title}</span></div>`;
+                  } else {
+                    return `<div class="relation-item"><span>📄</span> <span style="cursor:pointer;" onclick="window.previewDocument('${docId}')">${title}</span></div>`;
+                  }
+                }).join('') : ''}
+                ${spk.presentations ? spk.presentations.map(p => {
+                  const title = typeof p === 'object' ? p.title : p;
+                  const doc = db.documents.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15)));
                   const docId = doc ? doc.id : 'doc-001';
-                  return `<div class="relation-item"><span>📊</span> <span style="cursor:pointer;" onclick="window.previewDocument('${docId}')">${p}</span></div>`;
-                }).join('')}
+                  const link = typeof p === 'object' ? (p.link || p.sharePointUrl) : '';
+                  if (link) {
+                    return `<div class="relation-item"><span>📊</span> <span style="cursor:pointer;" onclick="window.open('${link}', '_blank')">${title}</span></div>`;
+                  } else {
+                    return `<div class="relation-item"><span>📊</span> <span style="cursor:pointer;" onclick="window.previewDocument('${docId}')">${title}</span></div>`;
+                  }
+                }).join('') : ''}
               </div>
             </div>
           </div>
