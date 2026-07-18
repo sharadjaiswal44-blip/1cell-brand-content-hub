@@ -113,7 +113,36 @@ function init() {
 
   // Role switching
   roleSelect.addEventListener('change', (e) => {
-    currentRole = e.target.value;
+    const newRole = e.target.value;
+    
+    // Validate Marketing email authorization if switching manually
+    if (newRole === 'marketing_admin') {
+      const email = sessionStorage.getItem("authEmail");
+      if (email) {
+        const authorizedMarketingEmails = [
+          "sharad.jaiswal@1cell.ai",
+          "vikas.naguru@1cell.ai",
+          "parita.razdan@1cell.ai",
+          "arjvee.vaidya@1cell.ai",
+          "tanisha.tolani@1cell.ai",
+          "pranad.kshirsagar@1cell.ai",
+          "richa@1cell.ai"
+        ];
+        if (!authorizedMarketingEmails.includes(email.toLowerCase())) {
+          showToast("Access denied: Your email is not authorized for the Marketing Admin role.");
+          // Revert selection
+          let prevRole = 'sales';
+          const authDept = sessionStorage.getItem("authDept");
+          if (authDept === 'Leadership') prevRole = 'leadership';
+          else if (authDept === 'Genomic Scientist') prevRole = 'medical';
+          roleSelect.value = prevRole;
+          currentRole = prevRole;
+          return;
+        }
+      }
+    }
+
+    currentRole = newRole;
 
     // Sync sessionStorage authDept if they switch roles manually (to keep category styling synced)
     let correspondingDept = 'Marketing';
@@ -192,9 +221,36 @@ function init() {
       // Email domain validation
       if (!email.toLowerCase().endsWith('@1cell.ai')) {
         if (emailInput) emailInput.classList.add('input-error');
-        if (errorMsg) errorMsg.style.display = 'flex';
+        if (errorMsg) {
+          const span = errorMsg.querySelector('span');
+          if (span) span.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
+          errorMsg.style.display = 'flex';
+        }
         showToast("Access denied: Only official @1cell.ai email domains are authorized.");
         return;
+      }
+
+      // Marketing team authorization validation
+      if (dept === 'Marketing') {
+        const authorizedMarketingEmails = [
+          "sharad.jaiswal@1cell.ai",
+          "vikas.naguru@1cell.ai",
+          "parita.razdan@1cell.ai",
+          "arjvee.vaidya@1cell.ai",
+          "tanisha.tolani@1cell.ai",
+          "pranad.kshirsagar@1cell.ai",
+          "richa@1cell.ai"
+        ];
+        if (!authorizedMarketingEmails.includes(email.toLowerCase())) {
+          if (emailInput) emailInput.classList.add('input-error');
+          if (errorMsg) {
+            const span = errorMsg.querySelector('span');
+            if (span) span.innerText = "Access denied: Your email is not registered in the Marketing team. Choose another department.";
+            errorMsg.style.display = 'flex';
+          }
+          showToast("Access denied: Email not registered in the Marketing team.");
+          return;
+        }
       }
 
       if (name && email && dept) {
