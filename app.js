@@ -407,6 +407,63 @@ function renderRoute(route) {
   }
 }
 
+// Dynamic render for product-wise SharePoint documents directory
+function renderDashboardProductDocs(productName) {
+  const container = document.getElementById('dashboardProductDocsContainer');
+  if (!container) return;
+
+  const relatedDocs = db.documents.filter(d => d.product === productName);
+  
+  if (relatedDocs.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1 / -1; color: var(--text-tertiary); font-size: 13px; text-align: center; padding: 24px;">No documents registered in this product folder.</div>`;
+    return;
+  }
+
+  let html = '';
+  relatedDocs.forEach(doc => {
+    let icon = '📄';
+    if (doc.contentType === 'Brochure') icon = '📖';
+    else if (doc.contentType === 'Whitepaper') icon = '🧬';
+    else if (doc.contentType === 'Case Study') icon = '🔬';
+    else if (doc.contentType === 'Battlecard') icon = '⚔️';
+    else if (doc.contentType === 'Presentation') icon = '📊';
+
+    html += `
+      <div class="folder-doc-card">
+        <div class="folder-doc-header">
+          <span class="folder-doc-icon">${icon}</span>
+          <div style="flex: 1;">
+            <div class="folder-doc-title" onclick="window.previewDocument('${doc.id}')">${doc.title}</div>
+            <div class="folder-doc-path">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:11px;height:11px;color:#0078d4;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+              </svg>
+              ${doc.folderPath}
+            </div>
+          </div>
+        </div>
+        <div class="folder-doc-actions">
+          <button onclick="window.previewDocument('${doc.id}')">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Details
+          </button>
+          <a href="${doc.sharePointUrl}" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;color:#0078d4;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v11.5A2.25 2.25 0 005.25 22h11.5A2.25 2.25 0 0019 19.75V11.25M18.75 3L11.75 10M18.75 3h-6m6 0v6" />
+            </svg>
+            SharePoint
+          </a>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
 // 1. Dashboard View
 function renderDashboard() {
   let actionsHtml = '';
@@ -444,42 +501,27 @@ function renderDashboard() {
       </div>
     </div>
 
-    <!-- Quick Access Tiles -->
+    <!-- Product-wise SharePoint Folder Directory Tabs -->
     <div class="dashboard-section">
-      <div class="section-title-row">
-        <h2 class="section-headline">Quick Access Assets</h2>
+      <div class="section-title-row" style="margin-bottom: 12px;">
+        <h2 class="section-headline">Quick Product Assets (SharePoint Directory)</h2>
       </div>
-      <div class="quick-tiles-grid">
-        <div class="quick-tile-card" data-action="quick-access" data-id="doc-013">
-          <div class="tile-icon-wrapper">📊</div>
-          <div class="tile-label">Global Corporate Deck</div>
-          <div class="tile-sublabel">Presentation (v1.0)</div>
-        </div>
-        <div class="quick-tile-card" data-action="quick-access" data-id="doc-001">
-          <div class="tile-icon-wrapper">📄</div>
-          <div class="tile-label">OncoIndx Brochure</div>
-          <div class="tile-sublabel">Brochure (v2.3)</div>
-        </div>
-        <div class="quick-tile-card" data-action="quick-access" data-id="doc-004">
-          <div class="tile-icon-wrapper">🧬</div>
-          <div class="tile-label">OncoHRD validation</div>
-          <div class="tile-sublabel">Research Paper (v3.0)</div>
-        </div>
-        <div class="quick-tile-card" data-action="quick-access" data-id="doc-007">
-          <div class="tile-icon-wrapper">🔬</div>
-          <div class="tile-label">OncoMonitor Case Study</div>
-          <div class="tile-sublabel">Case Library</div>
-        </div>
-        <div class="quick-tile-card" data-action="quick-access" data-id="doc-005">
-          <div class="tile-icon-wrapper">🎨</div>
-          <div class="tile-label">Brand Guidelines</div>
-          <div class="tile-sublabel">Brand Manual 2026</div>
-        </div>
-        <div class="quick-tile-card" data-action="quick-access" data-id="doc-011">
-          <div class="tile-icon-wrapper">✉️</div>
-          <div class="tile-label">Outreach Email Template</div>
-          <div class="tile-sublabel">Campaign templates</div>
-        </div>
+      
+      <!-- Product Tabs Container -->
+      <div class="product-tabs-container">
+        <button class="product-tab active" data-product="oncoindx">OncoIndx®</button>
+        <button class="product-tab" data-product="oncohrd">OncoHRD®</button>
+        <button class="product-tab" data-product="oncomonitor">OncoMonitor®</button>
+        <button class="product-tab" data-product="oncopredikt">OncoPredikt®</button>
+        <button class="product-tab" data-product="oncorisk">OncoRisk®</button>
+        <button class="product-tab" data-product="oncotarget">OncoTarget®</button>
+        <button class="product-tab" data-product="primeplus">PrimePlus®</button>
+        <button class="product-tab" data-product="icore">iCore®</button>
+      </div>
+      
+      <!-- Folders Directory Content View -->
+      <div id="dashboardProductDocsContainer" class="product-docs-folder-view">
+        <!-- Rendered dynamically -->
       </div>
     </div>
 
@@ -554,13 +596,19 @@ function renderDashboard() {
     });
   }
 
-  // Quick access tile clicks
-  document.querySelectorAll('[data-action="quick-access"]').forEach(tile => {
-    tile.addEventListener('click', () => {
-      const docId = tile.getAttribute('data-id');
-      window.previewDocument(docId);
+  // Set up product tabs click handlers
+  const tabs = workspaceViewport.querySelectorAll('.product-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const selectedProduct = tab.getAttribute('data-product');
+      renderDashboardProductDocs(selectedProduct);
     });
   });
+
+  // Initial render of first product (OncoIndx)
+  renderDashboardProductDocs('oncoindx');
 }
 
 // Render document card template
