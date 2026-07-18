@@ -282,15 +282,18 @@ function updateSidebarCategories() {
   const campaignsItem = document.querySelector('.sidebar .nav-item[data-route="campaigns"]');
   const brandAssetsItem = document.querySelector('.sidebar .nav-item[data-route="brand-assets"]');
   const templatesItem = document.querySelector('.sidebar .nav-item[data-route="templates"]');
+  const roleSelectorWrapper = document.querySelector('.role-pill-selector');
 
-  if (dept === 'Marketing') {
+  if (dept === 'Marketing' || dept === 'Leadership') {
     if (campaignsItem) campaignsItem.style.display = '';
     if (brandAssetsItem) brandAssetsItem.style.display = '';
     if (templatesItem) templatesItem.style.display = '';
+    if (roleSelectorWrapper) roleSelectorWrapper.style.display = '';
   } else {
     if (campaignsItem) campaignsItem.style.display = 'none';
     if (brandAssetsItem) brandAssetsItem.style.display = 'none';
     if (templatesItem) templatesItem.style.display = 'none';
+    if (roleSelectorWrapper) roleSelectorWrapper.style.display = 'none';
   }
 }
 
@@ -339,8 +342,8 @@ function renderRoute(route) {
     else if (currentRole === 'leadership') dept = 'Leadership';
   }
 
-  if (dept !== 'Marketing' && (route === 'campaigns' || route === 'brand-assets' || route === 'templates')) {
-    showToast("Access restricted: Section available to Marketing only.");
+  if (dept !== 'Marketing' && dept !== 'Leadership' && (route === 'campaigns' || route === 'brand-assets' || route === 'templates')) {
+    showToast("Access restricted: Section available to Marketing & Leadership only.");
     // Switch active nav item in UI to dashboard
     sidebarItems.forEach(item => {
       if (item.getAttribute('data-route') === 'dashboard') {
@@ -418,8 +421,8 @@ function renderDashboard() {
     else if (currentRole === 'leadership') dept = 'Leadership';
   }
 
-  // Conditionally render Admin uploads based on Role (exclude Sales)
-  if (dept !== 'Sales' && (currentRole === 'marketing_admin' || currentRole === 'medical')) {
+  // Conditionally render Admin uploads based on department: only Marketing and Leadership
+  if (dept === 'Marketing' || dept === 'Leadership') {
     actionsHtml = `
       <button class="btn-primary" id="dashUploadBtn">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;">
@@ -2003,8 +2006,8 @@ function handleMockUpload(e) {
     else if (currentRole === 'leadership') dept = 'Leadership';
   }
 
-  if (dept === 'Sales') {
-    showToast("Access denied: Sales team members are not permitted to register content.");
+  if (dept !== 'Marketing' && dept !== 'Leadership') {
+    showToast("Access denied: Only Marketing and Leadership are permitted to register content.");
     closeModal(uploadModal);
     return;
   }
