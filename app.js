@@ -602,6 +602,11 @@ function renderDocumentCard(doc) {
           SharePoint Properties
         </a>
         <div style="display:flex; gap: 4px;">
+          <button class="card-action-btn" onclick="window.open('${doc.sharePointUrl}', '_blank')" title="Open Document in SharePoint">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </button>
           <button class="card-action-btn ${isFav ? 'active' : ''}" onclick="window.toggleFavorite('${doc.id}')" title="Bookmark Asset">
             <svg xmlns="http://www.w3.org/2000/svg" fill="${isFav ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />

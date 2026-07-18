@@ -126,8 +126,8 @@ const db = {
       owner: "Sales",
       createdDate: "2026-02-15",
       updatedDate: "2026-06-01",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Sales/ASM/1Cell_Ai_ASM_Playbook_2026.pdf",
-      folderPath: "Sales/ASM/Playbooks",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Sales/1Cell_Ai_ASM_Playbook_2026.pdf",
+      folderPath: "Shared Documents/Sales",
       size: "8.2 MB",
       downloadCount: 412,
       viewCount: 1105,
@@ -151,8 +151,8 @@ const db = {
       owner: "Sales",
       createdDate: "2026-03-10",
       updatedDate: "2026-06-15",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Sales/ASM/Battlecards_OncoRisk_vs_Guardant360.pdf",
-      folderPath: "Sales/ASM/Battlecards",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoRisk/Battlecards_OncoRisk_vs_Guardant360.pdf",
+      folderPath: "Shared Documents/OncoRisk",
       size: "2.1 MB",
       downloadCount: 295,
       viewCount: 840,
@@ -176,8 +176,8 @@ const db = {
       owner: "Sales",
       createdDate: "2026-01-20",
       updatedDate: "2026-05-18",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Sales/ASM/Reimbursement_Objections_2026.pdf",
-      folderPath: "Sales/ASM/Finance",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Sales/Reimbursement_Objections_2026.pdf",
+      folderPath: "Shared Documents/Sales",
       size: "1.5 MB",
       downloadCount: 189,
       viewCount: 512,
@@ -201,8 +201,8 @@ const db = {
       owner: "Sales",
       createdDate: "2026-06-20",
       updatedDate: "2026-06-22",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Sales/ASM/ASM_Q3_Kickoff_Slides.pptx",
-      folderPath: "Sales/ASM/Meetings",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Sales/ASM_Q3_Kickoff_Slides.pptx",
+      folderPath: "Shared Documents/Sales",
       size: "14.5 MB",
       downloadCount: 78,
       viewCount: 220,
@@ -226,8 +226,8 @@ const db = {
       owner: "Marketing Admin",
       createdDate: "2025-01-10",
       updatedDate: "2025-05-12",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Marketing/Brochures/OncoIndx_Brochure_2025_v2.3.pdf",
-      folderPath: "Marketing/Brochures",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoIndx/OncoIndx_Brochure_2025_v2.3.pdf",
+      folderPath: "Shared Documents/OncoIndx",
       size: "4.8 MB",
       downloadCount: 342,
       viewCount: 1205,
@@ -251,8 +251,8 @@ const db = {
       owner: "Sales Support",
       createdDate: "2025-02-15",
       updatedDate: "2025-06-20",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Sales/Presentations/OncoIndx_Clinical_Utility_v1.8.pptx",
-      folderPath: "Sales/Presentations",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoIndx/OncoIndx_Clinical_Utility_v1.8.pptx",
+      folderPath: "Shared Documents/OncoIndx",
       size: "14.2 MB",
       downloadCount: 198,
       viewCount: 654,
@@ -276,8 +276,8 @@ const db = {
       owner: "Marketing Admin",
       createdDate: "2025-03-01",
       updatedDate: "2025-03-15",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Marketing/OnePagers/OncoPredikt_OnePager_v1.2.pdf",
-      folderPath: "Marketing/OnePagers",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoPredikt/OncoPredikt_OnePager_v1.2.pdf",
+      folderPath: "Shared Documents/OncoPredikt",
       size: "1.2 MB",
       downloadCount: 89,
       viewCount: 310,
@@ -301,8 +301,8 @@ const db = {
       owner: "Medical Affairs Coordinator",
       createdDate: "2024-09-12",
       updatedDate: "2024-11-05",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Publications/OncoHRD_Ovarian_Validation_v3.pdf",
-      folderPath: "Medical/Publications",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoHRD/OncoHRD_Ovarian_Validation_v3.pdf",
+      folderPath: "Shared Documents/OncoHRD",
       size: "2.4 MB",
       downloadCount: 450,
       viewCount: 1540,
@@ -326,8 +326,8 @@ const db = {
       owner: "Marketing Admin",
       createdDate: "2026-01-05",
       updatedDate: "2026-01-05",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Corporate/Brand/1Cell_Brand_Guidelines_v4.pdf",
-      folderPath: "Corporate/Brand",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_Brand_Guidelines_v4.pdf",
+      folderPath: "Shared Documents/Corporate",
       size: "18.5 MB",
       downloadCount: 512,
       viewCount: 2201,
@@ -351,8 +351,8 @@ const db = {
       owner: "Medical Affairs Coordinator",
       createdDate: "2025-01-20",
       updatedDate: "2025-04-18",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/FAQs/OncoRisk_BRCA_FAQ_v1.1.pdf",
-      folderPath: "Medical/FAQs",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoRisk/OncoRisk_BRCA_FAQ_v1.1.pdf",
+      folderPath: "Shared Documents/OncoRisk",
       size: "820 KB",
       downloadCount: 73,
       viewCount: 231,
@@ -376,8 +376,8 @@ const db = {
       owner: "Medical Affairs Coordinator",
       createdDate: "2025-03-10",
       updatedDate: "2025-05-24",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Cases/OncoMonitor_Lung_Recurrence_Case.pdf",
-      folderPath: "Medical/Cases",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoMonitor/OncoMonitor_Lung_Recurrence_Case.pdf",
+      folderPath: "Shared Documents/OncoMonitor",
       size: "1.9 MB",
       downloadCount: 165,
       viewCount: 689,
@@ -401,8 +401,8 @@ const db = {
       owner: "Scientific Team Leader",
       createdDate: "2025-02-18",
       updatedDate: "2025-02-18",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Scientific/Validation/OncoTarget_NGS_Validation_v1.5.pdf",
-      folderPath: "Scientific/Validation",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoTarget/OncoTarget_NGS_Validation_v1.5.pdf",
+      folderPath: "Shared Documents/OncoTarget",
       size: "3.2 MB",
       downloadCount: 88,
       viewCount: 420,
@@ -426,8 +426,8 @@ const db = {
       owner: "Sales Support",
       createdDate: "2025-04-12",
       updatedDate: "2025-06-05",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Sales/Presentations/PrimePlus_Clinician_Deck_v2.1.pptx",
-      folderPath: "Sales/Presentations",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/PrimePlus/PrimePlus_Clinician_Deck_v2.1.pptx",
+      folderPath: "Shared Documents/PrimePlus",
       size: "11.7 MB",
       downloadCount: 145,
       viewCount: 520,
@@ -451,8 +451,8 @@ const db = {
       owner: "Product Manager (iCore)",
       createdDate: "2024-11-20",
       updatedDate: "2025-03-01",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Product/Manuals/iCore_API_UserGuide_v3.2.pdf",
-      folderPath: "Product/Manuals",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/iCore/iCore_API_UserGuide_v3.2.pdf",
+      folderPath: "Shared Documents/iCore",
       size: "6.1 MB",
       downloadCount: 110,
       viewCount: 390,
@@ -476,8 +476,8 @@ const db = {
       owner: "Marketing Admin",
       createdDate: "2025-03-20",
       updatedDate: "2025-03-20",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Marketing/Campaigns/India_Q1_OncoIndx_Email_v1.html",
-      folderPath: "Marketing/Campaigns",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoIndx/India_Q1_OncoIndx_Email_v1.html",
+      folderPath: "Shared Documents/OncoIndx",
       size: "120 KB",
       downloadCount: 220,
       viewCount: 810,
@@ -501,8 +501,8 @@ const db = {
       owner: "Scientific Team Leader",
       createdDate: "2025-05-18",
       updatedDate: "2025-05-18",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Scientific/Posters/OncoHRD_ESMO_Breast_Poster.pdf",
-      folderPath: "Scientific/Posters",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoHRD/OncoHRD_ESMO_Breast_Poster.pdf",
+      folderPath: "Shared Documents/OncoHRD",
       size: "8.5 MB",
       downloadCount: 289,
       viewCount: 940,
@@ -526,8 +526,8 @@ const db = {
       owner: "Marketing Admin",
       createdDate: "2026-01-02",
       updatedDate: "2026-01-02",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Corporate/Decks/1Cell_Global_Corporate_Profile_2026.pptx",
-      folderPath: "Corporate/Decks",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_Global_Corporate_Profile_2026.pptx",
+      folderPath: "Shared Documents/Corporate",
       size: "15.4 MB",
       downloadCount: 305,
       viewCount: 1450,
@@ -551,8 +551,8 @@ const db = {
       owner: "Marketing Admin",
       createdDate: "2025-04-01",
       updatedDate: "2025-04-01",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Marketing/Creatives/OncoMonitor_WhatsApp_Creative.png",
-      folderPath: "Marketing/Creatives",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoMonitor/OncoMonitor_WhatsApp_Creative.png",
+      folderPath: "Shared Documents/OncoMonitor",
       size: "1.1 MB",
       downloadCount: 142,
       viewCount: 520,
@@ -576,8 +576,8 @@ const db = {
       owner: "Product Manager (OncoPredikt)",
       createdDate: "2026-05-10",
       updatedDate: "2026-06-15",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Product/Drafts/OncoPredikt_Training_Manual_v0.4.pdf",
-      folderPath: "Product/Drafts",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoPredikt/OncoPredikt_Training_Manual_v0.4.pdf",
+      folderPath: "Shared Documents/OncoPredikt",
       size: "4.1 MB",
       downloadCount: 14,
       viewCount: 45,
@@ -601,8 +601,8 @@ const db = {
       owner: "Marketing Admin",
       createdDate: "2025-05-01",
       updatedDate: "2025-05-01",
-      sharePointUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Corporate/Videos/1Cell_Corporate_Intro.mp4",
-      folderPath: "Corporate/Videos",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_Corporate_Intro.mp4",
+      folderPath: "Shared Documents/Corporate",
       size: "42.0 MB",
       downloadCount: 201,
       viewCount: 1104,
@@ -623,8 +623,8 @@ const db = {
       treatment: "Initiated maintenance therapy with Olaparib (PARP Inhibitor) based on the OncoHRD positive profile.",
       outcome: "Achieved sustained complete molecular and radiological response for over 18 months, with tolerable side-effects.",
       relatedProduct: "oncohrd",
-      presentationUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Cases/OncoHRD_Ovarian_Presentation.pptx",
-      pdfUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Cases/OncoHRD_Ovarian_CaseReport.pdf",
+      presentationUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/OncoHRD_Ovarian_Presentation.pptx",
+      pdfUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Medical/OncoHRD_Ovarian_CaseReport.pdf",
       supportingPublication: "OncoHRD Ovarian Cancer Clinical Evidence Paper"
     },
     {
@@ -638,8 +638,8 @@ const db = {
       treatment: "Liquid biopsy using OncoMonitor identified emerging low VAF EGFR T790M mutations (0.05% allele fraction) after 9 months.",
       outcome: "Therapy was preemptively switched to Osimertinib prior to systemic radiological relapse, resulting in durable progression-free survival.",
       relatedProduct: "oncomonitor",
-      presentationUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Cases/OncoMonitor_Lung_T790M_Presentation.pptx",
-      pdfUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Cases/OncoMonitor_Lung_T790M_Report.pdf",
+      presentationUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/OncoMonitor_Lung_T790M_Presentation.pptx",
+      pdfUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Medical/OncoMonitor_Lung_T790M_Report.pdf",
       supportingPublication: "OncoMonitor Liquid Biopsy Case Study - Lung Cancer Recurrence"
     }
   ],
@@ -656,8 +656,8 @@ const db = {
       summary: "This validation paper outlines how OncoIndx outperforms traditional panels by integrating transcriptomics (RNA fusions, pathway signatures) with digital pathology fusions.",
       relatedProduct: "oncoindx",
       relatedCases: ["case-102"],
-      supportingPptUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Publications/JCO_Multimodal_Presentation.pptx",
-      downloadPdfUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Publications/JCO_Multimodal_Validation.pdf",
+      supportingPptUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/JCO_Multimodal_Presentation.pptx",
+      downloadPdfUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Medical/JCO_Multimodal_Validation.pdf",
       citation: "Seth V, Ross A, Jenkins S, et al. Validation of a Multimodal Genomic and Pathology Classifier. J Clin Oncol. 2025;43(11):1124-1135."
     },
     {
@@ -671,8 +671,8 @@ const db = {
       summary: "Peer-reviewed scientific validation of the 1Cell OncoHRD algorithm scoring engine showing high robustness under low tumor purity conditions.",
       relatedProduct: "oncohrd",
       relatedCases: ["case-101"],
-      supportingPptUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Publications/GyneOnc_HRD_Presentation.pptx",
-      downloadPdfUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Medical/Publications/GyneOnc_HRD_Validation.pdf",
+      supportingPptUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/GyneOnc_HRD_Presentation.pptx",
+      downloadPdfUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Medical/GyneOnc_HRD_Validation.pdf",
       citation: "Ross A, Shah N, et al. Homologous Recombination Deficiency (HRD) Scoring Model in Epithelial Ovarian Cancers. Gynecol Oncol. 2024;174:45-52."
     }
   ],
@@ -684,7 +684,7 @@ const db = {
       objective: "Drive clinician awareness of whole transcriptome fusions in lung/colorectal solid tumors.",
       audience: "Medical Oncologists & Pathologists (Global)",
       platform: "LinkedIn / Email",
-      creativeUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Marketing/Campaigns/OncoIndx_ESMO_Creative.png",
+      creativeUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/OncoIndx_ESMO_Creative.png",
       openRate: "34.2%",
       ctr: "5.8%",
       conversions: 180,
@@ -697,7 +697,7 @@ const db = {
       objective: "Acquire patient volume for OncoMonitor MRD surveillance tests post-chemotherapy.",
       audience: "Surgical and Medical Oncologists in Tier-1 Metro Cities",
       platform: "WhatsApp / Email",
-      creativeUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Marketing/Campaigns/OncoMonitor_Launch_Creative.jpg",
+      creativeUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/OncoMonitor_Launch_Creative.jpg",
       openRate: "48.5%",
       ctr: "8.2%",
       conversions: 245,
@@ -715,7 +715,7 @@ const db = {
       cancerType: "Pan Cancer",
       duration: "4m 12s",
       type: "Product",
-      videoUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Videos/OncoIndx_SpatialPathology_Demo.mp4"
+      videoUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoIndx/OncoIndx_SpatialPathology_Demo.mp4"
     },
     {
       id: "vid-402",
@@ -725,7 +725,7 @@ const db = {
       cancerType: "Ovarian",
       duration: "45m 30s",
       type: "Webinar",
-      videoUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Videos/HRD_Clinical_Webinar.mp4"
+      videoUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoHRD/HRD_Clinical_Webinar.mp4"
     },
     {
       id: "vid-403",
@@ -735,7 +735,7 @@ const db = {
       cancerType: "Pan Cancer",
       duration: "5m 20s",
       type: "Explainer",
-      videoUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Videos/OncoMonitor_MRD_Explainer.mp4"
+      videoUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoMonitor/OncoMonitor_MRD_Explainer.mp4"
     }
   ],
 
@@ -805,28 +805,28 @@ const db = {
       title: "1Cell.Ai Primary Corporate Logo (Vector SVG)",
       category: "Logos",
       fileType: "SVG",
-      downloadUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Brand/Logos/1Cell_Primary_Logo.svg"
+      downloadUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_Primary_Logo.svg"
     },
     {
       id: "brand-602",
       title: "1Cell.Ai Corporate Brand Palette Cheat Sheet",
       category: "Brand Colors",
       fileType: "PDF",
-      downloadUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Brand/Colors/1Cell_Color_Palette_2026.pdf"
+      downloadUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_Color_Palette_2026.pdf"
     },
     {
       id: "brand-603",
       title: "Corporate PowerPoint Slides Template (16:9)",
       category: "PowerPoint Templates",
       fileType: "POTX",
-      downloadUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Brand/Templates/1Cell_Corporate_SlideTemplate_v4.potx"
+      downloadUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_Corporate_SlideTemplate_v4.potx"
     },
     {
       id: "brand-604",
       title: "Executive Email Signature Signature Boilerplate",
       category: "Email Signatures",
       fileType: "HTML",
-      downloadUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Brand/Signatures/1Cell_EmailSignature_Template.html"
+      downloadUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_EmailSignature_Template.html"
     }
   ],
 
@@ -835,25 +835,25 @@ const db = {
       id: "temp-701",
       title: "Standard Case Study Template",
       category: "Case",
-      downloadUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Templates/1Cell_CaseStudy_BlankTemplate.docx"
+      downloadUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_CaseStudy_BlankTemplate.docx"
     },
     {
       id: "temp-702",
       title: "Scientific Poster Layout (Landscape 4x3)",
       category: "Presentation",
-      downloadUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Templates/1Cell_ScientificPoster_Layout.pptx"
+      downloadUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_ScientificPoster_Layout.pptx"
     },
     {
       id: "temp-703",
       title: "Clinical Trial Abstract Word Document Outline",
       category: "Publication",
-      downloadUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Templates/1Cell_PublicationAbstract_Outline.docx"
+      downloadUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_PublicationAbstract_Outline.docx"
     },
     {
       id: "temp-704",
       title: "WhatsApp Creative Marketing Grid Template",
       category: "Creative",
-      downloadUrl: "https://1cellai.sharepoint.com/sites/content/Shared%20Documents/Templates/WhatsApp_Campaign_Grid.psd"
+      downloadUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/WhatsApp_Campaign_Grid.psd"
     }
   ],
 
