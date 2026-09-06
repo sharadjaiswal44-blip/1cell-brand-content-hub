@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v3';
+import db from './db.js?v=20260907-v4';
 window.db = db;
 
 // Application State
@@ -635,9 +635,7 @@ function renderDashboard() {
       <!-- Product Tabs Container -->
       <div class="product-tabs-container">
         ${db.products.map((p, idx) => `
-          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">
-            ${p.name}${p.id === 'oncoctc' ? '<span class="badge-new-tag">NEW</span>' : ''}
-          </button>
+          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
         `).join('')}
       </div>
       
@@ -883,10 +881,8 @@ function renderProductHub() {
         const docCount = db.documents.filter(d => d.product === p.id).length;
         const caseCount = db.cases.filter(c => c.relatedProduct === p.id).length;
         const pubCount = db.publications.filter(pub => pub.relatedProduct === p.id).length;
-        const isNew = p.id === 'oncoctc';
         return `
-          <div class="quick-tile-card" style="align-items: flex-start; text-align: left; padding: 24px; position: relative; ${isNew ? 'border: 1.5px solid var(--accent-color);' : ''}" onclick="window.openProductMicrosite('${p.id}')">
-            ${isNew ? '<span class="badge-new-tag" style="position: absolute; top: 18px; right: 18px; margin: 0; padding: 3px 8px; font-size: 10px;">NEW ASSAY</span>' : ''}
+          <div class="quick-tile-card" style="align-items: flex-start; text-align: left; padding: 24px;" onclick="window.openProductMicrosite('${p.id}')">
             <div class="tile-icon-wrapper" style="width: 42px; height: 42px; font-size:20px;">🔬</div>
             <h3 style="font-size:18px; margin-bottom: 8px; font-weight:700;">${p.name}</h3>
             <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-bottom: 20px;">${p.description}</p>
