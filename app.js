@@ -1,5 +1,6 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js';
+import db from './db.js?v=20260907-v3';
+window.db = db;
 
 // Application State
 let currentRole = 'marketing_admin';
@@ -634,7 +635,9 @@ function renderDashboard() {
       <!-- Product Tabs Container -->
       <div class="product-tabs-container">
         ${db.products.map((p, idx) => `
-          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
+          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">
+            ${p.name}${p.id === 'oncoctc' ? '<span class="badge-new-tag">NEW</span>' : ''}
+          </button>
         `).join('')}
       </div>
       
@@ -678,28 +681,35 @@ function renderDashboard() {
               <div class="quick-tile-card" style="flex-direction: row; text-align: left; padding: 14px; gap:12px; align-items:center;" onclick="window.previewDocument('${d.id}')">
                 <div class="tile-icon-wrapper" style="margin: 0; width: 36px; height: 36px; font-size:16px;">🔥</div>
                 <div style="flex:1;">
-                  <div class="tile-label" style="margin:0; font-size:12.5px;">${d.title}</div>
-                  <div class="tile-sublabel">${d.viewCount} views • ${d.contentType}</div>
+                  <h4 style="font-size:13px; font-weight:600; margin-bottom: 2px;">${d.title}</h4>
+                  <span style="font-size:11px; color:var(--text-tertiary);">${d.views || d.viewCount || 0} views • ${d.department}</span>
                 </div>
               </div>
             `).join('')}
           </div>
         </div>
 
+        <!-- Activity Feed -->
         <div class="dashboard-section">
           <div class="section-title-row">
-            <h2 class="section-headline">Most Downloaded</h2>
+            <h2 class="section-headline">Audit & Compliance Log</h2>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            ${db.documents.sort((a,b) => b.downloadCount - a.downloadCount).slice(0, 3).map(d => `
-              <div class="quick-tile-card" style="flex-direction: row; text-align: left; padding: 14px; gap:12px; align-items:center;" onclick="window.previewDocument('${d.id}')">
-                <div class="tile-icon-wrapper" style="margin: 0; width: 36px; height: 36px; font-size:16px; color:#10b981; background-color:var(--success-light);">↓</div>
-                <div style="flex:1;">
-                  <div class="tile-label" style="margin:0; font-size:12.5px;">${d.title}</div>
-                  <div class="tile-sublabel">${d.downloadCount} downloads • ${d.size}</div>
-                </div>
-              </div>
-            `).join('')}
+          <div class="activity-feed">
+            <div class="feed-item">
+              <div class="feed-time">10 mins ago</div>
+              <div class="feed-title">New version uploaded</div>
+              <div class="feed-desc">OncoIndx® Clinical Case Study updated to v2.1 by Medical Affairs.</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-time">2 hours ago</div>
+              <div class="feed-title">Regulatory approval tag added</div>
+              <div class="feed-desc">OncoHRD® Testing Guidelines verified by Diagnostic Compliance Lead.</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-time">Yesterday</div>
+              <div class="feed-title">New document registered</div>
+              <div class="feed-desc">OncoPredikt Technical Whitepaper added to Scientific directory.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -725,8 +735,16 @@ function renderDashboard() {
     });
   });
 
-  // Initial render of first product (OncoIndx)
-  renderDashboardProductDocs('oncoindx');
+  // Initial render: check URL hash or default to oncoindx
+  const initialHash = (window.location.hash || '').replace('#', '').toLowerCase();
+  const matchedTab = initialHash && workspaceViewport.querySelector(`.product-tab[data-product="${initialHash}"]`);
+  if (matchedTab) {
+    tabs.forEach(t => t.classList.remove('active'));
+    matchedTab.classList.add('active');
+    renderDashboardProductDocs(initialHash);
+  } else {
+    renderDashboardProductDocs('oncoindx');
+  }
 }
 
 // Render document card template
@@ -851,20 +869,24 @@ function renderCompanyAssets() {
 // 3. Product Hub View
 function renderProductHub() {
   workspaceViewport.innerHTML = `
+    ${window.renderCategoryHeader ? window.renderCategoryHeader('1Cell.Ai Product Hub Workspaces', 'Detailed workspace microsites for every clinical genomics assay model.', 'products') : `
     <div class="welcome-banner">
       <div>
         <h1 class="welcome-title">1Cell.Ai Product Hub Workspaces</h1>
         <p class="welcome-subtitle">Detailed workspace microsites for every clinical genomics assay model.</p>
       </div>
     </div>
+    `}
 
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 24px;">
       ${db.products.map(p => {
         const docCount = db.documents.filter(d => d.product === p.id).length;
         const caseCount = db.cases.filter(c => c.relatedProduct === p.id).length;
         const pubCount = db.publications.filter(pub => pub.relatedProduct === p.id).length;
+        const isNew = p.id === 'oncoctc';
         return `
-          <div class="quick-tile-card" style="align-items: flex-start; text-align: left; padding: 24px;" onclick="window.openProductMicrosite('${p.id}')">
+          <div class="quick-tile-card" style="align-items: flex-start; text-align: left; padding: 24px; position: relative; ${isNew ? 'border: 1.5px solid var(--accent-color);' : ''}" onclick="window.openProductMicrosite('${p.id}')">
+            ${isNew ? '<span class="badge-new-tag" style="position: absolute; top: 18px; right: 18px; margin: 0; padding: 3px 8px; font-size: 10px;">NEW ASSAY</span>' : ''}
             <div class="tile-icon-wrapper" style="width: 42px; height: 42px; font-size:20px;">🔬</div>
             <h3 style="font-size:18px; margin-bottom: 8px; font-weight:700;">${p.name}</h3>
             <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-bottom: 20px;">${p.description}</p>

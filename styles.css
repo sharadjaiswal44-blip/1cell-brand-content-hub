@@ -2111,6 +2111,26 @@ body.authenticated .login-overlay {
   box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
 }
 
+.badge-new-tag {
+  background-color: #0284c7;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+.product-tab.active .badge-new-tag {
+  background-color: #ffffff;
+  color: var(--accent-color);
+}
+
 .product-docs-folder-view {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

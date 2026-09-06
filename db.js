@@ -142,7 +142,9 @@ const db = {
       folderPath: "Shared Documents/OncoIndx",
       size: "2.4 MB",
       downloadCount: 120,
-      viewCount: 340
+      viewCount: 340,
+      isPinned: true,
+      isTrending: true
     },
     {
       id: "doc-002",
@@ -1022,7 +1024,9 @@ const db = {
       folderPath: "Shared Documents/OncoCTC",
       size: "2.8 MB",
       downloadCount: 165,
-      viewCount: 420
+      viewCount: 420,
+      isPinned: true,
+      isTrending: true
     },
     {
       id: "doc-042",
