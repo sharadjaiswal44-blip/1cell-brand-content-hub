@@ -368,23 +368,29 @@
           </div>
 
           <div class="form-group">
-            <label for="editDocContentType">Content Type</label>
+                        <label for="editDocContentType">Category / Content Type *</label>
             <select id="editDocContentType">
               <option value="Brochure">Brochure</option>
-              <option value="Case Study">Case Study</option>
-              <option value="Whitepaper">Whitepaper</option>
-              <option value="Battlecard">Battlecard</option>
-              <option value="Presentation">Presentation</option>
-              <option value="Sales Deck">Sales Deck</option>
-              <option value="One Pager">One Pager</option>
-              <option value="Two Pager">Two Pager</option>
-              <option value="Clinical Evidence">Clinical Evidence</option>
-              <option value="Publication">Publication</option>
-              <option value="Video">Video</option>
-              <option value="FAQ">FAQ</option>
-              <option value="Training">Training</option>
-              <option value="Brand Asset">Brand Asset</option>
-              <option value="Playbook">Playbook</option>
+              <option value="Case Studies">Case Studies</option>
+              <option value="WhitePaper">WhitePaper</option>
+              <option value="Sales Enablement">Sales Enablement</option>
+              <option value="Others">Others</option>
+              <optgroup label="Detailed Content Types">
+                <option value="Case Study">Case Study</option>
+                <option value="Whitepaper">Whitepaper</option>
+                <option value="Battlecard">Battlecard</option>
+                <option value="Presentation">Presentation</option>
+                <option value="Sales Deck">Sales Deck</option>
+                <option value="One Pager">One Pager</option>
+                <option value="Two Pager">Two Pager</option>
+                <option value="Clinical Evidence">Clinical Evidence</option>
+                <option value="Publication">Publication</option>
+                <option value="Video">Video</option>
+                <option value="FAQ">FAQ</option>
+                <option value="Training">Training</option>
+                <option value="Brand Asset">Brand Asset</option>
+                <option value="Playbook">Playbook</option>
+              </optgroup>
             </select>
           </div>
 
@@ -430,7 +436,13 @@
           </svg>
           Test SharePoint Link
         </button>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="btn-outline" id="editDocDeleteBtn" type="button" style="color:#ef4444; border-color:#fca5a5;" title="Permanently delete this content card">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;margin-right:4px;display:inline-block;vertical-align:middle;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+            Delete Card
+          </button>
           <button class="btn-outline" id="editAssetModalCancel" type="button">Cancel</button>
           <button class="btn-primary" id="editAssetModalSave" type="button">Save Changes</button>
         </div>
@@ -503,25 +515,30 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="formContentType">Content Type *</label>
+                        <label for="formContentType">Category / Content Type *</label>
             <select id="formContentType" required>
               <option value="Brochure">Brochure</option>
-              <option value="Presentation">Presentation</option>
-              <option value="One Pager">One Pager</option>
-              <option value="Two Pager">Two Pager</option>
-              <option value="Sales Deck">Sales Deck</option>
-              <option value="FAQ">FAQ</option>
-              <option value="Case Study">Case Study</option>
-              <option value="Clinical Evidence">Clinical Evidence</option>
-              <option value="Publication">Publication</option>
-              <option value="Whitepaper">Whitepaper</option>
-              <option value="Video">Video</option>
-              <option value="Training">Training</option>
-              <option value="Infographic">Infographic</option>
-              <option value="Email Template">Email Template</option>
-              <option value="WhatsApp Creative">WhatsApp Creative</option>
-              <option value="Brand Asset">Brand Asset</option>
-              <option value="Playbook">Playbook</option>
+              <option value="Case Studies">Case Studies</option>
+              <option value="WhitePaper">WhitePaper</option>
+              <option value="Sales Enablement">Sales Enablement</option>
+              <option value="Others">Others</option>
+              <optgroup label="Detailed Content Types">
+                <option value="Battlecard">Battlecard</option>
+                <option value="Presentation">Presentation</option>
+                <option value="Sales Deck">Sales Deck</option>
+                <option value="One Pager">One Pager</option>
+                <option value="Two Pager">Two Pager</option>
+                <option value="Clinical Evidence">Clinical Evidence</option>
+                <option value="Publication">Publication</option>
+                <option value="Video">Video</option>
+                <option value="FAQ">FAQ</option>
+                <option value="Training">Training</option>
+                <option value="Infographic">Infographic</option>
+                <option value="Email Template">Email Template</option>
+                <option value="WhatsApp Creative">WhatsApp Creative</option>
+                <option value="Brand Asset">Brand Asset</option>
+                <option value="Playbook">Playbook</option>
+              </optgroup>
             </select>
           </div>
           <div class="form-group">
@@ -635,6 +652,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script type="module" src="app.js?v=20260907-v6"></script>
+  <script type="module" src="app.js?v=20260907-v7"></script>
 </body>
 </html>
