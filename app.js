@@ -633,14 +633,9 @@ function renderDashboard() {
       
       <!-- Product Tabs Container -->
       <div class="product-tabs-container">
-        <button class="product-tab active" data-product="oncoindx">OncoIndx®</button>
-        <button class="product-tab" data-product="oncohrd">OncoHRD®</button>
-        <button class="product-tab" data-product="oncomonitor">OncoMonitor®</button>
-        <button class="product-tab" data-product="oncopredikt">OncoPredikt®</button>
-        <button class="product-tab" data-product="oncorisk">OncoRisk®</button>
-        <button class="product-tab" data-product="oncotarget">OncoTarget®</button>
-        <button class="product-tab" data-product="primeplus">PrimePlus®</button>
-        <button class="product-tab" data-product="icore">iCore®</button>
+        ${db.products.map((p, idx) => `
+          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
+        `).join('')}
       </div>
       
       <!-- Folders Directory Content View -->
@@ -915,7 +910,7 @@ window.openProductMicrosite = function(prodId) {
           </div>
         </div>
       </div>
-      <p class="product-description-full">${product.details}</p>
+      <p class="product-description-full">${product.details || product.description}</p>
 
       <div class="product-tabs-row">
         <button class="product-tab-btn active" onclick="window.switchProductTab(event, '${prodId}', 'assets')">All Assets</button>
@@ -953,20 +948,27 @@ window.switchProductTab = function(event, prodId, tabName) {
       </div>
     `;
   } else if (tabName === 'clinical') {
+    const benefits = product.clinicalBenefits || [
+      'High diagnostic specificity and analytical concordance with reference standards.',
+      'Comprehensive actionable alteration mapping to current NCCN guidelines.',
+      'Rapid turnaround time minimizing delay to targeted therapy initiation.'
+    ];
+    const compAdv = product.competitiveAdvantage || 'Proprietary clinical multi-omics workflows providing deeper molecular resolution than standard single-analyte testing.';
+
     container.innerHTML = `
       <div class="product-details-grid">
         <div class="detail-card">
           <h3 class="detail-card-title">Clinical Benefits & Evidence</h3>
           <ul class="detail-list">
-            ${product.clinicalBenefits.map(b => `<li class="detail-list-item">${b}</li>`).join('')}
+            ${benefits.map(b => `<li class="detail-list-item">${b}</li>`).join('')}
           </ul>
         </div>
         <div class="detail-card">
           <h3 class="detail-card-title">Competitive Advantages</h3>
-          <p style="font-size: 13.5px; line-height:1.6; color:var(--text-secondary);">${product.competitiveAdvantage}</p>
+          <p style="font-size: 13.5px; line-height:1.6; color:var(--text-secondary);">${compAdv}</p>
           <div style="background-color: var(--accent-light); padding:16px; border-radius:8px; margin-top:20px;">
             <strong style="font-size:12.5px; color:var(--accent-color);">Sales Pitch Tip</strong>
-            <p style="font-size: 11.5px; color:var(--text-secondary); margin-top:4px;">Highlight spatial tumor pathology parameters which general competitor sequencing assays completely miss.</p>
+            <p style="font-size: 11.5px; color:var(--text-secondary); margin-top:4px;">Highlight single-cell resolution and multi-omic parameters which general competitor assays completely miss.</p>
           </div>
         </div>
       </div>
@@ -990,8 +992,8 @@ window.switchProductTab = function(event, prodId, tabName) {
               <div class="case-details-summary">${c.summary}</div>
               <div class="case-field-grid">
                 <div>
-                  <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Treatment</span>
-                  <div style="font-size:11.5px; font-weight:550; margin-top:2px;">${c.treatment}</div>
+                  <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Cancer Type</span>
+                  <div style="font-size:11.5px; font-weight:550; margin-top:2px;">${c.cancerType || c.treatment || 'Solid Tumor'}</div>
                 </div>
                 <div>
                   <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Outcome</span>
@@ -1000,8 +1002,8 @@ window.switchProductTab = function(event, prodId, tabName) {
               </div>
             </div>
             <div class="card-actions-bar">
-              <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.previewDocument('doc-007')">Preview Case</button>
-              <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.triggerDownload('${c.title}')">Download Case Report</button>
+              <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
+              <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.open('${c.readMoreUrl || '#'}', '_blank')">Read Case Study</button>
             </div>
           </div>
         `).join('')}
@@ -1023,7 +1025,7 @@ window.switchProductTab = function(event, prodId, tabName) {
             <div class="pub-abstract-box"><strong>Abstract:</strong> ${pub.abstract}</div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
-              <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.triggerDownload('${pub.title}')">Download PDF</button>
+              <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.open('${pub.link || '#'}', '_blank')">Read Publication</button>
             </div>
           </div>
         `).join('')}
