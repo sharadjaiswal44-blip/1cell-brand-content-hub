@@ -1,127 +1,171 @@
 // 1Cell.Ai Content Hub Database
 const db = {
     products: [
-    {
-      id: "oncoindx",
-      name: "OncoIndx®",
-      description: "Comprehensive genomic profiling analyzing solid tumor molecular biology to guide immunotherapy and targeted therapies.",
-      details: "OncoIndx® is a comprehensive genomic profiling (CGP) assay that sequences over 1,000 cancer-relevant genes to identify SNVs, InDels, CNVs, and genomic fusions. It simultaneously evaluates key pan-cancer biomarkers including TMB, MSI, and HRD to match patients with approved therapies and global clinical trials.",
-      clinicalBenefits: [
-        "1080-gene broad comprehensive genomic profiling covering all NCCN-recommended biomarkers.",
-        "Simultaneous assessment of TMB, MSI, and genomic instability for immunotherapy matching.",
-        "Clinical guidance matching approved targeted treatments and active clinical trials."
-      ],
-      competitiveAdvantage: "Broader actionable gene content and proprietary computational variant curation compared to conventional small-panel NGS assays.",
-      logo: "logo.svg"
-    },
-    {
-      id: "oncohrd",
-      name: "OncoHRD®",
-      description: "Homologous Recombination Deficiency (HRD) profiling assessing genomic instability to guide PARP inhibitor selections.",
-      details: "OncoHRD® evaluates homologous recombination repair deficiency across ovarian, breast, prostate, and pancreatic cancers. By calculating a validated Genomic Instability Score (GIS) combined with BRCA1/2 mutation status, OncoHRD® identifies patients most likely to benefit from PARP inhibitors and platinum-based chemotherapy.",
-      clinicalBenefits: [
-        "Gold-standard evaluation of BRCA1/BRCA2 alterations combined with Genomic Instability Score.",
-        "Accurate stratification for PARP inhibitor eligibility and platinum sensitivity.",
-        "Applicable to both primary and recurrent ovarian and breast cancer specimens."
-      ],
-      competitiveAdvantage: "Proprietary AI-powered genomic instability algorithms providing high concordance with centralized reference testing at accelerated turnaround times.",
-      logo: "logo.svg"
-    },
-    {
-      id: "oncomonitor",
-      name: "OncoMonitor®",
-      description: "Longitudinal minimal residual disease (MRD) liquid biopsy monitoring clinical response and recurrences in real-time.",
-      details: "OncoMonitor® is an ultrasensitive personalized cell-free DNA (ctDNA) liquid biopsy assay designed for serial monitoring of treatment response, early detection of minimal residual disease (MRD), and tracking emergent resistance mutations months ahead of conventional radiographic imaging.",
-      clinicalBenefits: [
-        "Ultrasensitive detection down to 0.01% variant allele frequency (VAF).",
-        "Non-invasive longitudinal blood draws tracking clonal evolution and drug resistance.",
-        "Early detection of disease recurrence up to 6-9 months prior to radiological relapse."
-      ],
-      competitiveAdvantage: "Integrated methylation and fragmentomic analysis (MIRAGE & OncoAlibrex algorithms) maximizing sensitivity for low-shedding tumors.",
-      logo: "logo.svg"
-    },
-    {
-      id: "oncopredikt",
-      name: "OncoPredikt®",
-      description: "Deep-learning digital pathology framework quantifying biomarkers directly from whole-slide tissue images.",
-      details: "OncoPredikt® is a breakthrough computational pathology platform utilizing deep learning on standard H&E and IHC whole-slide images (WSI) to detect tumor regions, quantify biomarker expression, and predict molecular phenotypes such as HRD directly from morphology.",
-      clinicalBenefits: [
-        "Direct molecular phenotype inference from standard H&E stained pathology slides.",
-        "Objective, automated biomarker quantification reducing inter-observer variability.",
-        "Rapid results delivered within hours to expedite initial therapy planning."
-      ],
-      competitiveAdvantage: "Zero additional tissue consumption; provides instant computational insights while saving biopsy tissue for next-generation sequencing.",
-      logo: "logo.svg"
-    },
-    {
-      id: "oncoctc",
-      name: "OncoCTC®",
-      description: "Next-generation liquid biopsy platform for high-purity capture, enumeration, and single-cell multi-omics of live Circulating Tumor Cells (CTCs) to detect minimal residual disease and therapy resistance.",
-      details: "OncoCTC® is 1Cell.Ai's flagship Circulating Tumor Cell (CTC) diagnostic platform. Featuring proprietary microfluidics that achieve live tumor cell isolation with zero leukocyte contamination, OncoCTC® enables single-cell genomics, transcriptomics, and PD-L1 phenotyping from non-invasive peripheral blood. It uncovers emergent resistance mutations and tumor clonal evolution undetected by standard cell-free DNA (ctDNA) liquid biopsies alone.",
-      clinicalBenefits: [
-        "True live single CTC capture with zero background leukocyte contamination.",
-        "Single-cell multi-omic profiling combining targeted sequencing, whole-genome CNA, and PD-L1 expression.",
-        "Detects actionable alterations and resistance clones in cancers that shed low amounts of ctDNA.",
-        "Non-invasive longitudinal monitoring for minimal residual disease (MRD) and clonal evolution."
-      ],
-      competitiveAdvantage: "Unlike conventional EpCAM-dependent capture or ctDNA-only fragmentomics that analyze dead cell debris, OncoCTC® isolates intact, viable tumor cells and clusters, preserving functional biology and intact single-cell genomic integrity.",
-      logo: "logo.svg"
-    },
-    {
-      id: "oncorisk",
-      name: "OncoRisk®",
-      description: "Comprehensive germline genetic risk assessment panels determining inherited cancer susceptibilities.",
-      details: "OncoRisk® tests for hereditary cancer risk mutations across multiple tumor syndromes, providing essential insights for patient screening, prophylactic interventions, and cascade testing for family members.",
-      clinicalBenefits: [
-        "High-depth germline NGS coverage of hereditary cancer susceptibility genes.",
-        "Clear ACMG-classified variant reporting with genetic counseling support.",
-        "Actionable risk reduction and early surveillance recommendations."
-      ],
-      competitiveAdvantage: "Integrated multi-database clinical curation ensuring minimal rates of Variants of Uncertain Significance (VUS).",
-      logo: "logo.svg"
-    },
-    {
-      id: "oncotarget",
-      name: "OncoTarget®",
-      description: "Actionable targeted genomic sequencing profiling specifically matching standard-of-care therapies.",
-      details: "OncoTarget® is a focused, cost-effective genomic panel designed for rapid turnaround in routine clinical oncology, focusing exclusively on guideline-mandated, actionable mutations and fusions in NSCLC, colorectal, and breast cancers.",
-      clinicalBenefits: [
-        "Rapid turnaround time (48-72 hours) for urgent treatment decisions.",
-        "Focused coverage of FDA and NCCN-approved therapeutic targets.",
-        "Optimized for low-input FFPE biopsy tissue samples."
-      ],
-      competitiveAdvantage: "Streamlined workflow and cost-effective pricing tailored for routine hospital oncology deployments.",
-      logo: "logo.svg"
-    },
-    {
-      id: "primeplus",
-      name: "PrimePlus®",
-      description: "Next-gen single-cell isolation and sample preparation platform for multi-omic analysis.",
-      details: "PrimePlus® provides advanced microfluidic cell sorting and single-cell isolation for research and clinical development partners, enabling ultra-pure sample preparation for single-cell DNA and RNA sequencing.",
-      clinicalBenefits: [
-        "Automated microfluidic single-cell deposition into multi-well plates.",
-        "Preserved high cell viability (>95%) throughout the sorting process.",
-        "Compatible with diverse downstream single-cell genomic and transcriptomic protocols."
-      ],
-      competitiveAdvantage: "Gentle acoustic/microfluidic sorting avoiding the harsh shear stresses of standard FACS sorters.",
-      logo: "logo.svg"
-    },
-    {
-      id: "icore",
-      name: "iCore®",
-      description: "AI-powered precision oncology informatics platform delivering real-time genomic insights and clinical integration.",
-      details: "iCore® is 1Cell.Ai's cloud-native clinical bioinformatics platform that automates tertiary NGS analysis, variant curation, molecular tumor board reports, and clinical trial matching across hospital laboratory networks.",
-      clinicalBenefits: [
-        "Automated tertiary NGS pipeline with real-time knowledge base synchronization.",
-        "Interactive Molecular Tumor Board (MTB) reporting portal.",
-        "Seamless integration with hospital LIS and EMR architectures."
-      ],
-      competitiveAdvantage: "Combines algorithmic variant interpretation with expert curation, significantly reducing pathologist reporting time.",
-      logo: "logo.svg"
-    }
-  ],
+      {
+            "id": "oncoindx",
+            "name": "OncoIndx\u00ae",
+            "description": "Comprehensive genomic profiling across solid tumors. 1080-gene panel evaluating SNVs, INDELs, CNVs, fusions, TMB, MSI, HRD, and 350 resistance genes.",
+            "details": "OncoIndx\u00ae offers comprehensive genomic profiling across solid tumors to identify key actionable insights for personalizing cancer treatment. Designed for oncologists managing complex, advanced, and refractory cancer patients, it analyzes 1080 proprietary genes, 15,719 exons, 339 intronic regions, 36 pharmacogenomic markers, 50 genes (including 138 fusion partners), >50 HRR genes, genome-wide 16,000 LOH markers, and 350 resistance genes. Validated on both tissue (FFPE) and liquid biopsy (cfDNA) with AI-enhanced reporting via the iCare\u2122 platform.",
+            "clinicalBenefits": [
+                  "Proprietary 1080-gene comprehensive panel with >99% on-target coverage across tested genes.",
+                  "Ultra-deep sequencing: 2000x mean depth for tissue FFPE samples and 10000x for liquid biopsy blood.",
+                  "Rigorous analytical validation: 100% accuracy for SNVs and CNAs, 98.48% accuracy for fusions, and 97.40% for small INDELs.",
+                  "Genome-wide HRD scoring (aggregate of LOH, LST, TAI, and HRR alterations) and NGS-based MSI with 2000 microsatellite hotspots.",
+                  "Actionable therapeutic recommendations aligned with ACMG, AMP, ASCO, and CAP guidelines, with global clinical trial traceability."
+            ],
+            "competitiveAdvantage": "Dual-specimen validation (tissue & blood), comprehensive resistance mutation mapping (350 genes), and integrated AI analysis through iCare\u2122 providing rapid, evidence-backed treatment choices.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "primeplus",
+            "name": "OncoIndx\u00ae Prime+",
+            "description": "NexGen sequencing using Tissue-Liquid-Normal matching for true somatic vs. germline identification, whole transcriptomics, and CUP tissue-of-origin resolution.",
+            "details": "OncoIndx\u00ae Prime+ is a comprehensive multi-technology, multi-specimen test performing simultaneous molecular profiling of tumor and normal samples from the same patient. By matching blood (PBMC gDNA), plasma/CSF/pleural fluid (ctDNA), and FFPE tissue (tDNA, tRNA, IHC), it accurately distinguishes true somatic alterations from germline mutations and clonal hematopoiesis of indeterminate potential (CHIP), while evaluating 25,000 genes for exceptional expressions, RNA fusions, and pathway signatures.",
+            "clinicalBenefits": [
+                  "Simultaneous Tissue-Liquid-Normal match eliminating false-positive CHIP and germline background variants.",
+                  "Transcriptomics validation with 25,000 genes for exceptional expressions, RNA fusions, and 20 pathway analyses (MSS).",
+                  "High-accuracy calibration of TMB, MSI, and genome-wide HRD against the patient's matched normal sample.",
+                  "Specially indicated for Advanced Stage Cancers, Rare Cancers, Cancers of Unknown Primary (CUP), Multiple/Dual Malignancies, and Ambiguous Histology.",
+                  "Combines 1080-gene DNA sequencing (2000x tissue / 10000x liquid) with PD-L1 IHC and CTC enumeration."
+            ],
+            "competitiveAdvantage": "Resolves diagnostic ambiguity in Cancers of Unknown Primary (CUP) via RNA-based gene expression while filtering out age-related CHIP mutations that confound standard tumor-only NGS.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "oncoindxtbx",
+            "name": "OncoIndx\u00ae TBx",
+            "description": "Integrated NGS test combining 1080 DNA genes with Whole Transcriptomic Sequencing (WTS) for high-sensitivity RNA fusion detection and tumor profiling.",
+            "details": "OncoIndx\u00ae TBx offers integrated genomic (DNA 1080 genes) and transcriptomic (RNA WTS) profiling across solid tumors. By uniting DNA sequencing with RNA-based fusion detection, splice variants, and gene expression, it provides unparalleled clarity for oncologists managing complex, aggressive, and refractory cancers where DNA-only testing misses actionable fusions.",
+            "clinicalBenefits": [
+                  "Integrated DNA (1080 genes) + RNA Whole Transcriptomic Sequencing (WTS) from a single FFPE tissue block.",
+                  "Significantly elevates sensitivity (78.6%) and precision (\u226595%) for actionable gene fusions (ALK, ROS1, RET, NTRK1/2/3, FGFR).",
+                  "Detects SNVs, INDELs, CNVs, pharmacogenomics, 350 resistance genes, HRD, MSI, TMB, LOH, TAI, and Large-Scale Transitions (LST).",
+                  "Crucial for rapidly progressing or aggressive tumors where standard-of-care options have been exhausted.",
+                  "Ultra-deep 2000x mean sequencing depth with >99% on-target coverage and iCare\u2122 AI reporting."
+            ],
+            "competitiveAdvantage": "Empirically validated RNA fusion detection (100% PPV, 100% specificity) that rescues actionable fusion alterations invisible to DNA-only hybrid-capture panels.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "oncoindx360",
+            "name": "OncoIndx\u00ae 360\u00b0 Endometrium",
+            "description": "Upfront, integrated NGS + IHC molecular test delivering a single, biology-driven snapshot with WHO and ESGO/ESTRO/ESP-aligned treatment direction in endometrial cancer.",
+            "details": "OncoIndx\u00ae 360\u00b0 Endometrium is the first upfront, integrated molecular test that delivers a single, biology-driven snapshot with clear, guideline-aligned treatment direction in endometrial cancer. It resolves NSMP classification uncertainty and provides upfront molecular risk stratification across POLE-Ultramutated, MMRd/MSI-High, TP53-Abnormal, NSMP ER+/ER-, and HER2-Positive subtypes.",
+            "clinicalBenefits": [
+                  "Upfront integrated molecular profiling (NGS + IHC) on a single FFPE block, preventing tissue exhaustion and repeat biopsies.",
+                  "Definitive risk stratification into WHO-aligned molecular subtypes: POLE-mutated, MMRd/MSI-H, TP53-abnormal, NSMP, and HER2+.",
+                  "Enables safe treatment de-escalation in POLE-mutated disease (avoiding unnecessary chemotherapy despite high-grade histology).",
+                  "Guides treatment escalation: immunotherapy prioritization for MMRd/MSI-H, intensive chemo \u00b1 HER2-targeted agents for TP53-abnormal.",
+                  "Accelerated turnaround time of 10-12 days (compared to 2-3 weeks for traditional sequential lab testing)."
+            ],
+            "competitiveAdvantage": "Replaces fragmented sequential testing with a single unified report aligning with ESGO/ESTRO/ESP guidelines and clinical trial protocols.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "oncotarget",
+            "name": "OncoTarget\u00ae",
+            "description": "Targeted disease-specific NGS panel customizable for guideline-mandated mutations across 10 major solid tumors with rapid 48-72 hour reporting.",
+            "details": "OncoTarget\u00ae is a cutting-edge NGS panel designed to identify targeted, guideline-recommended mutations across 10 solid tumors: Bladder, Breast, Colon, Gastrointestinal, Lung, Melanoma, Ovary, Prostate, Rectal, and Thyroid. It is customizable with the ability to select up to 20 genes per cancer type for rapid, cost-effective clinical turnaround.",
+            "clinicalBenefits": [
+                  "Customizable disease-specific panels for 10 cancer types covering NCCN, ASCO, and ESMO guideline targets.",
+                  "Covers 3 alteration tiers: Immunotherapy Biomarkers (MSI), Genomic Alterations (SNVs, CNVs, INDELs, 30 fusions with 40 partners), and Treatment Resistance.",
+                  "Includes pharmacogenomics assessment (DPYD for fluoropyrimidine toxicity screening).",
+                  "Flexible specimen options: Liquid biopsy (Plasma ctDNA) or Tissue FFPE with 2000x (tissue) and 10000x (liquid) depth.",
+                  "Rapid turnaround time (48-72 hours) designed for urgent therapeutic decision-making."
+            ],
+            "competitiveAdvantage": "Highly cost-effective, disease-focused architecture that delivers essential actionable therapeutic targets without the expense and delay of large uncurated panels.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "oncohrd",
+            "name": "OncoHRD\u00ae",
+            "description": "Assistive Homologous Recombination Deficiency (HRD) assay combining 50+ HRR gene sequencing with triple genomic scar assessment (LOH, TAI, LST).",
+            "details": "OncoHRD\u00ae is a next-generation diagnostic test that evaluates homologous recombination deficiency across solid tumors by combining comprehensive analysis of 50+ HRR genes with quantitative genomic scar profiling. It identifies patients who will benefit from PARP inhibitor therapy and platinum-based chemotherapy in ovarian, breast, prostate, and pancreatic cancers.",
+            "clinicalBenefits": [
+                  "Deep NGS coverage of 50+ HRR pathway genes including BRCA1/2, ATM, ATR, BARD1, BRIP1, CDK12, CHEK1/2, PALB2, RAD51C/D, and TP53.",
+                  "Comprehensive genomic scar assessment calculating Loss of Heterozygosity (LOH), Telomeric-Allelic Imbalance (TAI), and Large-Scale Transitions (LST).",
+                  "Identifies HRD in ~50% of high-grade serous ovarian cancers (including the ~30% with non-BRCA HRR alterations and epigenetic silencing).",
+                  "Stratifies patients for PARP inhibitor eligibility (olaparib, niraparib, rucaparib, talazoparib) and platinum sensitivity in TNBC, mCRPC, and PDAC.",
+                  "AI-powered dynamic reporting through iCARE\u2122 with peer-reviewed literature and clinical trial associations."
+            ],
+            "competitiveAdvantage": "Captures epigenetic promoter methylation and subtle genomic scar signatures that conventional BRCA-only tests completely overlook.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "oncorisk",
+            "name": "OncoRisk\u00ae",
+            "description": "74-gene germline NGS panel uncovering inherited cancer susceptibilities across 11+ hereditary and familial cancer syndromes.",
+            "details": "OncoRisk\u00ae is a dedicated germline NGS test examining a comprehensive panel of 74 genes connected to more than 11 distinct hereditary and familial cancer syndromes: Breast, Ovarian, Colorectal, Pancreatic, Prostate, Gastric, Melanoma/Skin, Renal, Endocrine, Lung, and Uterine cancers. It empowers patients and clinicians with proactive risk assessment and early detection roadmaps.",
+            "clinicalBenefits": [
+                  "Comprehensive 74-gene germline panel aligned with NCCN genetic screening guidelines.",
+                  "Evaluates risk across 11+ distinct hereditary cancer syndromes to identify at-high-risk unaffected relatives.",
+                  "Provides evidence-based guidance for risk-reducing surgeries (prophylactic mastectomy, bilateral salpingo-oophorectomy) and early surveillance.",
+                  "Includes integrated pre- and post-test genetic counseling to support patients and families.",
+                  "AI-powered clinical curation ensuring minimal rates of Variants of Uncertain Significance (VUS)."
+            ],
+            "competitiveAdvantage": "Broadest guideline-concordant germline coverage paired with dedicated genetic counseling and family cascade testing protocols.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "oncomonitor",
+            "name": "OncoMonitor\u00ae",
+            "description": "Novel liquid biopsy monitoring suite featuring OncoMonitor\u00ae MRD for early-stage recurrence surveillance and OncoMonitor\u00ae TRM for metastatic monitoring.",
+            "details": "OncoMonitor\u00ae is an ultrasensitive liquid biopsy testing suite for non-invasive longitudinal monitoring throughout the cancer care journey. It offers two targeted solutions: OncoMonitor\u00ae MRD (for early-stage post-curative surgery measuring CTC & ctDNA epigenomics to detect minimal residual disease) and OncoMonitor\u00ae TRM (for advanced metastatic cancers tracking treatment response, resistance emergence, and progression via multi-omics).",
+            "clinicalBenefits": [
+                  "Dual testing solutions: OncoMonitor\u00ae MRD (early-stage surveillance & adjuvant decision-making) and OncoMonitor\u00ae TRM (metastatic treatment response tracking).",
+                  "Multi-modal biomarker integration: Cellulomics (CTC load), Epigenomics (3440+ CpG methylation sites), and Genomics (SNVs, INDELs, CNVs, 30 fusions, MSI).",
+                  "Rigorous analytical validation: 90.5% sensitivity, 95% PPV, 97.2% specificity, 94.6% NPV, 94.7% concordance, with an LOD of 0.05.",
+                  "Ultra-deep 10,000x sequencing depth detecting molecular recurrence up to 6-9 months prior to radiological relapse.",
+                  "Simple non-invasive peripheral blood draw (2 PAXgene tubes + 1 K2EDTA tube; 10 ml each) with AI-powered reporting via iCARE\u2122."
+            ],
+            "competitiveAdvantage": "Uniquely integrates live CTC capture with ctDNA methylation profiling, providing high sensitivity even in low-shedding tumors where ctDNA alone is undetectable.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "oncopredikt",
+            "name": "OncoPredikt\u00ae",
+            "description": "Deep-learning digital pathology framework predicting cancer recurrence and molecular phenotypes directly from standard histopathology images.",
+            "details": "OncoPredikt\u00ae is 1Cell.Ai's computational pathology platform utilizing deep learning on standard H&E and IHC whole-slide images (WSI). It quantifies tumor morphology, evaluates biomarker expression, and predicts cancer recurrence and molecular phenotypes directly from routine biopsy slides without requiring additional tissue.",
+            "clinicalBenefits": [
+                  "Zero tissue consumption: runs purely on digital whole-slide images (WSI) from routine diagnostic biopsy slides.",
+                  "Objective AI-driven quantification reducing inter-observer histological variability.",
+                  "Predicts recurrence risk and molecular phenotypes to guide initial adjuvant treatment planning.",
+                  "Rapid turnaround within hours, delivering preliminary prognostic insights before NGS results are finalized."
+            ],
+            "competitiveAdvantage": "Instant computational biomarker inference that conserves precious tumor biopsy tissue blocks for downstream NGS testing.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "oncoctc",
+            "name": "OncoCTC\u00ae",
+            "description": "Flagship liquid biopsy platform for high-purity capture, enumeration, and single-cell multi-omics of live Circulating Tumor Cells (CTCs).",
+            "details": "OncoCTC\u00ae (OncoIncytes) is 1Cell.Ai's live circulating tumor cell diagnostic platform. Featuring proprietary microfluidics that achieve live tumor cell isolation with zero background leukocyte contamination, it enables single-cell genomics, transcriptomics, and PD-L1 phenotyping from non-invasive peripheral blood to detect minimal residual disease and emergent therapy resistance.",
+            "clinicalBenefits": [
+                  "True live single CTC and cluster isolation with zero background white blood cell contamination.",
+                  "Single-cell multi-omic profiling combining targeted sequencing, whole-genome CNA, and PD-L1 expression.",
+                  "Non-invasive longitudinal blood draws tracking clonal evolution and drug resistance post-treatment.",
+                  "Detects actionable alterations in low-shedding cancers where cell-free DNA (ctDNA) is inadequate."
+            ],
+            "competitiveAdvantage": "Unlike conventional EpCAM-dependent capture or fragmented apoptotic ctDNA, OncoCTC\u00ae captures living, metastatic tumor cells and clusters, preserving functional biology and intact single-cell genomic integrity.",
+            "logo": "logo.svg"
+      },
+      {
+            "id": "icore",
+            "name": "iCore\u00ae / iCare\u2122",
+            "description": "AI-powered precision oncology informatics platform delivering automated tertiary NGS analysis, Molecular Tumor Board (MTB) support, and clinical integration.",
+            "details": "iCore\u00ae (powering the iCare\u2122 reporting suite) is 1Cell.Ai's proprietary cloud-native clinical bioinformatics platform. It automates tertiary NGS analysis, variant curation, ACMG/AMP/ASCO classification, Molecular Tumor Board (MTB) workflow, and clinical trial matching across hospital laboratory networks.",
+            "clinicalBenefits": [
+                  "Automated tertiary NGS pipeline with real-time knowledge base synchronization across 20+ variant databases.",
+                  "Interactive Molecular Tumor Board (MTB) reporting portal and Dr G clinician mobile application integration.",
+                  "Seamless bi-directional integration with hospital laboratory information systems (LIS) and electronic medical records (EMR)."
+            ],
+            "competitiveAdvantage": "Unifies multi-omic clinical data into clean, evidence-backed reports with active therapy matching, significantly reducing clinician interpretation time.",
+            "logo": "logo.svg"
+      }
+],
 
   documents: [
+
     {
       id: "doc-001",
       title: "OncoIndx® Product Brochure",
