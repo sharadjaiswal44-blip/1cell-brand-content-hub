@@ -259,6 +259,12 @@
           <div class="preview-toolbar">
             <div id="previewToolbarTitle" style="font-size: 12.5px; font-weight:600; color:var(--text-secondary);">Loading preview...</div>
             <div class="preview-toolbar-btn-row">
+              <button class="btn-outline" style="padding:4px 8px; font-size:11px; color:var(--accent-color);" id="previewBtnEdit">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px;margin-right:3px;display:inline-block;vertical-align:middle;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+                Edit Asset
+              </button>
               <button class="btn-outline" style="padding:4px 8px; font-size:11px;" id="previewBtnSp">SharePoint</button>
               <button class="btn-outline" style="padding:4px 8px; font-size:11px;" id="previewBtnDownload">Download</button>
             </div>
@@ -291,9 +297,143 @@
           <!-- Dynamic details loaded here -->
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-outline" id="spModalCopyPath">Copy SharePoint Path</button>
-        <button class="btn-primary" id="spModalOpenUrl">Open in SharePoint</button>
+      <div class="modal-footer" style="justify-content:space-between;">
+        <button class="btn-outline" id="spModalEditBtn" style="color:var(--accent-color);">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;margin-right:4px;display:inline-block;vertical-align:middle;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+          </svg>
+          Edit SharePoint Link
+        </button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-outline" id="spModalCopyPath">Copy SharePoint Path</button>
+          <button class="btn-primary" id="spModalOpenUrl">Open in SharePoint</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Document / Asset SharePoint Link & Details -->
+  <div id="editAssetModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display:flex; align-items:center; gap:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px;height:20px;color:var(--accent-color);">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+          </svg>
+          <span>Edit Asset & SharePoint Link</span>
+        </h3>
+        <button class="modal-close-btn" id="editAssetModalClose">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editAssetForm" class="form-grid">
+          <input type="hidden" id="editDocId">
+          <input type="hidden" id="editItemType" value="document">
+
+          <div class="form-group full-width">
+            <label for="editDocTitle">Document / Asset Title *</label>
+            <input type="text" id="editDocTitle" required placeholder="Asset title">
+          </div>
+
+          <div class="form-group full-width">
+            <label for="editDocSpUrl" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>SharePoint Document URL *</span>
+              <span style="font-size:11px; font-weight:normal; color:#0078d4;">Redirect target when clicked</span>
+            </label>
+            <input type="url" id="editDocSpUrl" required placeholder="https://ocdipl.sharepoint.com/...">
+          </div>
+
+          <div class="form-group">
+            <label for="editDocFolderPath">SharePoint Folder Path</label>
+            <input type="text" id="editDocFolderPath" placeholder="e.g. Shared Documents/OncoCTC">
+          </div>
+
+          <div class="form-group">
+            <label for="editDocProduct">Product Workspace</label>
+            <select id="editDocProduct">
+              <option value="">None (General Asset)</option>
+              <option value="oncoindx">OncoIndx®</option>
+              <option value="oncohrd">OncoHRD®</option>
+              <option value="oncomonitor">OncoMonitor®</option>
+              <option value="oncopredikt">OncoPredikt®</option>
+              <option value="oncoctc">OncoCTC®</option>
+              <option value="oncorisk">OncoRisk®</option>
+              <option value="oncotarget">OncoTarget®</option>
+              <option value="primeplus">PrimePlus®</option>
+              <option value="icore">iCore®</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editDocContentType">Content Type</label>
+            <select id="editDocContentType">
+              <option value="Brochure">Brochure</option>
+              <option value="Case Study">Case Study</option>
+              <option value="Whitepaper">Whitepaper</option>
+              <option value="Battlecard">Battlecard</option>
+              <option value="Presentation">Presentation</option>
+              <option value="Sales Deck">Sales Deck</option>
+              <option value="One Pager">One Pager</option>
+              <option value="Two Pager">Two Pager</option>
+              <option value="Clinical Evidence">Clinical Evidence</option>
+              <option value="Publication">Publication</option>
+              <option value="Video">Video</option>
+              <option value="FAQ">FAQ</option>
+              <option value="Training">Training</option>
+              <option value="Brand Asset">Brand Asset</option>
+              <option value="Playbook">Playbook</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editDocDept">Department</label>
+            <select id="editDocDept">
+              <option value="Marketing">Marketing</option>
+              <option value="Medical">Medical</option>
+              <option value="Product">Product</option>
+              <option value="Scientific">Scientific</option>
+              <option value="Sales">Sales</option>
+              <option value="HR">HR</option>
+              <option value="Corporate">Corporate</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editDocVersion">Version</label>
+            <input type="text" id="editDocVersion" placeholder="v1.0">
+          </div>
+
+          <div class="form-group">
+            <label for="editDocStatus">Status</label>
+            <select id="editDocStatus">
+              <option value="Approved">Approved</option>
+              <option value="Latest">Latest</option>
+              <option value="Draft">Draft</option>
+              <option value="Internal">Internal</option>
+              <option value="Public">Public</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="editDocDesc">Description</label>
+            <textarea id="editDocDesc" rows="2" placeholder="Document description..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn-outline" id="editDocTestLinkBtn" type="button" title="Test opening this SharePoint URL in a new tab">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;margin-right:4px;display:inline-block;vertical-align:middle;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+          Test SharePoint Link
+        </button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-outline" id="editAssetModalCancel" type="button">Cancel</button>
+          <button class="btn-primary" id="editAssetModalSave" type="button">Save Changes</button>
+        </div>
       </div>
     </div>
   </div>
@@ -495,6 +635,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script type="module" src="app.js?v=20260907-v4"></script>
+  <script type="module" src="app.js?v=20260907-v6"></script>
 </body>
 </html>

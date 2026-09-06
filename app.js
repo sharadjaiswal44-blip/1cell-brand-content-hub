@@ -1,6 +1,63 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v4';
+import db from './db.js?v=20260907-v6';
 window.db = db;
+
+// Hydrate custom edits and uploads from localStorage
+function hydrateCustomStorage() {
+  try {
+    const savedDocs = localStorage.getItem('1cell_custom_documents');
+    if (savedDocs) {
+      const parsed = JSON.parse(savedDocs);
+      parsed.forEach(savedDoc => {
+        const idx = db.documents.findIndex(d => d.id === savedDoc.id);
+        if (idx >= 0) {
+          db.documents[idx] = { ...db.documents[idx], ...savedDoc };
+        } else {
+          db.documents.unshift(savedDoc);
+        }
+      });
+    }
+    const savedCases = localStorage.getItem('1cell_custom_cases');
+    if (savedCases) {
+      const parsedCases = JSON.parse(savedCases);
+      parsedCases.forEach(savedCase => {
+        const idx = db.cases.findIndex(c => c.id === savedCase.id);
+        if (idx >= 0) {
+          db.cases[idx] = { ...db.cases[idx], ...savedCase };
+        } else {
+          db.cases.unshift(savedCase);
+        }
+      });
+    }
+    const savedPubs = localStorage.getItem('1cell_custom_pubs');
+    if (savedPubs) {
+      const parsedPubs = JSON.parse(savedPubs);
+      parsedPubs.forEach(savedPub => {
+        const idx = db.publications.findIndex(p => p.id === savedPub.id);
+        if (idx >= 0) {
+          db.publications[idx] = { ...db.publications[idx], ...savedPub };
+        } else {
+          db.publications.unshift(savedPub);
+        }
+      });
+    }
+    const savedVideos = localStorage.getItem('1cell_custom_videos');
+    if (savedVideos) {
+      const parsedVideos = JSON.parse(savedVideos);
+      parsedVideos.forEach(savedVid => {
+        const idx = db.videos.findIndex(v => v.id === savedVid.id);
+        if (idx >= 0) {
+          db.videos[idx] = { ...db.videos[idx], ...savedVid };
+        } else {
+          db.videos.unshift(savedVid);
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('Could not load custom stored documents:', err);
+  }
+}
+
 
 // Application State
 let currentRole = 'marketing_admin';
@@ -8,7 +65,9 @@ let currentTheme = 'light';
 let userFavorites = new Set(['doc-001', 'doc-004', 'doc-005']); // Default mock favorites
 let recentAssets = ['doc-001', 'doc-007', 'doc-013'];
 let activeSearchQuery = '';
-let activeQuizTab = 'quiz'; // 'quiz' or 'leaderboard'
+let activeQuizTab = 'quiz';
+let currentMicrositeId = null;
+let currentMicrositeTab = 'assets'; // 'quiz' or 'leaderboard'
 let currentActiveQuiz = null;
 let quizProgress = {
   questionIndex: 0,
@@ -99,6 +158,7 @@ function getInitials(name) {
 
 // Initialize Application
 function init() {
+  hydrateCustomStorage();
   // Check session authentication status on start
   checkAuth();
 
@@ -200,6 +260,29 @@ function init() {
 
   // Setup form submission for custom uploads
   uploadModalSave.addEventListener('click', handleMockUpload);
+
+  // Edit Modal Event Listeners
+  const editModal = document.getElementById('editAssetModal');
+  const editModalClose = document.getElementById('editAssetModalClose');
+  const editModalCancel = document.getElementById('editAssetModalCancel');
+  const editModalSave = document.getElementById('editAssetModalSave');
+  const editDocTestLinkBtn = document.getElementById('editDocTestLinkBtn');
+
+  if (editModalClose) editModalClose.addEventListener('click', () => closeModal(editModal));
+  if (editModalCancel) editModalCancel.addEventListener('click', () => closeModal(editModal));
+  if (editModalSave) editModalSave.addEventListener('click', window.saveAssetEdit);
+  if (editDocTestLinkBtn) {
+    editDocTestLinkBtn.addEventListener('click', () => {
+      const spUrl = document.getElementById('editDocSpUrl').value.trim();
+      if (!spUrl) {
+        showToast("Please enter a SharePoint URL to test.");
+        return;
+      }
+      window.open(spUrl, '_blank');
+      showToast("Testing SharePoint link in new tab...");
+    });
+  }
+
 
   // Authentication Event Listeners
   if (loginForm) {
@@ -500,19 +583,25 @@ function renderDashboardProductDocs(productName) {
           </div>
         </div>
         <div class="folder-doc-actions">
-          <button onclick="window.previewDocument('${doc.id}')">
+          <button onclick="window.previewDocument('${doc.id}')" title="Preview metadata and properties">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             Details
           </button>
-          <a href="${doc.sharePointUrl}" target="_blank">
+          <button onclick="window.openEditAssetModal('${doc.id}')" style="color: var(--accent-color);" title="Edit File & Direct SharePoint Link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+            Edit
+          </button>
+          <button onclick="window.openSharePoint('${doc.id}')" style="color:#0078d4;" title="Open document in SharePoint">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;color:#0078d4;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v11.5A2.25 2.25 0 005.25 22h11.5A2.25 2.25 0 0019 19.75V11.25M18.75 3L11.75 10M18.75 3h-6m6 0v6" />
             </svg>
             SharePoint
-          </a>
+          </button>
         </div>
       </div>
     `;
@@ -790,7 +879,12 @@ function renderDocumentCard(doc) {
           SharePoint Properties
         </a>
         <div style="display:flex; gap: 4px;">
-          <button class="card-action-btn" onclick="window.open('${doc.sharePointUrl}', '_blank')" title="Open Document in SharePoint">
+          <button class="card-action-btn" onclick="window.openEditAssetModal('${doc.id}')" title="Edit File & SharePoint Link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+          </button>
+          <button class="card-action-btn" onclick="window.openSharePoint('${doc.id}')" title="Open Document in SharePoint">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
@@ -900,6 +994,8 @@ function renderProductHub() {
 
 // Product Microsite Workspace Detail view
 window.openProductMicrosite = function(prodId) {
+  currentMicrositeId = prodId;
+  currentMicrositeTab = 'assets';
   const product = db.products.find(p => p.id === prodId);
   const docs = db.documents.filter(d => d.product === prodId);
   const cases = db.cases.filter(c => c.relatedProduct === prodId);
@@ -950,6 +1046,8 @@ window.openProductMicrosite = function(prodId) {
 
 // Switch tabs inside Product Workspace
 window.switchProductTab = function(event, prodId, tabName) {
+  currentMicrositeId = prodId;
+  currentMicrositeTab = tabName;
   // Highlight correct tab
   const tabs = document.querySelectorAll('.product-tab-btn');
   tabs.forEach(t => t.classList.remove('active'));
@@ -1020,8 +1118,9 @@ window.switchProductTab = function(event, prodId, tabName) {
               </div>
             </div>
             <div class="card-actions-bar">
+              <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.openEditAssetModal('${c.id}')">Edit Link</button>
               <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
-              <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.open('${c.readMoreUrl || '#'}', '_blank')">Read Case Study</button>
+              <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.openSharePoint('${c.id}')">Read Case Study</button>
             </div>
           </div>
         `).join('')}
@@ -1041,9 +1140,12 @@ window.switchProductTab = function(event, prodId, tabName) {
             <h3 style="font-size:17px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
             <div class="pub-authors">${pub.authors}</div>
             <div class="pub-abstract-box"><strong>Abstract:</strong> ${pub.abstract}</div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
-              <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.open('${pub.link || '#'}', '_blank')">Read Publication</button>
+              <div style="display:flex; gap:8px;">
+                <button class="btn-outline" style="padding:8px 14px; font-size:12px;" onclick="window.openEditAssetModal('${pub.id}')">Edit Link</button>
+                <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.openSharePoint('${pub.id}')">Read Publication</button>
+              </div>
             </div>
           </div>
         `).join('')}
@@ -1105,8 +1207,9 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
             </div>
           </div>
           <div class="card-actions-bar">
+            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.openEditAssetModal('${c.id}')">Edit Link</button>
             <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
-            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.open('${c.readMoreUrl}', '_blank')">Read Case Study</button>
+            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.openSharePoint('${c.id}')">Read Case Study</button>
           </div>
         </div>
       `).join('')}
@@ -1132,8 +1235,9 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 12px;">
             <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
             <div style="display:flex; gap:8px;">
+              <button class="btn-outline" style="padding:8px 14px; font-size:12px;" onclick="window.openEditAssetModal('${pub.id}')">Edit Link</button>
               <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${pub.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
-              <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.open('${pub.link}', '_blank')">Read Publication</button>
+              <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.openSharePoint('${pub.id}')">Read Publication</button>
             </div>
           </div>
         </div>
@@ -1229,9 +1333,13 @@ ${window.renderCategoryHeader('1Cell.Ai Digital Video Library', 'Browse doctor i
           <div class="card-body" style="padding:16px;">
             <span class="badge badge-prod" style="align-self: flex-start; margin-bottom:8px;">${productName}</span>
             <h3 style="font-size:14px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
-            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-tertiary); margin-top:auto;">
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-tertiary); margin-top:auto; margin-bottom:8px;">
               <span>Speaker: ${vid.speaker}</span>
               <span>Type: ${vid.type}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; border-top:1px solid var(--border-color); padding-top:8px;">
+              <button class="btn-outline" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')">Edit Link</button>
+              <button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">Watch Video</button>
             </div>
           </div>
         </div>
@@ -2086,6 +2194,14 @@ window.previewDocument = function(docId) {
     `;
   }
 
+  const previewBtnEdit = document.getElementById('previewBtnEdit');
+  if (previewBtnEdit) {
+    previewBtnEdit.onclick = () => {
+      closeModal(previewModal);
+      window.openEditAssetModal(docId);
+    };
+  }
+
   // Open the Modal
   openModal(previewModal);
 };
@@ -2136,6 +2252,14 @@ window.inspectSharepoint = function(docId) {
     window.open(doc.sharePointUrl, '_blank');
     showToast(`Redirecting to live SharePoint document: ${doc.title}`);
   };
+
+  const spModalEditBtn = document.getElementById('spModalEditBtn');
+  if (spModalEditBtn) {
+    spModalEditBtn.onclick = () => {
+      closeModal(sharepointModal);
+      window.openEditAssetModal(docId);
+    };
+  }
 
   openModal(sharepointModal);
 };
@@ -2693,4 +2817,243 @@ window.resetQuizFlow = function() {
   quizProgress.answers = [];
   quizProgress.isCompleted = false;
   renderQuizPage();
+};
+
+
+// -------------------------------------------------------------
+// Universal SharePoint & Asset Editing Core Functions
+// -------------------------------------------------------------
+
+// Universal SharePoint Link Opener & Redirector
+window.openSharePoint = function(id) {
+  if (!id) return;
+  // 1. Check documents or newsletters
+  const doc = db.documents.find(d => d.id === id) || db.newsletters.find(n => n.id === id);
+  if (doc && doc.sharePointUrl) {
+    let url = doc.sharePointUrl.trim();
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+    showToast(`Redirecting to SharePoint: ${doc.title}`);
+    return;
+  }
+  // 2. Check clinical cases
+  const c = db.cases.find(item => item.id === id);
+  if (c && c.readMoreUrl) {
+    let url = c.readMoreUrl.trim();
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+    showToast(`Opening case study: ${c.title}`);
+    return;
+  }
+  // 3. Check publications
+  const pub = db.publications.find(item => item.id === id);
+  if (pub && pub.link) {
+    let url = pub.link.trim();
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+    showToast(`Opening publication: ${pub.title}`);
+    return;
+  }
+  // 4. Check digital videos
+  const vid = db.videos.find(item => item.id === id);
+  if (vid && vid.videoUrl) {
+    let url = vid.videoUrl.trim();
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+    showToast(`Opening video: ${vid.title}`);
+    return;
+  }
+  showToast("SharePoint URL not configured for this item.");
+};
+
+// Open Edit Asset Modal pre-populated with document/file data
+window.openEditAssetModal = function(id) {
+  const editModal = document.getElementById('editAssetModal');
+  if (!editModal) return;
+
+  const doc = db.documents.find(d => d.id === id);
+  if (doc) {
+    document.getElementById('editDocId').value = doc.id;
+    document.getElementById('editItemType').value = 'document';
+    document.getElementById('editDocTitle').value = doc.title || '';
+    document.getElementById('editDocSpUrl').value = doc.sharePointUrl || '';
+    document.getElementById('editDocFolderPath').value = doc.folderPath || '';
+    document.getElementById('editDocProduct').value = doc.product || '';
+    document.getElementById('editDocContentType').value = doc.contentType || 'Brochure';
+    document.getElementById('editDocDept').value = doc.department || 'Marketing';
+    document.getElementById('editDocVersion').value = doc.version || 'v1.0';
+    document.getElementById('editDocStatus').value = doc.status || 'Approved';
+    document.getElementById('editDocDesc').value = doc.description || '';
+  } else {
+    // Check if case study
+    const c = db.cases.find(item => item.id === id);
+    if (c) {
+      document.getElementById('editDocId').value = c.id;
+      document.getElementById('editItemType').value = 'case';
+      document.getElementById('editDocTitle').value = c.title || '';
+      document.getElementById('editDocSpUrl').value = c.readMoreUrl || '';
+      document.getElementById('editDocFolderPath').value = `Clinical Cases/${c.cancerType || 'Solid Tumor'}`;
+      document.getElementById('editDocProduct').value = c.relatedProduct || '';
+      document.getElementById('editDocContentType').value = 'Case Study';
+      document.getElementById('editDocDept').value = 'Medical';
+      document.getElementById('editDocVersion').value = 'v1.0';
+      document.getElementById('editDocStatus').value = 'Approved';
+      document.getElementById('editDocDesc').value = c.summary || '';
+    } else {
+      // Check if publication
+      const pub = db.publications.find(item => item.id === id);
+      if (pub) {
+        document.getElementById('editDocId').value = pub.id;
+        document.getElementById('editItemType').value = 'publication';
+        document.getElementById('editDocTitle').value = pub.title || '';
+        document.getElementById('editDocSpUrl').value = pub.link || '';
+        document.getElementById('editDocFolderPath').value = `Publications/${pub.journal || 'Peer-Reviewed'}`;
+        document.getElementById('editDocProduct').value = pub.relatedProduct || '';
+        document.getElementById('editDocContentType').value = 'Publication';
+        document.getElementById('editDocDept').value = 'Scientific';
+        document.getElementById('editDocVersion').value = 'v1.0';
+        document.getElementById('editDocStatus').value = 'Approved';
+        document.getElementById('editDocDesc').value = pub.abstract || '';
+      } else {
+        // Check if video
+        const vid = db.videos.find(item => item.id === id);
+        if (vid) {
+          document.getElementById('editDocId').value = vid.id;
+          document.getElementById('editItemType').value = 'video';
+          document.getElementById('editDocTitle').value = vid.title || '';
+          document.getElementById('editDocSpUrl').value = vid.videoUrl || '';
+          document.getElementById('editDocFolderPath').value = 'Digital Videos';
+          document.getElementById('editDocProduct').value = vid.product || '';
+          document.getElementById('editDocContentType').value = 'Video';
+          document.getElementById('editDocDept').value = 'Marketing';
+          document.getElementById('editDocVersion').value = 'v1.0';
+          document.getElementById('editDocStatus').value = 'Approved';
+          document.getElementById('editDocDesc').value = vid.description || '';
+        }
+      }
+    }
+  }
+
+  openModal(editModal);
+};
+
+// Save edited asset and SharePoint URL
+window.saveAssetEdit = function() {
+  const id = document.getElementById('editDocId').value;
+  const itemType = document.getElementById('editItemType').value;
+  const title = document.getElementById('editDocTitle').value.trim();
+  let spUrl = document.getElementById('editDocSpUrl').value.trim();
+  const folderPath = document.getElementById('editDocFolderPath').value.trim();
+  const product = document.getElementById('editDocProduct').value || null;
+  const contentType = document.getElementById('editDocContentType').value;
+  const department = document.getElementById('editDocDept').value;
+  const version = document.getElementById('editDocVersion').value.trim() || 'v1.0';
+  const status = document.getElementById('editDocStatus').value;
+  const desc = document.getElementById('editDocDesc').value.trim();
+
+  if (!title || !spUrl) {
+    showToast("Document Title and SharePoint URL are required!");
+    return;
+  }
+
+  if (!/^https?:\/\//i.test(spUrl)) {
+    spUrl = 'https://' + spUrl;
+  }
+
+  if (itemType === 'document') {
+    const doc = db.documents.find(d => d.id === id);
+    if (doc) {
+      doc.title = title;
+      doc.sharePointUrl = spUrl;
+      doc.folderPath = folderPath || doc.folderPath;
+      doc.product = product;
+      doc.contentType = contentType;
+      doc.department = department;
+      doc.version = version;
+      doc.status = status;
+      doc.description = desc;
+      doc.updatedDate = new Date().toISOString().split('T')[0];
+
+      try {
+        localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
+      } catch (e) {
+        console.warn('LocalStorage save failed:', e);
+      }
+    }
+  } else if (itemType === 'case') {
+    const c = db.cases.find(item => item.id === id);
+    if (c) {
+      c.title = title;
+      c.readMoreUrl = spUrl;
+      c.relatedProduct = product || c.relatedProduct;
+      c.summary = desc || c.summary;
+      try {
+        localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases));
+      } catch (e) {}
+    }
+  } else if (itemType === 'publication') {
+    const pub = db.publications.find(item => item.id === id);
+    if (pub) {
+      pub.title = title;
+      pub.link = spUrl;
+      pub.relatedProduct = product || pub.relatedProduct;
+      pub.abstract = desc || pub.abstract;
+      try {
+        localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications));
+      } catch (e) {}
+    }
+  } else if (itemType === 'video') {
+    const vid = db.videos.find(item => item.id === id);
+    if (vid) {
+      vid.title = title;
+      vid.videoUrl = spUrl;
+      vid.product = product || vid.product;
+      vid.description = desc || vid.description;
+      try {
+        localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
+      } catch (e) {}
+    }
+  }
+
+  showToast(`Updated "${title}"! Direct SharePoint link saved.`);
+  const editModal = document.getElementById('editAssetModal');
+  if (editModal) closeModal(editModal);
+
+  // Refresh current view to instantly display updated cards
+  window.refreshCurrentView();
+};
+
+// Re-render current active screen
+window.refreshCurrentView = function() {
+  // If user is inside a product microsite, re-render the microsite
+  if (currentMicrositeId && document.querySelector('.product-workspace-header')) {
+    window.openProductMicrosite(currentMicrositeId);
+    if (currentMicrositeTab && currentMicrositeTab !== 'assets') {
+      const tabButtons = Array.from(document.querySelectorAll('.product-tab-btn'));
+      const targetBtn = tabButtons.find(b => b.getAttribute('onclick')?.includes(`'${currentMicrositeTab}'`));
+      if (targetBtn) targetBtn.click();
+    }
+    return;
+  }
+
+  const activeNav = document.querySelector('.sidebar .nav-item.active');
+  const route = activeNav ? activeNav.getAttribute('data-route') : 'dashboard';
+  
+  if (route === 'dashboard') {
+    const activeTab = document.querySelector('.product-tab.active');
+    const selectedProd = activeTab ? activeTab.getAttribute('data-product') : 'oncoindx';
+    renderDashboard();
+    // Preserve active product folder tab
+    const tabs = workspaceViewport.querySelectorAll('.product-tab');
+    tabs.forEach(t => {
+      if (t.getAttribute('data-product') === selectedProd) {
+        t.classList.add('active');
+      } else {
+        t.classList.remove('active');
+      }
+    });
+    renderDashboardProductDocs(selectedProd);
+  } else {
+    renderRoute(route);
+  }
 };
