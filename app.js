@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v11';
+import db from './db.js?v=20260907-v12';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -157,6 +157,19 @@ const userProfiles = {
   leadership: { name: "Devin Thorne", role: "VP Strategy & Leadership", avatar: "LD" }
 };
 
+// Authorized Marketing Team Emails
+const authorizedMarketingEmails = [
+  "sharad.jaiswal@1cell.ai",
+  "vikas.naguru@1cell.ai",
+  "parita.razdan@1cell.ai",
+  "arjvee.vaidya@1cell.ai",
+  "tanisha.tolani@1cell.ai",
+  "pranad.kshirsagar@1cell.ai",
+  "richa@1cell.ai",
+  "ishita.dhaddha@1cell.ai"
+];
+window.authorizedMarketingEmails = authorizedMarketingEmails;
+
 // Authentication state controller
 function checkAuth() {
   const authName = sessionStorage.getItem("authName");
@@ -204,16 +217,8 @@ function init() {
     if (newRole === 'marketing_admin') {
       const email = sessionStorage.getItem("authEmail");
       if (email) {
-        const authorizedMarketingEmails = [
-          "sharad.jaiswal@1cell.ai",
-          "vikas.naguru@1cell.ai",
-          "parita.razdan@1cell.ai",
-          "arjvee.vaidya@1cell.ai",
-          "tanisha.tolani@1cell.ai",
-          "pranad.kshirsagar@1cell.ai",
-          "richa@1cell.ai"
-        ];
-        if (!authorizedMarketingEmails.includes(email.toLowerCase())) {
+        const cleanEmail = email.toLowerCase().trim();
+        if (!authorizedMarketingEmails.includes(cleanEmail)) {
           showToast("Access denied: Your email is not authorized for the Marketing Admin role.");
           // Revert selection
           let prevRole = 'sales';
@@ -356,16 +361,8 @@ function init() {
 
       // Marketing team authorization validation
       if (dept === 'Marketing') {
-        const authorizedMarketingEmails = [
-          "sharad.jaiswal@1cell.ai",
-          "vikas.naguru@1cell.ai",
-          "parita.razdan@1cell.ai",
-          "arjvee.vaidya@1cell.ai",
-          "tanisha.tolani@1cell.ai",
-          "pranad.kshirsagar@1cell.ai",
-          "richa@1cell.ai"
-        ];
-        if (!authorizedMarketingEmails.includes(email.toLowerCase())) {
+        const cleanEmail = email.toLowerCase().trim();
+        if (!authorizedMarketingEmails.includes(cleanEmail)) {
           if (emailInput) emailInput.classList.add('input-error');
           if (errorMsg) {
             const span = errorMsg.querySelector('span');
