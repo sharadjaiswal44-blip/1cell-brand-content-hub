@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v9';
+import db from './db.js?v=20260907-v11';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -612,11 +612,11 @@ function renderDashboardProductDocs(productName) {
     else if (doc.contentType === 'Presentation') icon = '📊';
 
     html += `
-      <div class="folder-doc-card">
+      <div class="folder-doc-card" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in SharePoint">
         <div class="folder-doc-header">
           <span class="folder-doc-icon">${icon}</span>
           <div style="flex: 1;">
-            <div class="folder-doc-title" onclick="window.previewDocument('${doc.id}')">${doc.title}</div>
+            <div class="folder-doc-title">${doc.title}</div>
             <div class="folder-doc-path">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:11px;height:11px;color:#0078d4;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
@@ -626,26 +626,23 @@ function renderDashboardProductDocs(productName) {
           </div>
         </div>
         <div class="folder-doc-actions">
-          <button onclick="window.previewDocument('${doc.id}')" title="Preview metadata and properties">
+          <button onclick="event.stopPropagation(); window.openSharePoint('${doc.id}')" class="btn-primary" style="padding:4px 12px; font-size:11px; font-weight:600;" title="Open document in SharePoint">
+            View
+          </button>
+          <button onclick="event.stopPropagation(); window.previewDocument('${doc.id}')" title="Preview metadata and properties">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             Details
           </button>
-          <button onclick="window.openEditAssetModal('${doc.id}')" style="color: var(--accent-color);" title="Edit File & Direct SharePoint Link">
+          <button onclick="event.stopPropagation(); window.openEditAssetModal('${doc.id}')" style="color: var(--accent-color);" title="Edit File & Direct SharePoint Link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
             </svg>
             Edit
           </button>
-          <button onclick="window.openSharePoint('${doc.id}')" style="color:#0078d4;" title="Open document in SharePoint">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;color:#0078d4;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v11.5A2.25 2.25 0 005.25 22h11.5A2.25 2.25 0 0019 19.75V11.25M18.75 3L11.75 10M18.75 3h-6m6 0v6" />
-            </svg>
-            SharePoint
-          </button>
-          <button onclick="window.deleteAsset('${doc.id}')" style="color:#ef4444;" title="Delete Content Card">
+          <button onclick="event.stopPropagation(); window.deleteAsset('${doc.id}')" style="color:#ef4444;" title="Delete Content Card">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
@@ -887,10 +884,11 @@ function renderDashboard() {
 function renderDocumentCard(doc) {
   const isFav = userFavorites.has(doc.id);
   const biomarkerBadge = doc.biomarker ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
-  const productTag = doc.product ? `<span class="badge badge-prod">${db.products.find(p => p.id === doc.product).name}</span>` : '';
+  const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
+  const productTag = productObj ? `<span class="badge badge-prod">${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : '');
 
   return `
-    <div class="doc-card" id="card-${doc.id}">
+    <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in SharePoint">
       <div class="card-header-bar">
         <div class="card-type-icon">
           ${doc.contentType === 'Video' ? '🎥' : doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation' ? '📊' : '📄'}
@@ -903,7 +901,7 @@ function renderDocumentCard(doc) {
         </div>
       </div>
       <div class="card-body">
-        <h3 class="card-title" onclick="window.previewDocument('${doc.id}')">${doc.title}</h3>
+        <h3 class="card-title">${doc.title}</h3>
         <p class="card-description">${doc.description}</p>
         <div class="card-metadata">
           <div class="meta-row">
@@ -920,35 +918,30 @@ function renderDocumentCard(doc) {
           </div>
         </div>
       </div>
-      <div class="card-actions-bar">
-        <a class="sp-link-indicator" onclick="window.inspectSharepoint('${doc.id}')">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-1.5V9a3 3 0 00-3-3h-3V4.5a3 3 0 00-3-3H4.5a3 3 0 00-3 3V18a3 3 0 003 3h15zM6 4.5a1.5 1.5 0 011.5-1.5h1.5A1.5 1.5 0 0110.5 4.5V6H7.5A1.5 1.5 0 016 4.5z" />
+      <div class="card-actions-bar" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${doc.id}')" title="View Document in SharePoint">
+          <span>View</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
           </svg>
-          SharePoint Properties
-        </a>
-        <div style="display:flex; gap: 4px;">
-          <button class="card-action-btn" onclick="window.openEditAssetModal('${doc.id}')" title="Edit File & SharePoint Link">
+        </button>
+        <div style="display:flex; gap: 4px; align-items:center;">
+          <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${doc.id}')" title="Edit File & SharePoint Link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
             </svg>
           </button>
-          <button class="card-action-btn" onclick="window.openSharePoint('${doc.id}')" title="Open Document in SharePoint">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-            </svg>
-          </button>
-          <button class="card-action-btn ${isFav ? 'active' : ''}" onclick="window.toggleFavorite('${doc.id}')" title="Bookmark Asset">
+          <button class="card-action-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); window.toggleFavorite('${doc.id}')" title="Bookmark Asset">
             <svg xmlns="http://www.w3.org/2000/svg" fill="${isFav ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
             </svg>
           </button>
-          <button class="card-action-btn" onclick="window.shareAsset('${doc.id}')" title="Copy Document Share Link">
+          <button class="card-action-btn" onclick="event.stopPropagation(); window.shareAsset('${doc.id}')" title="Copy Document Share Link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186l5.572 3.285m-5.572-3.285L12.79 6.94m0 0a2.25 2.25 0 103.504-1.408 2.25 2.25 0 00-3.504 1.408zm0 10.12l3.504 1.409a2.25 2.25 0 101.076-2.186l-4.58-1.833z" />
             </svg>
           </button>
-          <button class="card-action-btn" onclick="window.deleteAsset('${doc.id}')" title="Delete / Remove Content Card" style="color:#ef4444;">
+          <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${doc.id}')" title="Delete / Remove Content Card" style="color:#ef4444;">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
@@ -1183,7 +1176,7 @@ function renderProductTabContent(prodId, tabName) {
       }
       if (relatedCases.length > 0) {
         html += relatedCases.map(c => `
-          <div class="doc-card">
+          <div class="doc-card" onclick="window.openSharePoint('${c.id}')" style="cursor:pointer;" title="Click to view case in SharePoint">
             <div class="case-card-header">
               <span class="badge badge-biomarker">${c.biomarker || 'Clinical Case'}</span>
               <h3 style="font-size:15px; font-weight:700; margin-top:8px;">${c.title}</h3>
@@ -1203,9 +1196,9 @@ function renderProductTabContent(prodId, tabName) {
               </div>
             </div>
             <div class="card-actions-bar">
-              <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="window.openEditAssetModal('${c.id}')">Edit</button>
-              <button class="btn-outline" style="padding:6px 10px; font-size:11px; color:#ef4444; border-color:#fca5a5;" onclick="window.deleteAsset('${c.id}')">Delete</button>
-              <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.openSharePoint('${c.id}')">Read Case Study</button>
+              <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${c.id}')">Edit</button>
+              <button class="btn-outline" style="padding:6px 10px; font-size:11px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${c.id}')">Delete</button>
+              <button class="btn-primary" style="padding:6px 14px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${c.id}')">View</button>
             </div>
           </div>
         `).join('');
@@ -1244,7 +1237,7 @@ function renderProductTabContent(prodId, tabName) {
       }
       if (relatedPubs.length > 0) {
         html += relatedPubs.map(pub => `
-          <div class="pub-item" style="grid-column: 1 / -1;">
+          <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
             <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
             <h3 style="font-size:17px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
             <div class="pub-authors">${pub.authors}</div>
@@ -1252,9 +1245,9 @@ function renderProductTabContent(prodId, tabName) {
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
               <div style="display:flex; gap:8px;">
-                <button class="btn-outline" style="padding:6px 12px; font-size:12px;" onclick="window.openEditAssetModal('${pub.id}')">Edit</button>
-                <button class="btn-outline" style="padding:6px 12px; font-size:12px; color:#ef4444; border-color:#fca5a5;" onclick="window.deleteAsset('${pub.id}')">Delete</button>
-                <button class="btn-primary" style="padding:6px 16px; font-size:12px;" onclick="window.openSharePoint('${pub.id}')">Read Publication</button>
+                <button class="btn-outline" style="padding:6px 12px; font-size:12px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
+                <button class="btn-outline" style="padding:6px 12px; font-size:12px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
+                <button class="btn-primary" style="padding:6px 16px; font-size:12px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
               </div>
             </div>
           </div>
@@ -1262,7 +1255,7 @@ function renderProductTabContent(prodId, tabName) {
       }
       if (relatedVideos.length > 0) {
         html += relatedVideos.map(vid => `
-          <div class="doc-card">
+          <div class="doc-card" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
             <div class="video-card-thumbnail" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;">
               <div class="video-play-icon">▶</div>
               <span class="video-duration">${vid.duration}</span>
@@ -1274,9 +1267,9 @@ function renderProductTabContent(prodId, tabName) {
                 <span>Type: ${vid.type}</span>
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:8px;">
-                <button class="btn-outline" style="padding:4px 8px; font-size:11px;" onclick="window.openEditAssetModal('${vid.id}')">Edit</button>
-                <button class="btn-outline" style="padding:4px 8px; font-size:11px; color:#ef4444; border-color:#fca5a5;" onclick="window.deleteAsset('${vid.id}')">Delete</button>
-                <button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="window.openSharePoint('${vid.id}')">Watch</button>
+                <button class="btn-outline" style="padding:4px 8px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')">Edit</button>
+                <button class="btn-outline" style="padding:4px 8px; font-size:11px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${vid.id}')">Delete</button>
+                <button class="btn-primary" style="padding:4px 12px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
               </div>
             </div>
           </div>
@@ -1356,10 +1349,10 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
     
     <div class="assets-grid">
       ${db.cases.map(c => `
-        <div class="doc-card">
+        <div class="doc-card" onclick="window.openSharePoint('${c.id}')" style="cursor:pointer;" title="Click to view case in SharePoint">
           <div class="case-card-header">
             <span class="badge badge-biomarker" style="margin-right:6px;">${c.biomarker}</span>
-            <span class="badge badge-prod">${db.products.find(p => p.id === c.relatedProduct).name}</span>
+            <span class="badge badge-prod">${(db.products.find(p => p.id === c.relatedProduct) || {}).name || '1Cell.Ai'}</span>
             <h3 style="font-size:16px; font-weight:700; margin-top:8px;">${c.title}</h3>
             <div class="case-hospital">${c.doctor} • ${c.hospital}</div>
           </div>
@@ -1377,9 +1370,9 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
             </div>
           </div>
           <div class="card-actions-bar">
-            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.openEditAssetModal('${c.id}')">Edit Link</button>
-            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
-            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.openSharePoint('${c.id}')">Read Case Study</button>
+            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${c.id}')">Edit Link</button>
+            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
+            <button class="btn-primary" style="padding:6px 16px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${c.id}')">View</button>
           </div>
         </div>
       `).join('')}
@@ -1446,7 +1439,7 @@ window.updateReportLibraryCards = function() {
     const prod = db.products.find(p => p.id === r.product);
     const prodName = prod ? prod.name : (r.product ? r.product.toUpperCase() : 'General');
     return `
-      <div class="doc-card animate-fade-in" style="display:flex; flex-direction:column; justify-content:space-between; position:relative;">
+      <div class="doc-card animate-fade-in" onclick="window.openSharePoint('${r.id}')" style="display:flex; flex-direction:column; justify-content:space-between; position:relative; cursor:pointer;" title="Click to view report in SharePoint">
         <div>
           <div class="case-card-header" style="display:flex; flex-direction:column; gap:6px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
@@ -1478,20 +1471,20 @@ window.updateReportLibraryCards = function() {
 
         <div class="card-actions-bar" style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; gap:6px;">
           <div style="display:flex; gap:6px;">
-            <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="window.openEditAssetModal('${r.id}')" title="Edit SharePoint link or report metadata">
+            <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${r.id}')" title="Edit SharePoint link or report metadata">
               Edit Link
             </button>
-            <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="window.previewDocument('${r.id}')" title="Preview metadata">
+            <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="event.stopPropagation(); window.previewDocument('${r.id}')" title="Preview metadata">
               Preview
             </button>
-            <button class="btn-outline" style="padding:6px 8px; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="window.deleteAsset('${r.id}')" title="Delete report">
+            <button class="btn-outline" style="padding:6px 8px; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); window.deleteAsset('${r.id}')" title="Delete report">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px; height:13px;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
               </svg>
             </button>
           </div>
-          <button class="btn-primary" style="padding:6px 14px; font-size:11px; display:inline-flex; align-items:center; gap:6px;" onclick="window.openSharePoint('${r.id}')" title="Open PDF directly in SharePoint Online">
-            <span>View in SharePoint</span>
+          <button class="btn-primary" style="padding:6px 16px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${r.id}')" title="View in SharePoint">
+            <span>View</span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
@@ -1651,7 +1644,7 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
     
     <div>
       ${db.publications.map(pub => `
-        <div class="pub-item">
+        <div class="pub-item" onclick="window.openSharePoint('${pub.id}')" style="cursor:pointer;" title="Click to view publication in SharePoint">
           <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div class="pub-journal">${pub.journal} • Published ${pub.publishedDate}</div>
             <span class="badge badge-prod">${db.products.find(p => p.id === pub.relatedProduct).name}</span>
@@ -1662,9 +1655,14 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 12px;">
             <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
             <div style="display:flex; gap:8px;">
-              <button class="btn-outline" style="padding:8px 14px; font-size:12px;" onclick="window.openEditAssetModal('${pub.id}')">Edit Link</button>
-              <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${pub.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
-              <button class="btn-primary" style="padding:8px 16px; font-size:12px;" onclick="window.openSharePoint('${pub.id}')">Read Publication</button>
+              <button class="btn-outline" style="padding:8px 14px; font-size:12px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit Link</button>
+              <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${pub.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
+              <button class="btn-primary" style="padding:8px 16px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">
+                <span>View</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -1752,7 +1750,7 @@ ${window.renderCategoryHeader('1Cell.Ai Digital Video Library', 'Browse doctor i
         const productObj = db.products.find(p => p.id === vid.product);
         const productName = productObj ? productObj.name : 'Corporate';
         return `
-        <div class="doc-card" onclick="window.open('${vid.videoUrl}', '_blank')" style="cursor:pointer;">
+        <div class="doc-card" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
           <div class="video-card-thumbnail">
             <div class="video-play-icon">▶</div>
             <span class="video-duration">${vid.duration}</span>
@@ -1766,7 +1764,7 @@ ${window.renderCategoryHeader('1Cell.Ai Digital Video Library', 'Browse doctor i
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; border-top:1px solid var(--border-color); padding-top:8px;">
               <button class="btn-outline" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')">Edit Link</button>
-              <button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">Watch Video</button>
+              <button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
             </div>
           </div>
         </div>
@@ -1834,7 +1832,7 @@ ${window.renderCategoryHeader('Corporate Brand Assets & Guidelines', 'Core logos
     
     <div class="assets-grid">
       ${db.brandAssets.map(asset => `
-        <div class="doc-card">
+        <div class="doc-card" onclick="window.openSharePoint('${asset.id}')" style="cursor:pointer;" title="Click to view brand asset in SharePoint">
           <div class="card-header-bar">
             <div class="card-type-icon">🎨</div>
             <span class="badge badge-dept">Corporate</span>
@@ -1853,8 +1851,8 @@ ${window.renderCategoryHeader('Corporate Brand Assets & Guidelines', 'Core logos
             </div>
           </div>
           <div class="card-actions-bar" style="justify-content: space-between;">
-            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.open('${asset.downloadUrl}', '_blank')">Open Link</button>
-            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.triggerDownload('${asset.title}')">Download Asset</button>
+            <button class="btn-primary" style="padding:6px 14px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${asset.id}')">View</button>
+            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); window.triggerDownload('${asset.title}')">Download Asset</button>
           </div>
         </div>
       `).join('')}
@@ -1880,7 +1878,7 @@ ${window.renderCategoryHeader('Document Templates & Outlines', 'Pre-approved lay
     
     <div class="assets-grid">
       ${db.templates.map(temp => `
-        <div class="doc-card">
+        <div class="doc-card" onclick="window.openSharePoint('${temp.id}')" style="cursor:pointer;" title="Click to view template in SharePoint">
           <div class="card-header-bar">
             <div class="card-type-icon">📄</div>
             <span class="badge badge-dept">Marketing</span>
@@ -1895,8 +1893,8 @@ ${window.renderCategoryHeader('Document Templates & Outlines', 'Pre-approved lay
             </div>
           </div>
           <div class="card-actions-bar" style="justify-content: space-between;">
-            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="window.open('${temp.downloadUrl}', '_blank')">SharePoint</button>
-            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="window.triggerDownload('${temp.title}')">Download Template</button>
+            <button class="btn-primary" style="padding:6px 14px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${temp.id}')">View</button>
+            <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); window.triggerDownload('${temp.title}')">Download Template</button>
           </div>
         </div>
       `).join('')}
@@ -2336,6 +2334,133 @@ window.clearFilters = function(reload = true) {
   }
 };
 
+// Centralized function to gather all searchable files across system
+function getAllSearchableFiles() {
+  const docs = (db.documents || []).map(d => ({
+    ...d,
+    sourceType: 'document',
+    displayType: d.contentType || 'Document',
+    version: d.version || 'v1.0',
+    updatedDate: d.updatedDate || '2026-09',
+    owner: d.owner || '1Cell Commercial Team',
+    status: d.status || 'Approved',
+    description: d.description || ''
+  }));
+  const reports = (db.reports || []).map(r => ({
+    ...r,
+    sourceType: 'report',
+    contentType: 'Sample Report',
+    displayType: 'Sample Report',
+    department: 'Medical',
+    owner: r.author || 'Clinical Genomics Laboratory',
+    version: r.version || 'v1.0',
+    updatedDate: r.date || '2026-09',
+    status: 'Approved',
+    description: r.description || `${r.cancerType || ''} clinical sample report for ${r.product ? r.product.toUpperCase() : '1Cell.Ai'}`
+  }));
+  const cases = (db.cases || []).map(c => ({
+    ...c,
+    sourceType: 'case',
+    contentType: 'Case Study',
+    displayType: 'Case Study',
+    product: c.relatedProduct,
+    department: 'Medical',
+    description: c.summary || '',
+    owner: c.doctor || 'Clinical Specialist',
+    version: 'v1.0',
+    updatedDate: c.date || '2026-09',
+    status: 'Approved'
+  }));
+  const pubs = (db.publications || []).map(p => ({
+    ...p,
+    sourceType: 'publication',
+    contentType: 'Publication',
+    displayType: 'Publication',
+    product: p.relatedProduct,
+    department: 'Scientific',
+    description: p.abstract || '',
+    owner: p.authors || 'Research Team',
+    version: 'v1.0',
+    updatedDate: p.year ? String(p.year) : '2026',
+    status: 'Approved'
+  }));
+  const videos = (db.videos || []).map(v => ({
+    ...v,
+    sourceType: 'video',
+    contentType: 'Video',
+    displayType: 'Video',
+    department: 'Marketing',
+    owner: v.speaker || 'Marketing',
+    version: 'HD Video',
+    updatedDate: v.date || '2026-09',
+    status: 'Approved',
+    description: v.description || ''
+  }));
+  const newsletters = (db.newsletters || []).map(n => ({
+    ...n,
+    sourceType: 'newsletter',
+    displayType: 'Newsletter',
+    department: 'Corporate',
+    version: 'Issue',
+    updatedDate: n.date || '2026-09',
+    status: 'Approved'
+  }));
+  return [...docs, ...reports, ...cases, ...pubs, ...videos, ...newsletters];
+}
+window.getAllSearchableFiles = getAllSearchableFiles;
+
+// Robust matcher for query against file metadata and product tagging
+function matchFileToQuery(file, qRaw, matchedProductIds) {
+  if (!qRaw) return true;
+  const qLower = qRaw.toLowerCase().trim();
+  const qClean = qLower.replace(/[^a-z0-9]/g, '');
+
+  // 1. Tagged with matching product
+  const fileProd = (file.product || file.relatedProduct || '').toLowerCase().trim();
+  if (fileProd) {
+    if (matchedProductIds && matchedProductIds.includes(fileProd)) return true;
+    if (fileProd.includes(qClean) || qClean.includes(fileProd)) return true;
+    const pObj = db.products.find(p => p.id === fileProd);
+    if (pObj) {
+      const pNameLower = pObj.name.toLowerCase();
+      const pNameClean = pNameLower.replace(/[^a-z0-9]/g, '');
+      if (pNameLower.includes(qLower) || pNameClean.includes(qClean) || qClean.includes(pNameClean)) {
+        return true;
+      }
+    }
+  }
+
+  // 2. Title matching
+  const title = (file.title || '').toLowerCase();
+  const titleClean = title.replace(/[^a-z0-9]/g, '');
+  if (title.includes(qLower) || (qClean.length > 2 && titleClean.includes(qClean))) return true;
+
+  // 3. Content Type / Category matching
+  const ct = (file.contentType || file.displayType || '').toLowerCase();
+  if (ct.includes(qLower)) return true;
+
+  // 4. Cancer Type matching
+  const cancer = (file.cancerType || '').toLowerCase();
+  if (cancer.includes(qLower)) return true;
+
+  // 5. Biomarker matching
+  const biomarker = (file.biomarker || '').toLowerCase();
+  if (biomarker.includes(qLower)) return true;
+
+  // 6. Description / Summary matching
+  const desc = (file.description || file.summary || file.abstract || '').toLowerCase();
+  if (desc.includes(qLower)) return true;
+
+  // 7. Department / Author matching
+  const dept = (file.department || '').toLowerCase();
+  if (dept.includes(qLower)) return true;
+  const author = (file.author || file.doctor || file.authors || file.speaker || file.owner || '').toLowerCase();
+  if (author.includes(qLower)) return true;
+
+  return false;
+}
+window.matchFileToQuery = matchFileToQuery;
+
 // Read filters checkbox inputs and update grid
 window.updateFilterState = function() {
   // Sync checkboxes to local state
@@ -2360,20 +2485,22 @@ window.updateFilterState = function() {
   }
 
   // Perform evaluation logic
-  const query = activeSearchQuery.toLowerCase().trim();
-  const allAssets = [...db.documents, ...db.newsletters];
+  const qRaw = activeSearchQuery.trim();
+  const qLower = qRaw.toLowerCase();
+  const qClean = qLower.replace(/[^a-z0-9]/g, '');
+
+  // Identify matching products
+  const matchedProductIds = db.products.filter(p => {
+    const pClean = p.id.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const pNameClean = p.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return pClean.includes(qClean) || pNameClean.includes(qClean) || p.name.toLowerCase().includes(qLower);
+  }).map(p => p.id);
+
+  const allAssets = getAllSearchableFiles();
   const filtered = allAssets.filter(doc => {
-    // 1. Text Query Matching
-    if (query) {
-      const matchTitle = doc.title.toLowerCase().includes(query);
-      const matchDesc = doc.description.toLowerCase().includes(query);
-      const matchBiomarker = doc.biomarker ? doc.biomarker.toLowerCase().includes(query) : false;
-      const matchCancer = doc.cancerType ? doc.cancerType.toLowerCase().includes(query) : false;
-      const matchAuthor = doc.author ? doc.author.toLowerCase().includes(query) : false;
-      const matchOwner = doc.owner.toLowerCase().includes(query);
-      const matchDept = doc.department.toLowerCase().includes(query);
-      
-      if (!matchTitle && !matchDesc && !matchBiomarker && !matchCancer && !matchAuthor && !matchOwner && !matchDept) {
+    // 1. Text / Product Query Matching
+    if (qRaw) {
+      if (!matchFileToQuery(doc, qRaw, matchedProductIds)) {
         return false;
       }
     }
@@ -2424,37 +2551,39 @@ window.updateFilterState = function() {
         </div>
       `;
     } else {
-      resultsGrid.innerHTML = filtered.map(d => renderDocumentCard(d)).join('');
+      resultsGrid.innerHTML = filtered.map(doc => renderDocumentCard(doc)).join('');
     }
   }
 };
 
 // Global search auto suggestions engine
 function handleSearchInput(e) {
-  const query = e.target.value.toLowerCase().trim();
-  if (!query) {
+  const qRaw = e.target.value.trim();
+  const qLower = qRaw.toLowerCase();
+  const qClean = qLower.replace(/[^a-z0-9]/g, '');
+
+  if (!qRaw) {
     suggestionsDropdown.style.display = 'none';
     return;
   }
 
-  // Find matches
-  const allSearchable = [...db.documents, ...db.newsletters];
-  const matchedDocs = allSearchable.filter(doc => 
-    doc.title.toLowerCase().includes(query) || 
-    doc.department.toLowerCase().includes(query) ||
-    (doc.biomarker && doc.biomarker.toLowerCase().includes(query)) ||
-    (doc.cancerType && doc.cancerType.toLowerCase().includes(query))
-  ).slice(0, 5);
+  // Identify matching products
+  const matchedProducts = db.products.filter(p => {
+    const pClean = p.id.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const pNameClean = p.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return pClean.includes(qClean) || pNameClean.includes(qClean) || p.name.toLowerCase().includes(qLower) || (p.description && p.description.toLowerCase().includes(qLower));
+  });
+  const matchedProductIds = matchedProducts.map(p => p.id);
 
-  const matchedProducts = db.products.filter(p => 
-    p.name.toLowerCase().includes(query) || 
-    p.description.toLowerCase().includes(query)
-  ).slice(0, 2);
+  // Search across all files in system
+  const allFiles = getAllSearchableFiles();
+  const matchedFiles = allFiles.filter(f => matchFileToQuery(f, qRaw, matchedProductIds));
 
-  if (matchedDocs.length === 0 && matchedProducts.length === 0) {
+  if (matchedFiles.length === 0 && matchedProducts.length === 0) {
     suggestionsDropdown.innerHTML = `
-      <div style="padding: 12px 16px; font-size:12.5px; color:var(--text-tertiary); text-align:center;">
-        No quick assets found. Press Enter to search hub.
+      <div style="padding: 16px 20px; font-size:12.5px; color:var(--text-tertiary); text-align:center;">
+        <div>🔍 No files found matching "<strong>${qRaw}</strong>"</div>
+        <div style="font-size:11px; margin-top:4px; opacity:0.8;">Press Enter to search the full hub.</div>
       </div>
     `;
     suggestionsDropdown.style.display = 'block';
@@ -2463,44 +2592,83 @@ function handleSearchInput(e) {
 
   let html = '';
 
+  // 1. Matching Product Workspaces
   if (matchedProducts.length > 0) {
     html += `
       <div class="search-suggestion-section">
-        <div class="suggestion-header">Product Workspaces</div>
-        ${matchedProducts.map(p => `
-          <div class="suggestion-item" onclick="window.openProductMicrosite('${p.id}')">
+        <div class="suggestion-header">Product Workspaces (${matchedProducts.length})</div>
+        ${matchedProducts.map(p => {
+          const taggedCount = allFiles.filter(f => (f.product === p.id || f.relatedProduct === p.id)).length;
+          return `
+          <div class="suggestion-item" onclick="window.openProductMicrosite('${p.id}'); suggestionsDropdown.style.display='none';">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-1.5V9a3 3 0 00-3-3h-3V4.5a3 3 0 00-3-3H4.5a3 3 0 00-3 3V18a3 3 0 003 3h15z" />
             </svg>
-            <span class="suggestion-text">${p.name}</span>
-            <span class="suggestion-badge">Workspace</span>
+            <div style="display:flex; flex-direction:column; gap:2px; flex:1;">
+              <span class="suggestion-text" style="font-weight:700;">${p.name} Workspace</span>
+              <span style="font-size:11px; color:var(--text-tertiary);">${taggedCount} files tagged under this product</span>
+            </div>
+            <span class="suggestion-badge" style="background-color:rgba(0,120,212,0.1); color:#0078d4; font-weight:600;">Open Workspace ↗</span>
           </div>
-        `).join('')}
+        `;}).join('')}
       </div>
     `;
   }
 
-  if (matchedDocs.length > 0) {
+  // 2. Matching Files & Documents tagged with product or matching query
+  if (matchedFiles.length > 0) {
+    const isProdSearch = matchedProducts.length > 0;
+    const headerTitle = isProdSearch 
+      ? `Files Tagged with ${matchedProducts[0].name} (${matchedFiles.length} files)`
+      : `Matching Files & Documents (${matchedFiles.length})`;
+
     html += `
       <div class="search-suggestion-section">
-        <div class="suggestion-header">Documents & Assets</div>
-        ${matchedDocs.map(d => `
-          <div class="suggestion-item" onclick="window.previewDocument('${d.id}')">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
-            <span class="suggestion-text">${d.title}</span>
-            <span class="suggestion-badge">${d.contentType}</span>
-          </div>
-        `).join('')}
+        <div class="suggestion-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>${headerTitle}</span>
+          <span style="font-size:10px; text-transform:none; color:var(--text-tertiary);">Click file to open SharePoint</span>
+        </div>
+        ${matchedFiles.map(d => {
+          const prodObj = d.product ? db.products.find(p => p.id === d.product) : null;
+          const prodBadge = prodObj ? `<span class="badge badge-prod" style="font-size:9.5px; padding:1px 6px;">${prodObj.name}</span>` : '';
+          const icon = d.contentType === 'Video' ? '🎥' : d.contentType === 'Sample Report' ? '📋' : d.contentType === 'Case Study' ? '🔬' : d.contentType === 'Presentation' ? '📊' : '📄';
+
+          return `
+            <div class="suggestion-item" onclick="window.openSharePoint('${d.id}'); suggestionsDropdown.style.display='none';" title="Click to view file in SharePoint Online">
+              <span style="font-size:15px; flex-shrink:0;">${icon}</span>
+              <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;">
+                <span class="suggestion-text" style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${d.title}</span>
+                <div style="display:flex; gap:6px; align-items:center; font-size:11px; color:var(--text-tertiary);">
+                  ${prodBadge}
+                  <span>${d.displayType || d.contentType}</span>
+                  ${d.cancerType ? `• <span>${d.cancerType}</span>` : ''}
+                </div>
+              </div>
+              <span class="suggestion-badge" style="background:#0078d4; color:#ffffff; font-weight:600; display:inline-flex; align-items:center; gap:3px;">
+                <span>View</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:10px;height:10px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
+              </span>
+            </div>
+          `;
+        }).join('')}
       </div>
     `;
   }
+
+  // Footer: View all in Search Hub
+  html += `
+    <div style="padding:10px 16px; background-color:var(--bg-tertiary); border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; font-size:11.5px; cursor:pointer;" onclick="window.triggerSearchHub('${qRaw}'); suggestionsDropdown.style.display='none';">
+      <span style="font-weight:600; color:var(--text-primary);">View all ${matchedFiles.length} files in Search Hub</span>
+      <span style="color:var(--text-tertiary);">Press <strong>Enter ↵</strong></span>
+    </div>
+  `;
 
   suggestionsDropdown.innerHTML = html;
   suggestionsDropdown.style.display = 'block';
 }
-
+window.handleSearchInput = handleSearchInput;
 // 14. Preview Document Modal logic
 window.previewDocument = function(docId) {
   const doc = db.documents.find(d => d.id === docId) || db.newsletters.find(n => n.id === docId) || (db.reports || []).find(r => r.id === docId);
@@ -3316,10 +3484,14 @@ window.resetQuizFlow = function() {
 // Universal SharePoint Link Opener & Redirector
 window.openSharePoint = function(id) {
   if (!id) return;
+  if (/^https?:\/\//i.test(id)) {
+    window.open(id, '_blank');
+    return;
+  }
   // 0. Check clinical sample reports
   const rep = (db.reports || []).find(r => r.id === id);
-  if (rep && rep.sharePointUrl) {
-    let url = rep.sharePointUrl.trim();
+  if (rep && (rep.sharePointUrl || rep.downloadUrl)) {
+    let url = (rep.sharePointUrl || rep.downloadUrl).trim();
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     window.open(url, '_blank');
     showToast(`Redirecting to SharePoint: ${rep.title}`);
@@ -3327,8 +3499,8 @@ window.openSharePoint = function(id) {
   }
   // 1. Check documents or newsletters
   const doc = db.documents.find(d => d.id === id) || db.newsletters.find(n => n.id === id);
-  if (doc && doc.sharePointUrl) {
-    let url = doc.sharePointUrl.trim();
+  if (doc && (doc.sharePointUrl || doc.downloadUrl)) {
+    let url = (doc.sharePointUrl || doc.downloadUrl).trim();
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     window.open(url, '_blank');
     showToast(`Redirecting to SharePoint: ${doc.title}`);
@@ -3336,29 +3508,46 @@ window.openSharePoint = function(id) {
   }
   // 2. Check clinical cases
   const c = db.cases.find(item => item.id === id);
-  if (c && c.readMoreUrl) {
-    let url = c.readMoreUrl.trim();
+  if (c && (c.sharePointUrl || c.readMoreUrl)) {
+    let url = (c.sharePointUrl || c.readMoreUrl).trim();
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     window.open(url, '_blank');
-    showToast(`Opening case study: ${c.title}`);
+    showToast(`Opening in SharePoint: ${c.title}`);
     return;
   }
   // 3. Check publications
   const pub = db.publications.find(item => item.id === id);
-  if (pub && pub.link) {
-    let url = pub.link.trim();
+  if (pub && (pub.sharePointUrl || pub.link)) {
+    let url = (pub.sharePointUrl || pub.link).trim();
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     window.open(url, '_blank');
-    showToast(`Opening publication: ${pub.title}`);
+    showToast(`Opening in SharePoint: ${pub.title}`);
     return;
   }
   // 4. Check digital videos
   const vid = db.videos.find(item => item.id === id);
-  if (vid && vid.videoUrl) {
-    let url = vid.videoUrl.trim();
+  if (vid && (vid.sharePointUrl || vid.videoUrl)) {
+    let url = (vid.sharePointUrl || vid.videoUrl).trim();
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     window.open(url, '_blank');
-    showToast(`Opening video: ${vid.title}`);
+    showToast(`Opening in SharePoint: ${vid.title}`);
+    return;
+  }
+  // 5. Check brand assets or templates
+  const brand = (db.brandAssets || []).find(b => b.id === id);
+  if (brand && (brand.downloadUrl || brand.sharePointUrl)) {
+    let url = (brand.sharePointUrl || brand.downloadUrl).trim();
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+    showToast(`Opening in SharePoint: ${brand.title}`);
+    return;
+  }
+  const temp = (db.templates || []).find(t => t.id === id);
+  if (temp && (temp.downloadUrl || temp.sharePointUrl)) {
+    let url = (temp.sharePointUrl || temp.downloadUrl).trim();
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+    showToast(`Opening in SharePoint: ${temp.title}`);
     return;
   }
   showToast("SharePoint URL not configured for this item.");

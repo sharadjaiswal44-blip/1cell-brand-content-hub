@@ -292,7 +292,8 @@ button, input, select {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);
   z-index: 200;
-  overflow: hidden;
+  max-height: 480px;
+  overflow-y: auto;
   display: none;
 }
 
