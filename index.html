@@ -62,6 +62,14 @@
                 <span class="nav-item-text">Case Library</span>
               </a>
             </li>
+            <li class="nav-item" data-route="report-library">
+              <a>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <span class="nav-item-text">Report Library</span>
+              </a>
+            </li>
             <li class="nav-item" data-route="publications">
               <a>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -370,7 +378,24 @@
           </div>
 
           <div class="form-group">
-                        <label for="editDocContentType">Category / Content Type *</label>
+            <label for="editDocCancer">Cancer Type</label>
+            <select id="editDocCancer">
+              <option value="Pan Cancer">Pan Cancer</option>
+              <option value="Lung Cancer">Lung Cancer</option>
+              <option value="Breast Cancer">Breast Cancer</option>
+              <option value="Colorectal Cancer">Colorectal Cancer</option>
+              <option value="Ovarian Cancer">Ovarian Cancer</option>
+              <option value="Endometrial Cancer">Endometrial Cancer</option>
+              <option value="Prostate Cancer">Prostate Cancer</option>
+              <option value="Gastric Cancer">Gastric Cancer</option>
+              <option value="Melanoma">Melanoma</option>
+              <option value="Hematologic / Blood Cancer">Hematologic / Blood Cancer</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editDocContentType">Category / Content Type *</label>
             <select id="editDocContentType">
               <option value="Brochure">Brochure</option>
               <option value="Case Studies">Case Studies</option>
@@ -452,6 +477,113 @@
     </div>
   </div>
 
+  <!-- Modal: Add New Clinical Sample Report -->
+  <div id="sampleReportModal" class="modal-overlay">
+    <div class="modal-card animate-slide-up" style="max-width: 680px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:34px; height:34px; border-radius:8px; background:rgba(0,120,212,0.12); color:#0078d4; display:flex; align-items:center; justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px;height:20px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin:0;">Register New Sample Report</h3>
+            <p style="font-size:12px; color:var(--text-secondary); margin:2px 0 0 0;">Add official clinical sample test report with verified SharePoint link.</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="sampleReportModalClose">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="sampleReportForm" class="form-grid">
+          <div class="form-group full-width">
+            <label for="srTitle">Sample Report Title *</label>
+            <input type="text" id="srTitle" required placeholder="e.g. OncoIndx® Comprehensive Genomic Profile - Non-Small Cell Lung Carcinoma">
+          </div>
+          <div class="form-group">
+            <label for="srProduct">Product Assay *</label>
+            <select id="srProduct" required>
+              <option value="oncoindx">OncoIndx®</option>
+              <option value="primeplus">OncoIndx® Prime+</option>
+              <option value="oncoindxtbx">OncoIndx® TBx</option>
+              <option value="oncoindx360">OncoIndx® 360° Endometrium</option>
+              <option value="oncotarget">OncoTarget®</option>
+              <option value="oncohrd">OncoHRD®</option>
+              <option value="oncorisk">OncoRisk®</option>
+              <option value="oncomonitor">OncoMonitor®</option>
+              <option value="oncopredikt">OncoPredikt®</option>
+              <option value="oncoctc">OncoCTC®</option>
+              <option value="icore">iCore®</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="srCancerType">Cancer Type *</label>
+            <select id="srCancerType" required>
+              <option value="Lung Cancer">Lung Cancer</option>
+              <option value="Breast Cancer">Breast Cancer</option>
+              <option value="Colorectal Cancer">Colorectal Cancer</option>
+              <option value="Ovarian Cancer">Ovarian Cancer</option>
+              <option value="Endometrial Cancer">Endometrial Cancer</option>
+              <option value="Prostate Cancer">Prostate Cancer</option>
+              <option value="Pan Cancer">Pan Cancer / Solid Tumor</option>
+              <option value="Gastric Cancer">Gastric Cancer</option>
+              <option value="Melanoma">Melanoma</option>
+              <option value="Hematologic / Blood Cancer">Hematologic / Blood Cancer</option>
+              <option value="Other">Other Cancer Type</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="srSharePointUrl" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>SharePoint Document Link *</span>
+              <span style="font-size:10.5px; color:#0078d4; font-weight:600;">SharePoint Online Document URL</span>
+            </label>
+            <input type="url" id="srSharePointUrl" required placeholder="https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/SampleReports/..." value="https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/SampleReports/">
+          </div>
+          <div class="form-group">
+            <label for="srBiomarker">Biomarker / Molecular Target</label>
+            <input type="text" id="srBiomarker" placeholder="e.g. EGFR exon 19 del / TMB-High">
+          </div>
+          <div class="form-group">
+            <label for="srSpecimen">Specimen Type</label>
+            <select id="srSpecimen">
+              <option value="FFPE Tumor Tissue">FFPE Tumor Tissue</option>
+              <option value="Liquid Biopsy (cfDNA / Streck Tube)">Liquid Biopsy (cfDNA / Streck Tube)</option>
+              <option value="Whole Blood (EDTA)">Whole Blood (EDTA)</option>
+              <option value="Fresh Frozen Tissue">Fresh Frozen Tissue</option>
+              <option value="Bone Marrow Aspirate">Bone Marrow Aspirate</option>
+              <option value="Pleural Fluid / Cytology">Pleural Fluid / Cytology</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="srVersion">Version Label</label>
+            <input type="text" id="srVersion" placeholder="v1.0" value="v1.0">
+          </div>
+          <div class="form-group">
+            <label for="srStatus">Status</label>
+            <select id="srStatus">
+              <option value="Approved" selected>Approved</option>
+              <option value="Latest">Latest</option>
+              <option value="Draft">Draft</option>
+              <option value="Internal">Internal</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="srSummary">Clinical Summary / Indication Notes</label>
+            <textarea id="srSummary" rows="2" placeholder="Describe clinical findings, targeted therapy indications, or variant details..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" id="sampleReportModalCancel" type="button">Cancel</button>
+        <button class="btn-primary" id="sampleReportModalSave" type="button">Register Sample Report</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Upload / Create Content Metadata Record -->
   <div id="uploadModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 650px;">
@@ -479,6 +611,7 @@
               <option value="company-assets" selected>Company Assets</option>
               <option value="product-hub">Product Hub</option>
               <option value="case-library">Case Library</option>
+              <option value="report-library">Report Library</option>
               <option value="publications">Publications</option>
               <option value="campaigns">Marketing Campaigns</option>
               <option value="sales-enablement">Sales Enablement</option>
@@ -656,6 +789,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script type="module" src="app.js?v=20260907-v8"></script>
+  <script type="module" src="app.js?v=20260907-v9"></script>
 </body>
 </html>

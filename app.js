@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v8';
+import db from './db.js?v=20260907-v9';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -12,6 +12,7 @@ function hydrateCustomStorage() {
       db.cases = db.cases.filter(c => !delSet.has(c.id));
       db.publications = db.publications.filter(p => !delSet.has(p.id));
       db.videos = db.videos.filter(v => !delSet.has(v.id));
+      db.reports = (db.reports || []).filter(r => !delSet.has(r.id));
     }
 
     const savedDocs = localStorage.getItem('1cell_custom_documents');
@@ -313,6 +314,15 @@ function init() {
     });
   }
 
+  // Sample Report Modal Event Listeners
+  const sampleReportModal = document.getElementById('sampleReportModal');
+  const sampleReportModalClose = document.getElementById('sampleReportModalClose');
+  const sampleReportModalCancel = document.getElementById('sampleReportModalCancel');
+  const sampleReportModalSave = document.getElementById('sampleReportModalSave');
+  if (sampleReportModalClose) sampleReportModalClose.addEventListener('click', () => closeModal(sampleReportModal));
+  if (sampleReportModalCancel) sampleReportModalCancel.addEventListener('click', () => closeModal(sampleReportModal));
+  if (sampleReportModalSave) sampleReportModalSave.addEventListener('click', window.saveNewSampleReport);
+
 
   // Authentication Event Listeners
   if (loginForm) {
@@ -538,6 +548,9 @@ function renderRoute(route) {
       break;
     case 'cases':
       renderCaseLibrary();
+      break;
+    case 'report-library':
+      renderReportLibrary();
       break;
     case 'publications':
       renderPublications();
@@ -1373,6 +1386,263 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
     </div>
   `;
 }
+
+// 4.1. Report Library Route (1Cell.Ai Clinical Sample Reports)
+let reportLibraryProductFilter = 'all';
+let reportLibraryCancerFilter = 'all';
+let reportLibrarySearchQuery = '';
+
+window.setReportFilter = function(filterType, value) {
+  if (filterType === 'product') reportLibraryProductFilter = value;
+  if (filterType === 'cancer') reportLibraryCancerFilter = value;
+  window.updateReportLibraryCards();
+};
+
+window.searchReports = function(query) {
+  reportLibrarySearchQuery = (query || '').toLowerCase().trim();
+  window.updateReportLibraryCards();
+};
+
+window.updateReportLibraryCards = function() {
+  const container = document.getElementById('reportsGridContainer');
+  const countEl = document.getElementById('reportsCountBadge');
+  if (!container) return;
+
+  const allReports = db.reports || [];
+  const filtered = allReports.filter(r => {
+    if (reportLibraryProductFilter !== 'all' && r.product !== reportLibraryProductFilter) return false;
+    if (reportLibraryCancerFilter !== 'all' && r.cancerType !== reportLibraryCancerFilter) return false;
+    if (reportLibrarySearchQuery) {
+      const q = reportLibrarySearchQuery;
+      const matchTitle = (r.title || '').toLowerCase().includes(q);
+      const matchBiomarker = (r.biomarker || '').toLowerCase().includes(q);
+      const matchCancer = (r.cancerType || '').toLowerCase().includes(q);
+      const matchSummary = (r.summary || '').toLowerCase().includes(q);
+      const prodObj = db.products.find(p => p.id === r.product);
+      const matchProd = prodObj && prodObj.name.toLowerCase().includes(q);
+      if (!matchTitle && !matchBiomarker && !matchCancer && !matchSummary && !matchProd) return false;
+    }
+    return true;
+  });
+
+  if (countEl) countEl.innerText = `${filtered.length} Reports Found`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1/-1; text-align:center; padding: 48px 24px; background:var(--bg-secondary); border-radius:var(--radius-lg); border:1px dashed var(--border-color);">
+        <div style="font-size:36px; margin-bottom:12px;">📋</div>
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:6px;">No Sample Reports Matched</h3>
+        <p style="font-size:13px; color:var(--text-secondary); max-width:450px; margin:0 auto 16px;">No sample reports match your search criteria. You can clear filters or register a new clinical report.</p>
+        <div style="display:flex; justify-content:center; gap:10px;">
+          <button class="btn-outline" onclick="window.setReportFilter('product', 'all'); window.setReportFilter('cancer', 'all'); document.getElementById('reportSearchInput').value=''; window.searchReports('');">Clear Filters</button>
+          <button class="btn-primary" onclick="window.triggerAddSampleReportModal('${reportLibraryProductFilter !== 'all' ? reportLibraryProductFilter : 'oncoindx'}', '${reportLibraryCancerFilter !== 'all' ? reportLibraryCancerFilter : 'Lung Cancer'}')">+ Add Sample Report</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(r => {
+    const prod = db.products.find(p => p.id === r.product);
+    const prodName = prod ? prod.name : (r.product ? r.product.toUpperCase() : 'General');
+    return `
+      <div class="doc-card animate-fade-in" style="display:flex; flex-direction:column; justify-content:space-between; position:relative;">
+        <div>
+          <div class="case-card-header" style="display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <span class="badge badge-prod">${prodName}</span>
+                <span class="badge" style="background-color:rgba(14,165,233,0.12); color:#0284c7; font-weight:600;">${r.cancerType}</span>
+              </div>
+              <span class="badge" style="background-color:rgba(16,185,129,0.12); color:#059669; font-weight:600; font-size:10px;">${r.status || 'Approved'}</span>
+            </div>
+            <h3 style="font-size:15.5px; font-weight:700; margin-top:8px; line-height:1.4; color:var(--text-primary); cursor:pointer;" onclick="window.openSharePoint('${r.id}')" title="Click to open report in SharePoint">${r.title}</h3>
+          </div>
+          
+          <div class="card-body" style="padding-top:12px;">
+            <div style="background-color:var(--bg-tertiary); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:12px; font-size:11.5px; border-left:3px solid var(--accent-color);">
+              <div style="margin-bottom:4px;"><strong style="color:var(--text-secondary);">Target / Biomarker:</strong> <span style="font-weight:600; color:var(--text-primary);">${r.biomarker || 'Comprehensive Solid Tumor Profile'}</span></div>
+              <div><strong style="color:var(--text-secondary);">Specimen:</strong> <span style="font-weight:500; color:var(--text-primary);">${r.specimen || 'FFPE Tumor Tissue'}</span></div>
+            </div>
+
+            <div class="case-details-summary" style="font-size:12.5px; line-height:1.5; color:var(--text-secondary); margin-bottom:12px;">
+              ${r.summary || r.description || ''}
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-tertiary); padding-top:8px; border-top:1px solid var(--border-color);">
+              <span>Version: <strong>${r.version || 'v1.0'}</strong> • ${r.size || '3.0 MB'}</span>
+              <span>${r.updatedDate || '2026'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-actions-bar" style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; gap:6px;">
+          <div style="display:flex; gap:6px;">
+            <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="window.openEditAssetModal('${r.id}')" title="Edit SharePoint link or report metadata">
+              Edit Link
+            </button>
+            <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="window.previewDocument('${r.id}')" title="Preview metadata">
+              Preview
+            </button>
+            <button class="btn-outline" style="padding:6px 8px; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="window.deleteAsset('${r.id}')" title="Delete report">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px; height:13px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              </svg>
+            </button>
+          </div>
+          <button class="btn-primary" style="padding:6px 14px; font-size:11px; display:inline-flex; align-items:center; gap:6px;" onclick="window.openSharePoint('${r.id}')" title="Open PDF directly in SharePoint Online">
+            <span>View in SharePoint</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+function renderReportLibrary() {
+  const allReports = db.reports || [];
+  
+  workspaceViewport.innerHTML = `
+    <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+      <div>
+        <h1 class="welcome-title">Clinical Sample Report Library</h1>
+        <p class="welcome-subtitle">Search, view, and manage official 1Cell.Ai clinical NGS & liquid biopsy sample reports with verified SharePoint links.</p>
+      </div>
+      <div class="welcome-banner-actions">
+        <button class="btn-primary" onclick="window.triggerAddSampleReportModal()" style="display:inline-flex; align-items:center; gap:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>+ Add Sample Report</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls Bar -->
+    <div style="background-color:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:14px 18px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; align-items:center;">
+      <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; flex:1; min-width:280px;">
+        <div style="position:relative; min-width:240px; flex:1;">
+          <input type="text" id="reportSearchInput" placeholder="Search reports by biomarker, title, or cancer type..." style="width:100%; height:36px; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0 12px 0 32px; font-size:12.5px; background:var(--bg-primary); color:var(--text-primary);" oninput="window.searchReports(this.value)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px; height:14px; position:absolute; left:10px; top:11px; color:var(--text-tertiary);">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:6px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-secondary); white-space:nowrap;">Product:</label>
+          <select id="reportProductFilter" style="height:36px; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0 8px; font-size:12px; background:var(--bg-primary); color:var(--text-primary);" onchange="window.setReportFilter('product', this.value)">
+            <option value="all">All Products</option>
+            ${db.products.map(p => `<option value="${p.id}" ${reportLibraryProductFilter === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
+          </select>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:6px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-secondary); white-space:nowrap;">Cancer Type:</label>
+          <select id="reportCancerFilter" style="height:36px; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0 8px; font-size:12px; background:var(--bg-primary); color:var(--text-primary);" onchange="window.setReportFilter('cancer', this.value)">
+            <option value="all">All Cancer Types</option>
+            <option value="Lung Cancer" ${reportLibraryCancerFilter === 'Lung Cancer' ? 'selected' : ''}>Lung Cancer</option>
+            <option value="Breast Cancer" ${reportLibraryCancerFilter === 'Breast Cancer' ? 'selected' : ''}>Breast Cancer</option>
+            <option value="Colorectal Cancer" ${reportLibraryCancerFilter === 'Colorectal Cancer' ? 'selected' : ''}>Colorectal Cancer</option>
+            <option value="Ovarian Cancer" ${reportLibraryCancerFilter === 'Ovarian Cancer' ? 'selected' : ''}>Ovarian Cancer</option>
+            <option value="Endometrial Cancer" ${reportLibraryCancerFilter === 'Endometrial Cancer' ? 'selected' : ''}>Endometrial Cancer</option>
+            <option value="Prostate Cancer" ${reportLibraryCancerFilter === 'Prostate Cancer' ? 'selected' : ''}>Prostate Cancer</option>
+            <option value="Pan Cancer" ${reportLibraryCancerFilter === 'Pan Cancer' ? 'selected' : ''}>Pan Cancer / Solid Tumors</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="reportsCountBadge" style="font-size:12px; font-weight:600; color:var(--text-secondary); background:var(--bg-tertiary); padding:6px 12px; border-radius:20px;">
+        ${allReports.length} Reports
+      </div>
+    </div>
+
+    <!-- Reports Grid Container -->
+    <div class="assets-grid" id="reportsGridContainer"></div>
+  `;
+
+  window.updateReportLibraryCards();
+}
+
+// Function to trigger Add Sample Report Modal
+window.triggerAddSampleReportModal = function(defaultProduct, defaultCancer) {
+  const form = document.getElementById('sampleReportForm');
+  if (form) form.reset();
+  
+  if (defaultProduct) {
+    const prodEl = document.getElementById('srProduct');
+    if (prodEl) prodEl.value = defaultProduct;
+  }
+  if (defaultCancer) {
+    const cancerEl = document.getElementById('srCancerType');
+    if (cancerEl) cancerEl.value = defaultCancer;
+  }
+
+  const modal = document.getElementById('sampleReportModal');
+  if (modal) openModal(modal);
+};
+
+// Function to save new Sample Report
+window.saveNewSampleReport = function() {
+  const title = document.getElementById('srTitle').value.trim();
+  const product = document.getElementById('srProduct').value;
+  const cancerType = document.getElementById('srCancerType').value;
+  let sharePointUrl = document.getElementById('srSharePointUrl').value.trim();
+  const biomarker = document.getElementById('srBiomarker').value.trim();
+  const specimen = document.getElementById('srSpecimen').value;
+  const version = document.getElementById('srVersion').value.trim() || 'v1.0';
+  const status = document.getElementById('srStatus').value;
+  const summary = document.getElementById('srSummary').value.trim();
+
+  if (!title || !sharePointUrl) {
+    showToast("Report Title and SharePoint Document URL are required!");
+    return;
+  }
+
+  if (!/^https?:\/\//i.test(sharePointUrl)) {
+    sharePointUrl = 'https://' + sharePointUrl;
+  }
+
+  const newReport = {
+    id: `report-${Date.now()}`,
+    title,
+    product,
+    cancerType,
+    biomarker: biomarker || 'Comprehensive Genomic Target',
+    specimen: specimen || 'FFPE Tumor Tissue',
+    status,
+    version,
+    createdDate: new Date().toISOString().split('T')[0],
+    updatedDate: new Date().toISOString().split('T')[0],
+    author: sessionStorage.getItem('authUser') || 'Clinical Genomics Laboratory',
+    department: 'Medical',
+    summary: summary || `Clinical diagnostic test report for ${cancerType} using ${product}.`,
+    sharePointUrl,
+    folderPath: `Shared Documents/Report Library/${cancerType}`,
+    size: '3.0 MB',
+    viewCount: 1
+  };
+
+  if (!db.reports) db.reports = [];
+  db.reports.unshift(newReport);
+
+  try {
+    localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
+  } catch (e) {
+    console.warn('LocalStorage save failed:', e);
+  }
+
+  const modal = document.getElementById('sampleReportModal');
+  if (modal) closeModal(modal);
+
+  showToast(`Successfully registered sample report: "${title}"`);
+  
+  // Re-render report library view
+  renderReportLibrary();
+};
+
 
 // 5. Publications Route
 function renderPublications() {
@@ -2233,7 +2503,7 @@ function handleSearchInput(e) {
 
 // 14. Preview Document Modal logic
 window.previewDocument = function(docId) {
-  const doc = db.documents.find(d => d.id === docId) || db.newsletters.find(n => n.id === docId);
+  const doc = db.documents.find(d => d.id === docId) || db.newsletters.find(n => n.id === docId) || (db.reports || []).find(r => r.id === docId);
   if (!doc) return;
 
   // Track recent viewed item
@@ -2276,7 +2546,36 @@ window.previewDocument = function(docId) {
   previewRelationTag.innerText = recTagsHtml;
 
   // Render mock preview content
-  if (doc.contentType === 'Brochure' || doc.contentType === 'One Pager' || doc.contentType === 'Whitepaper' || doc.contentType === 'Clinical Evidence' || doc.contentType === 'FAQ') {
+  if (doc.id && doc.id.startsWith('report-')) {
+    previewContentDisplay.innerHTML = `
+      <div class="mock-pdf-page">
+        <div class="mock-pdf-header">
+          <span class="mock-pdf-logo">1Cell.Ai Clinical Genomics Laboratory</span>
+          <span style="font-size:9px; color:#0078d4; font-weight:700;">OFFICIAL CLINICAL SAMPLE REPORT</span>
+        </div>
+        <h2 class="mock-pdf-title" style="font-size:18px;">${doc.title}</h2>
+        <div style="display:flex; justify-content:space-between; margin-bottom:14px; font-size:11px; background:var(--bg-tertiary); padding:8px 12px; border-radius:6px; flex-wrap:wrap; gap:6px;">
+          <span><strong>Product:</strong> ${doc.product ? doc.product.toUpperCase() : '1Cell NGS'}</span>
+          <span><strong>Cancer Type:</strong> ${doc.cancerType || 'Solid Tumor'}</span>
+          <span><strong>Specimen:</strong> ${doc.specimen || 'FFPE Tissue'}</span>
+        </div>
+        
+        <div class="mock-pdf-section-title">Genomic Findings & Target Biomarkers</div>
+        <div style="font-size:12px; padding:10px 12px; background:rgba(0,120,212,0.08); border-left:3px solid #0078d4; border-radius:4px; margin-bottom:14px;">
+          <strong>Target Result:</strong> ${doc.biomarker || 'Actionable Alteration Identified'}
+        </div>
+
+        <div class="mock-pdf-section-title">Clinical Diagnostic Summary</div>
+        <p style="font-size:12px; line-height:1.6; margin-bottom:16px;">${doc.summary || doc.description}</p>
+
+        <div style="margin-top:20px; text-align:center;">
+          <button class="btn-primary" onclick="window.open('${doc.sharePointUrl}', '_blank')" style="padding:8px 20px;">
+            Open Complete Report in SharePoint Online
+          </button>
+        </div>
+      </div>
+    `;
+  } else if (doc.contentType === 'Brochure' || doc.contentType === 'One Pager' || doc.contentType === 'Whitepaper' || doc.contentType === 'Clinical Evidence' || doc.contentType === 'FAQ') {
     // Mock PDF layout
     previewContentDisplay.innerHTML = `
       <div class="mock-pdf-page">
@@ -2365,7 +2664,7 @@ window.previewDocument = function(docId) {
 
 // Inspect SharePoint details modal
 window.inspectSharepoint = function(docId) {
-  const doc = db.documents.find(d => d.id === docId) || db.newsletters.find(n => n.id === docId);
+  const doc = db.documents.find(d => d.id === docId) || db.newsletters.find(n => n.id === docId) || (db.reports || []).find(r => r.id === docId);
   if (!doc) return;
 
   spMetadataDetails.innerHTML = `
@@ -2523,7 +2822,31 @@ function handleMockUpload(e) {
   db.documents.unshift(newDoc);
 
   // Sync to respective sub-array to ensure rendering works instantly in specific categories:
-  if (category === 'case-library') {
+  if (category === 'report-library') {
+    if (!db.reports) db.reports = [];
+    db.reports.unshift({
+      id: `report-${Date.now()}`,
+      title,
+      product: product || 'oncoindx',
+      cancerType: cancerType || 'Pan Cancer',
+      biomarker: biomarker || 'Comprehensive Solid Tumor Profile',
+      specimen: 'FFPE Tumor Tissue',
+      status: status || 'Approved',
+      version: version || 'v1.0',
+      createdDate: new Date().toISOString().split('T')[0],
+      updatedDate: new Date().toISOString().split('T')[0],
+      author,
+      department,
+      summary: description,
+      sharePointUrl,
+      folderPath: `Shared Documents/Report Library/${cancerType}`,
+      size,
+      viewCount: 1
+    });
+    try {
+      localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
+    } catch (e) {}
+  } else if (category === 'case-library') {
     db.cases.unshift({
       id: `case-${Date.now()}`,
       title,
@@ -2993,6 +3316,15 @@ window.resetQuizFlow = function() {
 // Universal SharePoint Link Opener & Redirector
 window.openSharePoint = function(id) {
   if (!id) return;
+  // 0. Check clinical sample reports
+  const rep = (db.reports || []).find(r => r.id === id);
+  if (rep && rep.sharePointUrl) {
+    let url = rep.sharePointUrl.trim();
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+    showToast(`Redirecting to SharePoint: ${rep.title}`);
+    return;
+  }
   // 1. Check documents or newsletters
   const doc = db.documents.find(d => d.id === id) || db.newsletters.find(n => n.id === id);
   if (doc && doc.sharePointUrl) {
@@ -3045,6 +3377,8 @@ window.deleteAsset = function(id) {
   if (pub) itemTitle = pub.title;
   const vid = db.videos.find(item => item.id === id);
   if (vid) itemTitle = vid.title;
+  const rep = (db.reports || []).find(r => r.id === id);
+  if (rep) itemTitle = rep.title;
 
   if (!confirm(`Are you sure you want to remove "${itemTitle}"? This will delete the content card.`)) {
     return;
@@ -3083,6 +3417,15 @@ window.deleteAsset = function(id) {
     db.videos.splice(vidIdx, 1);
     try {
       localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
+    } catch (e) {}
+  }
+
+  // Delete from db.reports
+  const repIdx = (db.reports || []).findIndex(r => r.id === id);
+  if (repIdx >= 0) {
+    db.reports.splice(repIdx, 1);
+    try {
+      localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
     } catch (e) {}
   }
 
@@ -3128,6 +3471,8 @@ window.openEditAssetModal = function(id) {
     document.getElementById('editDocVersion').value = doc.version || 'v1.0';
     document.getElementById('editDocStatus').value = doc.status || 'Approved';
     document.getElementById('editDocDesc').value = doc.description || '';
+    const cancerEl = document.getElementById('editDocCancer');
+    if (cancerEl) cancerEl.value = doc.cancerType || 'Pan Cancer';
   } else {
     // Check if case study
     const c = db.cases.find(item => item.id === id);
@@ -3173,6 +3518,24 @@ window.openEditAssetModal = function(id) {
           document.getElementById('editDocVersion').value = 'v1.0';
           document.getElementById('editDocStatus').value = 'Approved';
           document.getElementById('editDocDesc').value = vid.description || '';
+        } else {
+          // Check if clinical sample report
+          const rep = (db.reports || []).find(r => r.id === id);
+          if (rep) {
+            document.getElementById('editDocId').value = rep.id;
+            document.getElementById('editItemType').value = 'report';
+            document.getElementById('editDocTitle').value = rep.title || '';
+            document.getElementById('editDocSpUrl').value = rep.sharePointUrl || '';
+            document.getElementById('editDocFolderPath').value = rep.folderPath || `Shared Documents/Report Library/${rep.cancerType || 'Clinical'}`;
+            document.getElementById('editDocProduct').value = rep.product || '';
+            document.getElementById('editDocContentType').value = 'Others';
+            const cancerEl = document.getElementById('editDocCancer');
+            if (cancerEl) cancerEl.value = rep.cancerType || 'Pan Cancer';
+            document.getElementById('editDocDept').value = 'Medical';
+            document.getElementById('editDocVersion').value = rep.version || 'v1.0';
+            document.getElementById('editDocStatus').value = rep.status || 'Approved';
+            document.getElementById('editDocDesc').value = rep.summary || rep.description || '';
+          }
         }
       }
     }
@@ -3216,6 +3579,8 @@ window.saveAssetEdit = function() {
       doc.version = version;
       doc.status = status;
       doc.description = desc;
+      const cancerEl = document.getElementById('editDocCancer');
+      if (cancerEl) doc.cancerType = cancerEl.value;
       doc.updatedDate = new Date().toISOString().split('T')[0];
 
       try {
@@ -3255,6 +3620,23 @@ window.saveAssetEdit = function() {
       vid.description = desc || vid.description;
       try {
         localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
+      } catch (e) {}
+    }
+  } else if (itemType === 'report') {
+    const rep = (db.reports || []).find(r => r.id === id);
+    if (rep) {
+      rep.title = title;
+      rep.sharePointUrl = spUrl;
+      rep.folderPath = folderPath || rep.folderPath;
+      rep.product = product || rep.product;
+      const cancerEl = document.getElementById('editDocCancer');
+      if (cancerEl) rep.cancerType = cancerEl.value;
+      rep.summary = desc || rep.summary;
+      rep.version = version || rep.version;
+      rep.status = status || rep.status;
+      rep.updatedDate = new Date().toISOString().split('T')[0];
+      try {
+        localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
       } catch (e) {}
     }
   }
