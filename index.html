@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>1Cell.Ai Content Hub</title>
-  <link rel="stylesheet" href="styles.css?v=20260907-v16">
+  <link rel="stylesheet" href="styles.css?v=20260907-v17">
 </head>
 <body>
   <div class="app-container">
@@ -381,18 +381,68 @@
           <div class="form-group">
             <label for="editDocCancer">Cancer Type</label>
             <select id="editDocCancer">
-              <option value="None">None</option>
-              <option value="Pan Cancer">Pan Cancer</option>
-              <option value="Lung Cancer">Lung Cancer</option>
-              <option value="Breast Cancer">Breast Cancer</option>
+              <option value="None" selected>None</option>
               <option value="Colorectal Cancer">Colorectal Cancer</option>
-              <option value="Ovarian Cancer">Ovarian Cancer</option>
+              <option value="Lung Cancer">Lung Cancer</option>
+              <option value="Non specific Cancer">Non specific Cancer</option>
+              <option value="Breast Cancer">Breast Cancer</option>
+              <option value="Pancreas Cancer">Pancreas Cancer</option>
+              <option value="Head & Neck Cancer">Head & Neck Cancer</option>
+              <option value="Liver Cancer">Liver Cancer</option>
+              <option value="Ovary Cancer">Ovary Cancer</option>
+              <option value="Stomach Cancer">Stomach Cancer</option>
+              <option value="Hepatobiliary Cancer">Hepatobiliary Cancer</option>
               <option value="Endometrial Cancer">Endometrial Cancer</option>
+              <option value="Gall Bladder Cancer">Gall Bladder Cancer</option>
               <option value="Prostate Cancer">Prostate Cancer</option>
-              <option value="Gastric Cancer">Gastric Cancer</option>
-              <option value="Melanoma">Melanoma</option>
-              <option value="Hematologic / Blood Cancer">Hematologic / Blood Cancer</option>
-              <option value="Other">Other</option>
+              <option value="Urothelial Cancer">Urothelial Cancer</option>
+              <option value="Melanoma Cancer">Melanoma Cancer</option>
+              <option value="Gastrointestinal Cancer">Gastrointestinal Cancer</option>
+              <option value="Oral Cancer">Oral Cancer</option>
+              <option value="Renal Cancer">Renal Cancer</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editDocBiomarker">Biomarkers / Mutations</label>
+            <select id="editDocBiomarker">
+              <option value="None" selected>None</option>
+              <option value="CTC">CTC</option>
+              <option value="ctDNA">ctDNA</option>
+              <option value="EGFR">EGFR</option>
+              <option value="ERBB2">ERBB2</option>
+              <option value="TP53">TP53</option>
+              <option value="cDNA">cDNA</option>
+              <option value="PTEN">PTEN</option>
+              <option value="PIK3CA">PIK3CA</option>
+              <option value="PDLI">PDLI</option>
+              <option value="HRD">HRD</option>
+              <option value="BRCA1/2">BRCA1/2</option>
+              <option value="HRRI">HRRI</option>
+              <option value="MSI">MSI</option>
+              <option value="MMR">MMR</option>
+              <option value="MSH2">MSH2</option>
+              <option value="Lynch Syndrome">Lynch Syndrome</option>
+              <option value="PGx">PGx</option>
+              <option value="KRAS">KRAS</option>
+              <option value="DPYD">DPYD</option>
+              <option value="TYMS">TYMS</option>
+              <option value="UGTIAT">UGTIAT</option>
+              <option value="TMB">TMB</option>
+              <option value="BRAF">BRAF</option>
+              <option value="APC">APC</option>
+              <option value="DNA">DNA</option>
+              <option value="NFT">NFT</option>
+              <option value="STKTT">STKTT</option>
+              <option value="NOTCH1/2">NOTCH1/2</option>
+              <option value="PARP">PARP</option>
+              <option value="ATM">ATM</option>
+              <option value="ARIDIA/B">ARIDIA/B</option>
+              <option value="IDHTI">IDHTI</option>
+              <option value="CCND1/2">CCND1/2</option>
+              <option value="PALB2">PALB2</option>
+              <option value="ESRI">ESRI</option>
+              <option value="HER2">HER2</option>
             </select>
           </div>
 
@@ -532,17 +582,24 @@
             <label for="srCancerType">Cancer Type *</label>
             <select id="srCancerType" required>
               <option value="None" selected>None</option>
-              <option value="Lung Cancer">Lung Cancer</option>
-              <option value="Breast Cancer">Breast Cancer</option>
               <option value="Colorectal Cancer">Colorectal Cancer</option>
-              <option value="Ovarian Cancer">Ovarian Cancer</option>
+              <option value="Lung Cancer">Lung Cancer</option>
+              <option value="Non specific Cancer">Non specific Cancer</option>
+              <option value="Breast Cancer">Breast Cancer</option>
+              <option value="Pancreas Cancer">Pancreas Cancer</option>
+              <option value="Head & Neck Cancer">Head & Neck Cancer</option>
+              <option value="Liver Cancer">Liver Cancer</option>
+              <option value="Ovary Cancer">Ovary Cancer</option>
+              <option value="Stomach Cancer">Stomach Cancer</option>
+              <option value="Hepatobiliary Cancer">Hepatobiliary Cancer</option>
               <option value="Endometrial Cancer">Endometrial Cancer</option>
+              <option value="Gall Bladder Cancer">Gall Bladder Cancer</option>
               <option value="Prostate Cancer">Prostate Cancer</option>
-              <option value="Pan Cancer">Pan Cancer / Solid Tumor</option>
-              <option value="Gastric Cancer">Gastric Cancer</option>
-              <option value="Melanoma">Melanoma</option>
-              <option value="Hematologic / Blood Cancer">Hematologic / Blood Cancer</option>
-              <option value="Other">Other Cancer Type</option>
+              <option value="Urothelial Cancer">Urothelial Cancer</option>
+              <option value="Melanoma Cancer">Melanoma Cancer</option>
+              <option value="Gastrointestinal Cancer">Gastrointestinal Cancer</option>
+              <option value="Oral Cancer">Oral Cancer</option>
+              <option value="Renal Cancer">Renal Cancer</option>
             </select>
           </div>
           <div class="form-group full-width">
@@ -553,8 +610,46 @@
             <input type="url" id="srSharePointUrl" required placeholder="https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/SampleReports/..." value="https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/SampleReports/">
           </div>
           <div class="form-group">
-            <label for="srBiomarker">Biomarker / Molecular Target</label>
-            <input type="text" id="srBiomarker" placeholder="e.g. EGFR exon 19 del / TMB-High">
+            <label for="srBiomarker">Biomarkers / Mutations</label>
+            <select id="srBiomarker">
+              <option value="None" selected>None</option>
+              <option value="CTC">CTC</option>
+              <option value="ctDNA">ctDNA</option>
+              <option value="EGFR">EGFR</option>
+              <option value="ERBB2">ERBB2</option>
+              <option value="TP53">TP53</option>
+              <option value="cDNA">cDNA</option>
+              <option value="PTEN">PTEN</option>
+              <option value="PIK3CA">PIK3CA</option>
+              <option value="PDLI">PDLI</option>
+              <option value="HRD">HRD</option>
+              <option value="BRCA1/2">BRCA1/2</option>
+              <option value="HRRI">HRRI</option>
+              <option value="MSI">MSI</option>
+              <option value="MMR">MMR</option>
+              <option value="MSH2">MSH2</option>
+              <option value="Lynch Syndrome">Lynch Syndrome</option>
+              <option value="PGx">PGx</option>
+              <option value="KRAS">KRAS</option>
+              <option value="DPYD">DPYD</option>
+              <option value="TYMS">TYMS</option>
+              <option value="UGTIAT">UGTIAT</option>
+              <option value="TMB">TMB</option>
+              <option value="BRAF">BRAF</option>
+              <option value="APC">APC</option>
+              <option value="DNA">DNA</option>
+              <option value="NFT">NFT</option>
+              <option value="STKTT">STKTT</option>
+              <option value="NOTCH1/2">NOTCH1/2</option>
+              <option value="PARP">PARP</option>
+              <option value="ATM">ATM</option>
+              <option value="ARIDIA/B">ARIDIA/B</option>
+              <option value="IDHTI">IDHTI</option>
+              <option value="CCND1/2">CCND1/2</option>
+              <option value="PALB2">PALB2</option>
+              <option value="ESRI">ESRI</option>
+              <option value="HER2">HER2</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="srSpecimen">Specimen Type</label>
@@ -708,28 +803,65 @@
             <label for="formCancer">Cancer Type</label>
             <select id="formCancer">
               <option value="None" selected>None</option>
-              <option value="Pan Cancer">Pan Cancer</option>
-              <option value="Breast Cancer">Breast Cancer</option>
-              <option value="Lung Cancer">Lung Cancer</option>
               <option value="Colorectal Cancer">Colorectal Cancer</option>
-              <option value="Ovarian Cancer">Ovarian Cancer</option>
+              <option value="Lung Cancer">Lung Cancer</option>
+              <option value="Non specific Cancer">Non specific Cancer</option>
+              <option value="Breast Cancer">Breast Cancer</option>
+              <option value="Pancreas Cancer">Pancreas Cancer</option>
+              <option value="Head & Neck Cancer">Head & Neck Cancer</option>
+              <option value="Liver Cancer">Liver Cancer</option>
+              <option value="Ovary Cancer">Ovary Cancer</option>
+              <option value="Stomach Cancer">Stomach Cancer</option>
+              <option value="Hepatobiliary Cancer">Hepatobiliary Cancer</option>
               <option value="Endometrial Cancer">Endometrial Cancer</option>
+              <option value="Gall Bladder Cancer">Gall Bladder Cancer</option>
               <option value="Prostate Cancer">Prostate Cancer</option>
-              <option value="Gastric Cancer">Gastric Cancer</option>
-              <option value="Melanoma">Melanoma</option>
-              <option value="Hematologic / Blood Cancer">Hematologic / Blood Cancer</option>
-              <option value="Other">Other</option>
+              <option value="Urothelial Cancer">Urothelial Cancer</option>
+              <option value="Melanoma Cancer">Melanoma Cancer</option>
+              <option value="Gastrointestinal Cancer">Gastrointestinal Cancer</option>
+              <option value="Oral Cancer">Oral Cancer</option>
+              <option value="Renal Cancer">Renal Cancer</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="formBiomarker">Biomarker Tag</label>
+            <label for="formBiomarker">Biomarkers / Mutations</label>
             <select id="formBiomarker">
-              <option value="">None</option>
-              <option value="MSI">MSI</option>
+              <option value="None" selected>None</option>
+              <option value="CTC">CTC</option>
+              <option value="ctDNA">ctDNA</option>
+              <option value="EGFR">EGFR</option>
+              <option value="ERBB2">ERBB2</option>
+              <option value="TP53">TP53</option>
+              <option value="cDNA">cDNA</option>
+              <option value="PTEN">PTEN</option>
+              <option value="PIK3CA">PIK3CA</option>
+              <option value="PDLI">PDLI</option>
               <option value="HRD">HRD</option>
-              <option value="BRCA">BRCA</option>
-              <option value="PD-L1">PD-L1</option>
+              <option value="BRCA1/2">BRCA1/2</option>
+              <option value="HRRI">HRRI</option>
+              <option value="MSI">MSI</option>
+              <option value="MMR">MMR</option>
+              <option value="MSH2">MSH2</option>
+              <option value="Lynch Syndrome">Lynch Syndrome</option>
+              <option value="PGx">PGx</option>
+              <option value="KRAS">KRAS</option>
+              <option value="DPYD">DPYD</option>
+              <option value="TYMS">TYMS</option>
+              <option value="UGTIAT">UGTIAT</option>
               <option value="TMB">TMB</option>
+              <option value="BRAF">BRAF</option>
+              <option value="APC">APC</option>
+              <option value="DNA">DNA</option>
+              <option value="NFT">NFT</option>
+              <option value="STKTT">STKTT</option>
+              <option value="NOTCH1/2">NOTCH1/2</option>
+              <option value="PARP">PARP</option>
+              <option value="ATM">ATM</option>
+              <option value="ARIDIA/B">ARIDIA/B</option>
+              <option value="IDHTI">IDHTI</option>
+              <option value="CCND1/2">CCND1/2</option>
+              <option value="PALB2">PALB2</option>
+              <option value="ESRI">ESRI</option>
               <option value="HER2">HER2</option>
             </select>
           </div>
@@ -805,6 +937,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script type="module" src="app.js?v=20260907-v16"></script>
+  <script type="module" src="app.js?v=20260907-v17"></script>
 </body>
 </html>

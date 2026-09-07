@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v16';
+import db from './db.js?v=20260907-v17';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -698,10 +698,14 @@ window.triggerRegisterAssetModal = function(routeName) {
     }
   }
 
-  // Ensure default Cancer Type is None and Owner is 1Cell.Ai
+  // Ensure default Cancer Type is None, Biomarker is None, and Owner is 1Cell.Ai
   const cancerSelect = document.getElementById('formCancer');
   if (cancerSelect) {
     cancerSelect.value = 'None';
+  }
+  const biomarkerSelect = document.getElementById('formBiomarker');
+  if (biomarkerSelect) {
+    biomarkerSelect.value = 'None';
   }
   const authorInput = document.getElementById('formAuthor');
   if (authorInput) {
@@ -1373,10 +1377,14 @@ window.triggerRegisterProductAsset = function(prodId, categoryTab) {
     formSpUrl.value = `https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/${prodFolder}/`;
   }
 
-  // Ensure default Cancer Type is None and Owner is 1Cell.Ai
+  // Ensure default Cancer Type is None, Biomarker is None, and Owner is 1Cell.Ai
   const formCancer = document.getElementById('formCancer');
   if (formCancer) {
     formCancer.value = 'None';
+  }
+  const formBiomarker = document.getElementById('formBiomarker');
+  if (formBiomarker) {
+    formBiomarker.value = 'None';
   }
   const formAuthor = document.getElementById('formAuthor');
   if (formAuthor) {
@@ -1449,7 +1457,12 @@ window.updateReportLibraryCards = function() {
   const allReports = db.reports || [];
   const filtered = allReports.filter(r => {
     if (reportLibraryProductFilter !== 'all' && r.product !== reportLibraryProductFilter) return false;
-    if (reportLibraryCancerFilter !== 'all' && r.cancerType !== reportLibraryCancerFilter) return false;
+    if (reportLibraryCancerFilter !== 'all') {
+      if (!r.cancerType) return false;
+      const rc = r.cancerType.toLowerCase();
+      const fc = reportLibraryCancerFilter.toLowerCase();
+      if (rc !== fc && !rc.includes(fc.replace(' cancer', '')) && !fc.includes(rc.replace(' cancer', ''))) return false;
+    }
     if (reportLibrarySearchQuery) {
       const q = reportLibrarySearchQuery;
       const matchTitle = (r.title || '').toLowerCase().includes(q);
@@ -1582,13 +1595,24 @@ function renderReportLibrary() {
           <select id="reportCancerFilter" style="height:36px; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0 8px; font-size:12px; background:var(--bg-primary); color:var(--text-primary);" onchange="window.setReportFilter('cancer', this.value)">
             <option value="all">All Cancer Types</option>
             <option value="None" ${reportLibraryCancerFilter === 'None' ? 'selected' : ''}>None</option>
-            <option value="Lung Cancer" ${reportLibraryCancerFilter === 'Lung Cancer' ? 'selected' : ''}>Lung Cancer</option>
-            <option value="Breast Cancer" ${reportLibraryCancerFilter === 'Breast Cancer' ? 'selected' : ''}>Breast Cancer</option>
             <option value="Colorectal Cancer" ${reportLibraryCancerFilter === 'Colorectal Cancer' ? 'selected' : ''}>Colorectal Cancer</option>
-            <option value="Ovarian Cancer" ${reportLibraryCancerFilter === 'Ovarian Cancer' ? 'selected' : ''}>Ovarian Cancer</option>
+            <option value="Lung Cancer" ${reportLibraryCancerFilter === 'Lung Cancer' ? 'selected' : ''}>Lung Cancer</option>
+            <option value="Non specific Cancer" ${reportLibraryCancerFilter === 'Non specific Cancer' ? 'selected' : ''}>Non specific Cancer</option>
+            <option value="Breast Cancer" ${reportLibraryCancerFilter === 'Breast Cancer' ? 'selected' : ''}>Breast Cancer</option>
+            <option value="Pancreas Cancer" ${reportLibraryCancerFilter === 'Pancreas Cancer' ? 'selected' : ''}>Pancreas Cancer</option>
+            <option value="Head & Neck Cancer" ${reportLibraryCancerFilter === 'Head & Neck Cancer' ? 'selected' : ''}>Head & Neck Cancer</option>
+            <option value="Liver Cancer" ${reportLibraryCancerFilter === 'Liver Cancer' ? 'selected' : ''}>Liver Cancer</option>
+            <option value="Ovary Cancer" ${reportLibraryCancerFilter === 'Ovary Cancer' ? 'selected' : ''}>Ovary Cancer</option>
+            <option value="Stomach Cancer" ${reportLibraryCancerFilter === 'Stomach Cancer' ? 'selected' : ''}>Stomach Cancer</option>
+            <option value="Hepatobiliary Cancer" ${reportLibraryCancerFilter === 'Hepatobiliary Cancer' ? 'selected' : ''}>Hepatobiliary Cancer</option>
             <option value="Endometrial Cancer" ${reportLibraryCancerFilter === 'Endometrial Cancer' ? 'selected' : ''}>Endometrial Cancer</option>
+            <option value="Gall Bladder Cancer" ${reportLibraryCancerFilter === 'Gall Bladder Cancer' ? 'selected' : ''}>Gall Bladder Cancer</option>
             <option value="Prostate Cancer" ${reportLibraryCancerFilter === 'Prostate Cancer' ? 'selected' : ''}>Prostate Cancer</option>
-            <option value="Pan Cancer" ${reportLibraryCancerFilter === 'Pan Cancer' ? 'selected' : ''}>Pan Cancer / Solid Tumors</option>
+            <option value="Urothelial Cancer" ${reportLibraryCancerFilter === 'Urothelial Cancer' ? 'selected' : ''}>Urothelial Cancer</option>
+            <option value="Melanoma Cancer" ${reportLibraryCancerFilter === 'Melanoma Cancer' ? 'selected' : ''}>Melanoma Cancer</option>
+            <option value="Gastrointestinal Cancer" ${reportLibraryCancerFilter === 'Gastrointestinal Cancer' ? 'selected' : ''}>Gastrointestinal Cancer</option>
+            <option value="Oral Cancer" ${reportLibraryCancerFilter === 'Oral Cancer' ? 'selected' : ''}>Oral Cancer</option>
+            <option value="Renal Cancer" ${reportLibraryCancerFilter === 'Renal Cancer' ? 'selected' : ''}>Renal Cancer</option>
           </select>
         </div>
       </div>
@@ -1619,6 +1643,11 @@ window.triggerAddSampleReportModal = function(defaultProduct, defaultCancer) {
     cancerEl.value = defaultCancer || 'None';
   }
 
+  const bioEl = document.getElementById('srBiomarker');
+  if (bioEl) {
+    bioEl.value = 'None';
+  }
+
   const authorEl = document.getElementById('srAuthor');
   if (authorEl) {
     authorEl.value = '1Cell.Ai';
@@ -1634,7 +1663,7 @@ window.saveNewSampleReport = function() {
   const product = document.getElementById('srProduct').value;
   const cancerType = document.getElementById('srCancerType').value || 'None';
   let sharePointUrl = document.getElementById('srSharePointUrl').value.trim();
-  const biomarker = document.getElementById('srBiomarker').value.trim();
+  const biomarker = (document.getElementById('srBiomarker').value || 'None').trim();
   const specimen = document.getElementById('srSpecimen').value;
   const authorEl = document.getElementById('srAuthor');
   const author = (authorEl ? authorEl.value.trim() : '') || '1Cell.Ai';
@@ -1656,7 +1685,7 @@ window.saveNewSampleReport = function() {
     title,
     product,
     cancerType,
-    biomarker: biomarker || 'Comprehensive Genomic Target',
+    biomarker: biomarker || 'None',
     specimen: specimen || 'FFPE Tumor Tissue',
     status,
     version,
@@ -2203,7 +2232,7 @@ function triggerSearchHub(query = '') {
         <div class="filter-group">
           <span class="filter-group-label">Cancer Type</span>
           <div class="filter-options-list">
-            ${['Breast', 'Lung', 'Colorectal', 'Ovarian', 'Endometrium', 'Pan Cancer'].map(c => `
+            ${['Colorectal Cancer', 'Lung Cancer', 'Non specific Cancer', 'Breast Cancer', 'Pancreas Cancer', 'Head & Neck Cancer', 'Liver Cancer', 'Ovary Cancer', 'Stomach Cancer', 'Hepatobiliary Cancer', 'Endometrial Cancer', 'Gall Bladder Cancer', 'Prostate Cancer', 'Urothelial Cancer', 'Melanoma Cancer', 'Gastrointestinal Cancer', 'Oral Cancer', 'Renal Cancer'].map(c => `
               <label class="filter-checkbox-label">
                 <input type="checkbox" data-filter="cancerType" value="${c}" ${activeFilters.cancerType.includes(c) ? 'checked' : ''} onchange="window.updateFilterState()">
                 ${c}
@@ -2216,7 +2245,7 @@ function triggerSearchHub(query = '') {
         <div class="filter-group">
           <span class="filter-group-label">Biomarkers</span>
           <div class="filter-options-list">
-            ${['MSI', 'HRD', 'BRCA', 'PD-L1', 'TMB', 'HER2'].map(b => `
+            ${['CTC', 'ctDNA', 'EGFR', 'ERBB2', 'TP53', 'cDNA', 'PTEN', 'PIK3CA', 'PDLI', 'HRD', 'BRCA1/2', 'HRRI', 'MSI', 'MMR', 'MSH2', 'Lynch Syndrome', 'PGx', 'KRAS', 'DPYD', 'TYMS', 'UGTIAT', 'TMB', 'BRAF', 'APC', 'DNA', 'NFT', 'STKTT', 'NOTCH1/2', 'PARP', 'ATM', 'ARIDIA/B', 'IDHTI', 'CCND1/2', 'PALB2', 'ESRI', 'HER2'].map(b => `
               <label class="filter-checkbox-label">
                 <input type="checkbox" data-filter="biomarker" value="${b}" ${activeFilters.biomarker.includes(b) ? 'checked' : ''} onchange="window.updateFilterState()">
                 ${b}
@@ -2574,12 +2603,26 @@ window.updateFilterState = function() {
       return false;
     }
     // 5. Cancer Type filter
-    if (activeFilters.cancerType.length > 0 && !activeFilters.cancerType.includes(doc.cancerType)) {
-      return false;
+    if (activeFilters.cancerType.length > 0) {
+      if (!doc.cancerType) return false;
+      const docC = doc.cancerType.toLowerCase();
+      const match = activeFilters.cancerType.some(c => {
+        const cLower = c.toLowerCase();
+        return docC === cLower || 
+               docC.includes(cLower.replace(' cancer', '')) || 
+               cLower.includes(docC.replace(' cancer', ''));
+      });
+      if (!match) return false;
     }
     // 6. Biomarker filter
-    if (activeFilters.biomarker.length > 0 && !activeFilters.biomarker.includes(doc.biomarker)) {
-      return false;
+    if (activeFilters.biomarker.length > 0) {
+      if (!doc.biomarker) return false;
+      const docB = doc.biomarker.toLowerCase();
+      const match = activeFilters.biomarker.some(b => {
+        const bLower = b.toLowerCase();
+        return docB === bLower || docB.includes(bLower) || bLower.includes(docB);
+      });
+      if (!match) return false;
     }
     // 7. Region filter
     if (activeFilters.region.length > 0 && !activeFilters.region.includes(doc.region)) {
@@ -3006,7 +3049,7 @@ function handleMockUpload(e) {
   const contentType = document.getElementById('formContentType').value;
   const region = document.getElementById('formRegion').value;
   const cancerType = document.getElementById('formCancer').value || 'None';
-  const biomarker = document.getElementById('formBiomarker').value || null;
+  const biomarker = document.getElementById('formBiomarker').value || 'None';
   const status = document.getElementById('formStatus').value;
   const version = document.getElementById('formVersion').value || 'v1.0';
   const sharePointUrl = document.getElementById('formSpUrl').value;
@@ -3728,6 +3771,8 @@ window.openEditAssetModal = function(id) {
     document.getElementById('editDocDesc').value = doc.description || '';
     const cancerEl = document.getElementById('editDocCancer');
     if (cancerEl) cancerEl.value = doc.cancerType || 'None';
+    const biomarkerEl = document.getElementById('editDocBiomarker');
+    if (biomarkerEl) biomarkerEl.value = doc.biomarker || 'None';
   } else {
     // Check if case study
     const c = db.cases.find(item => item.id === id);
@@ -3744,6 +3789,10 @@ window.openEditAssetModal = function(id) {
       document.getElementById('editDocVersion').value = 'v1.0';
       document.getElementById('editDocStatus').value = 'Approved';
       document.getElementById('editDocDesc').value = c.summary || '';
+      const cancerEl = document.getElementById('editDocCancer');
+      if (cancerEl) cancerEl.value = c.cancerType || 'None';
+      const biomarkerEl = document.getElementById('editDocBiomarker');
+      if (biomarkerEl) biomarkerEl.value = c.biomarker || 'None';
     } else {
       // Check if publication
       const pub = db.publications.find(item => item.id === id);
@@ -3760,6 +3809,10 @@ window.openEditAssetModal = function(id) {
         document.getElementById('editDocVersion').value = 'v1.0';
         document.getElementById('editDocStatus').value = 'Approved';
         document.getElementById('editDocDesc').value = pub.abstract || '';
+        const cancerEl = document.getElementById('editDocCancer');
+        if (cancerEl) cancerEl.value = 'None';
+        const biomarkerEl = document.getElementById('editDocBiomarker');
+        if (biomarkerEl) biomarkerEl.value = 'None';
       } else {
         // Check if video
         const vid = db.videos.find(item => item.id === id);
@@ -3776,6 +3829,10 @@ window.openEditAssetModal = function(id) {
           document.getElementById('editDocVersion').value = 'v1.0';
           document.getElementById('editDocStatus').value = 'Approved';
           document.getElementById('editDocDesc').value = vid.description || '';
+          const cancerEl = document.getElementById('editDocCancer');
+          if (cancerEl) cancerEl.value = 'None';
+          const biomarkerEl = document.getElementById('editDocBiomarker');
+          if (biomarkerEl) biomarkerEl.value = 'None';
         } else {
           // Check if clinical sample report
           const rep = (db.reports || []).find(r => r.id === id);
@@ -3789,6 +3846,8 @@ window.openEditAssetModal = function(id) {
             document.getElementById('editDocContentType').value = 'Others';
             const cancerEl = document.getElementById('editDocCancer');
             if (cancerEl) cancerEl.value = rep.cancerType || 'None';
+            const biomarkerEl = document.getElementById('editDocBiomarker');
+            if (biomarkerEl) biomarkerEl.value = rep.biomarker || 'None';
             document.getElementById('editDocDept').value = 'Medical';
             if (ownerEl) ownerEl.value = rep.author || rep.owner || '1Cell.Ai';
             document.getElementById('editDocVersion').value = rep.version || 'v1.0';
@@ -3880,6 +3939,8 @@ window.saveAssetEdit = function() {
       doc.description = desc;
       const cancerEl = document.getElementById('editDocCancer');
       if (cancerEl) doc.cancerType = cancerEl.value;
+      const biomarkerEl = document.getElementById('editDocBiomarker');
+      if (biomarkerEl) doc.biomarker = biomarkerEl.value;
       doc.updatedDate = new Date().toISOString().split('T')[0];
 
       try {
@@ -3899,6 +3960,10 @@ window.saveAssetEdit = function() {
         c.owner = owner;
       }
       c.summary = desc || c.summary;
+      const cancerEl = document.getElementById('editDocCancer');
+      if (cancerEl && cancerEl.value !== 'None') c.cancerType = cancerEl.value;
+      const biomarkerEl = document.getElementById('editDocBiomarker');
+      if (biomarkerEl && biomarkerEl.value !== 'None') c.biomarker = biomarkerEl.value;
       try {
         localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases));
       } catch (e) {}
@@ -3942,6 +4007,8 @@ window.saveAssetEdit = function() {
       rep.product = product || rep.product;
       const cancerEl = document.getElementById('editDocCancer');
       if (cancerEl) rep.cancerType = cancerEl.value;
+      const biomarkerEl = document.getElementById('editDocBiomarker');
+      if (biomarkerEl) rep.biomarker = biomarkerEl.value;
       if (owner) {
         rep.author = owner;
         rep.owner = owner;
