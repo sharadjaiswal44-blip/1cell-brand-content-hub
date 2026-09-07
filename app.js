@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v12';
+import db from './db.js?v=20260907-v13';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage

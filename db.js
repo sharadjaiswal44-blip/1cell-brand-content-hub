@@ -161,6 +161,21 @@ const db = {
             ],
             "competitiveAdvantage": "Unifies multi-omic clinical data into clean, evidence-backed reports with active therapy matching, significantly reducing clinician interpretation time.",
             "logo": "logo.svg"
+      },
+      {
+            "id": "oncoalibrex",
+            "name": "OncoAlibrex®",
+            "description": "Longitudinal molecular monitoring assay for real-time therapy response tracking. Evaluates treatment response and disease progression independently of conventional protein markers.",
+            "details": "OncoAlibrex® is a longitudinal molecular monitoring assay engineered for real-time therapy monitoring and treatment response tracking across solid tumors, including advanced and metastatic disease like Stage IV Colorectal Cancer. When conventional tumor-associated antigens (such as CEA) are not expressed or uninformative, OncoAlibrex provides antigen-independent longitudinal molecular assessment during systemic therapy (e.g., FOLFOX). It tracks disease behavior across metastatic sites (including liver and lung), detects early molecular progression signals, and defines clear escalation pathways (such as considering adding cetuximab) before radiological relapse.",
+            "clinicalBenefits": [
+                  "Antigen-independent longitudinal molecular monitoring during active systemic cancer therapy.",
+                  "Evaluates treatment response and disease behavior even when conventional tumor markers (like CEA) are absent or unexpressed.",
+                  "Provides early molecular progression signals across complex metastatic disease (e.g. liver and lung metastases).",
+                  "Defines structured treatment escalation pathways (e.g., prompting consideration of targeted agents like cetuximab on progression).",
+                  "Offers an additional molecular signal to complement imaging and guide timely therapy adjustments."
+            ],
+            "competitiveAdvantage": "Unlike conventional serum tumor markers that fail when tumors do not express the target antigen, OncoAlibrex® follows disease behavior molecularly with zero antigen dependence, empowering clinicians with actionable real-time response data.",
+            "logo": "logo.svg"
       }
 ],
 
@@ -1159,6 +1174,126 @@ const db = {
       size: "4.8 MB",
       downloadCount: 190,
       viewCount: 470
+    },
+    {
+      id: "doc-046",
+      title: "OncoAlibrex® Product Brochure",
+      description: "Official brochure detailing OncoAlibrex® real-time therapy monitoring, longitudinal molecular assessment, clinical indications, and antigen-independent monitoring.",
+      department: "Marketing",
+      product: "oncoalibrex",
+      cancerType: "Colorectal Cancer",
+      biomarker: "Longitudinal Molecular Monitoring | Real-Time Response",
+      contentType: "Brochure",
+      status: "Approved",
+      year: "2026",
+      version: "v1.0",
+      author: "Marketing Operations",
+      owner: "Brand Team",
+      createdDate: "2026-04-10",
+      updatedDate: "2026-09-07",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoAlibrex/OncoAlibrex_Brochure.pdf",
+      folderPath: "Shared Documents/OncoAlibrex",
+      size: "2.5 MB",
+      downloadCount: 95,
+      viewCount: 280,
+      isPinned: false,
+      isTrending: false
+    },
+    {
+      id: "doc-047",
+      title: "OncoAlibrex® Clinical Case Study: Stage IV Colorectal Cancer — CEA-Negative Monitoring",
+      description: "Clinical case study demonstrating longitudinal molecular monitoring with OncoAlibrex® during FOLFOX therapy in a Stage IV colorectal cancer patient without CEA expression.",
+      department: "Medical",
+      product: "oncoalibrex",
+      cancerType: "Colorectal Cancer",
+      biomarker: "KRAS Wild-Type | CEA-Negative",
+      contentType: "Case Study",
+      status: "Approved",
+      year: "2026",
+      version: "v1.0",
+      author: "Medical Affairs",
+      owner: "Medical Director",
+      createdDate: "2026-04-15",
+      updatedDate: "2026-09-07",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoAlibrex/OncoAlibrex_CaseStudy_Colorectal.pdf",
+      folderPath: "Shared Documents/OncoAlibrex",
+      size: "2.1 MB",
+      downloadCount: 78,
+      viewCount: 215,
+      isPinned: false,
+      isTrending: false
+    },
+    {
+      id: "doc-048",
+      title: "OncoAlibrex® Technical Whitepaper: Real-Time Therapy Monitoring",
+      description: "Scientific whitepaper detailing the methodology, analytical sensitivity, and clinical escalation utility of longitudinal molecular tracking.",
+      department: "Scientific",
+      product: "oncoalibrex",
+      cancerType: "Colorectal Cancer",
+      biomarker: "Longitudinal Molecular Signature",
+      contentType: "Whitepaper",
+      status: "Approved",
+      year: "2026",
+      version: "v1.0",
+      author: "R&D Translational Team",
+      owner: "Scientific Director",
+      createdDate: "2026-04-20",
+      updatedDate: "2026-09-07",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoAlibrex/OncoAlibrex_Whitepaper.pdf",
+      folderPath: "Shared Documents/OncoAlibrex",
+      size: "3.1 MB",
+      downloadCount: 65,
+      viewCount: 190,
+      isPinned: false,
+      isTrending: false
+    },
+    {
+      id: "doc-049",
+      title: "OncoAlibrex® Sales Battlecard vs. Conventional Serum Markers",
+      description: "Competitive analysis, positioning against conventional tumor markers (CEA/CA19-9), objection handling, and clinical pitch guides for OncoAlibrex®.",
+      department: "Sales",
+      product: "oncoalibrex",
+      cancerType: "Pan Cancer",
+      biomarker: "Competitive Positioning",
+      contentType: "Battlecard",
+      status: "Approved",
+      year: "2026",
+      version: "v1.0",
+      author: "Commercial Enablement",
+      owner: "Sales Enablement",
+      createdDate: "2026-04-22",
+      updatedDate: "2026-09-07",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoAlibrex/OncoAlibrex_Battlecard.pdf",
+      folderPath: "Shared Documents/OncoAlibrex",
+      size: "1.4 MB",
+      downloadCount: 120,
+      viewCount: 310,
+      isPinned: false,
+      isTrending: false
+    },
+    {
+      id: "doc-050",
+      title: "OncoAlibrex® Product Details & Presentation",
+      description: "Comprehensive slide deck on OncoAlibrex® real-time therapy monitoring, clinical case journeys, and decision escalation pathways.",
+      department: "Marketing",
+      product: "oncoalibrex",
+      cancerType: "Pan Cancer",
+      biomarker: "Product Overview",
+      contentType: "Presentation",
+      status: "Approved",
+      year: "2026",
+      version: "v1.0",
+      author: "Brand Operations",
+      owner: "Product Team",
+      createdDate: "2026-04-25",
+      updatedDate: "2026-09-07",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoAlibrex/OncoAlibrex_ProductDetails.pdf",
+      folderPath: "Shared Documents/OncoAlibrex",
+      size: "4.2 MB",
+      downloadCount: 88,
+      viewCount: 245,
+      isPinned: false,
+      isTrending: false
     }
   ],
 
@@ -1390,6 +1525,19 @@ const db = {
       outcome: "Target Identified",
       summary: "Abstract presentation on single circulating tumor cell genomics.",
       readMoreUrl: "https://1cell.ai/single-cell-genomics-reveals-resistance-signatures-in-colorectal-cancer-2/"
+    },
+    {
+      id: "case-020",
+      title: "Stage IV Colorectal Cancer — CEA-Negative Longitudinal Molecular Monitoring During FOLFOX",
+      doctor: "Dr. Sandhay Iyer & Clinical Oncology Board",
+      hospital: "1Cell.Ai Clinical Genomics Laboratory",
+      relatedProduct: "oncoalibrex",
+      biomarker: "KRAS WT | CEA-Negative | Real-Time Monitoring",
+      cancerType: "Colorectal Cancer",
+      outcome: "Progression Tracked & Escalation Defined",
+      summary: "A 65-year-old male with Stage IV colorectal cancer and liver/lung metastases who did not express CEA. OncoAlibrex provided antigen-independent longitudinal molecular monitoring during FOLFOX chemotherapy with an established escalation pathway to add cetuximab on progression.",
+      readMoreUrl: "https://1cell.ai/oncoalibrex-colorectal-cancer-longitudinal-molecular-monitoring/",
+      sharePointUrl: "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/OncoAlibrex/OncoAlibrex_CaseStudy_Colorectal.pdf"
     }
   ],
 
@@ -1498,7 +1646,7 @@ const db = {
       title: "OncoAlibrex: Ultrasensitive cfDNA Fragmentomics Assay for Early Treatment Response Assessment in Solid Tumors",
       journal: "AACR Annual Meeting",
       publishedDate: "2026",
-      relatedProduct: "oncomonitor",
+      relatedProduct: "oncoalibrex",
       authors: "Fragmentomics Group",
       abstract: "Tracing cell-free DNA size distribution dynamics to predict early responder states.",
       citation: "AACR 2026; Abstract #1035-3",
@@ -3276,6 +3424,25 @@ const db = {
         "folderPath": "Shared Documents/Sample Reports/Pan Cancer",
         "size": "4.5 MB",
         "viewCount": 155
+    },
+    {
+        "id": "report-011",
+        "title": "OncoAlibrex® Real-Time Therapy Monitoring - Stage IV Metastatic Colorectal Carcinoma",
+        "product": "oncoalibrex",
+        "cancerType": "Colorectal Cancer",
+        "biomarker": "KRAS Wild-Type | CEA-Negative | Molecular Tracking",
+        "specimen": "Serial Plasma cfDNA (Longitudinal Assessment)",
+        "status": "Approved",
+        "version": "v1.0",
+        "createdDate": "2026-04-12",
+        "updatedDate": "2026-09-07",
+        "author": "Clinical Molecular Monitoring Unit",
+        "department": "Medical",
+        "summary": "Serial molecular monitoring report in Stage IV colorectal adenocarcinoma evaluating treatment response during FOLFOX. Independent of CEA expression, assessing early molecular progression signals to inform targeted therapy escalation.",
+        "sharePointUrl": "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/SampleReports/OncoAlibrex_Therapy_Monitoring_Report.pdf",
+        "folderPath": "Shared Documents/Sample Reports/Colorectal Cancer",
+        "size": "2.8 MB",
+        "viewCount": 90
     }
 ],
 
@@ -3286,6 +3453,43 @@ const db = {
     { rank: 4, name: "Devin Thorne", points: 140, attempted: 3 },
     { rank: 5, name: "Emily Chen", points: 100, attempted: 2 },
     { rank: 6, name: "Suresh Pillai", points: 80, attempted: 2 }
-  ]
+  ],
+
+  analytics: {
+    totalAssets: 50,
+    assetsAddedThisMonth: 12,
+    assetsByDepartment: {
+      "Marketing": 18,
+      "Medical": 12,
+      "Scientific": 10,
+      "Sales": 8,
+      "Corporate": 5
+    },
+    assetsByProduct: {
+      "oncoindx": 8,
+      "primeplus": 5,
+      "oncoindxtbx": 5,
+      "oncoindx360": 4,
+      "oncotarget": 6,
+      "oncohrd": 5,
+      "oncorisk": 4,
+      "oncomonitor": 6,
+      "oncopredikt": 4,
+      "oncoctc": 6,
+      "oncoalibrex": 5,
+      "icore": 4
+    },
+    telemetry: {
+      views: 3420,
+      downloads: 1280,
+      mostPopular: [
+        { title: "OncoIndx® Product Brochure", views: 340 },
+        { title: "OncoCTC® Product Brochure", views: 420 },
+        { title: "OncoAlibrex® Product Brochure", views: 280 },
+        { title: "OncoHRD® Testing Guidelines", views: 295 }
+      ],
+      mostSearchedKeywords: ["OncoIndx", "OncoCTC", "OncoAlibrex", "HRD", "Liquid Biopsy", "Colorectal Cancer"]
+    }
+  }
 };
 export default db;
