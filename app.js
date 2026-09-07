@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v14';
+import db from './db.js?v=20260907-v15';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -441,7 +441,7 @@ function updateUserBadge() {
   // Sync author fields
   const authorInput = document.getElementById('formAuthor');
   if (authorInput) {
-    authorInput.value = authName || profile.name;
+    authorInput.value = '1Cell.Ai';
   }
 }
 
@@ -678,6 +678,16 @@ window.triggerRegisterAssetModal = function(routeName) {
     if (["Marketing", "Medical", "Product", "Scientific", "Sales", "HR", "Corporate"].includes(authDept)) {
       deptSelect.value = authDept;
     }
+  }
+
+  // Ensure default Cancer Type is None and Owner is 1Cell.Ai
+  const cancerSelect = document.getElementById('formCancer');
+  if (cancerSelect) {
+    cancerSelect.value = 'None';
+  }
+  const authorInput = document.getElementById('formAuthor');
+  if (authorInput) {
+    authorInput.value = '1Cell.Ai';
   }
 
   const uploadModal = document.getElementById('uploadModal');
@@ -1335,6 +1345,16 @@ window.triggerRegisterProductAsset = function(prodId, categoryTab) {
     formSpUrl.value = `https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/${prodFolder}/`;
   }
 
+  // Ensure default Cancer Type is None and Owner is 1Cell.Ai
+  const formCancer = document.getElementById('formCancer');
+  if (formCancer) {
+    formCancer.value = 'None';
+  }
+  const formAuthor = document.getElementById('formAuthor');
+  if (formAuthor) {
+    formAuthor.value = '1Cell.Ai';
+  }
+
   const uploadModal = document.getElementById('uploadModal');
   if (uploadModal) openModal(uploadModal);
 };
@@ -1425,7 +1445,7 @@ window.updateReportLibraryCards = function() {
         <p style="font-size:13px; color:var(--text-secondary); max-width:450px; margin:0 auto 16px;">No sample reports match your search criteria. You can clear filters or register a new clinical report.</p>
         <div style="display:flex; justify-content:center; gap:10px;">
           <button class="btn-outline" onclick="window.setReportFilter('product', 'all'); window.setReportFilter('cancer', 'all'); document.getElementById('reportSearchInput').value=''; window.searchReports('');">Clear Filters</button>
-          <button class="btn-primary" onclick="window.triggerAddSampleReportModal('${reportLibraryProductFilter !== 'all' ? reportLibraryProductFilter : 'oncoindx'}', '${reportLibraryCancerFilter !== 'all' ? reportLibraryCancerFilter : 'Lung Cancer'}')">+ Add Sample Report</button>
+          <button class="btn-primary" onclick="window.triggerAddSampleReportModal('${reportLibraryProductFilter !== 'all' ? reportLibraryProductFilter : 'oncoindx'}', '${reportLibraryCancerFilter !== 'all' ? reportLibraryCancerFilter : 'None'}')">+ Add Sample Report</button>
         </div>
       </div>
     `;
@@ -1533,6 +1553,7 @@ function renderReportLibrary() {
           <label style="font-size:11.5px; font-weight:600; color:var(--text-secondary); white-space:nowrap;">Cancer Type:</label>
           <select id="reportCancerFilter" style="height:36px; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0 8px; font-size:12px; background:var(--bg-primary); color:var(--text-primary);" onchange="window.setReportFilter('cancer', this.value)">
             <option value="all">All Cancer Types</option>
+            <option value="None" ${reportLibraryCancerFilter === 'None' ? 'selected' : ''}>None</option>
             <option value="Lung Cancer" ${reportLibraryCancerFilter === 'Lung Cancer' ? 'selected' : ''}>Lung Cancer</option>
             <option value="Breast Cancer" ${reportLibraryCancerFilter === 'Breast Cancer' ? 'selected' : ''}>Breast Cancer</option>
             <option value="Colorectal Cancer" ${reportLibraryCancerFilter === 'Colorectal Cancer' ? 'selected' : ''}>Colorectal Cancer</option>
@@ -1565,9 +1586,14 @@ window.triggerAddSampleReportModal = function(defaultProduct, defaultCancer) {
     const prodEl = document.getElementById('srProduct');
     if (prodEl) prodEl.value = defaultProduct;
   }
-  if (defaultCancer) {
-    const cancerEl = document.getElementById('srCancerType');
-    if (cancerEl) cancerEl.value = defaultCancer;
+  const cancerEl = document.getElementById('srCancerType');
+  if (cancerEl) {
+    cancerEl.value = defaultCancer || 'None';
+  }
+
+  const authorEl = document.getElementById('srAuthor');
+  if (authorEl) {
+    authorEl.value = '1Cell.Ai';
   }
 
   const modal = document.getElementById('sampleReportModal');
@@ -1578,10 +1604,12 @@ window.triggerAddSampleReportModal = function(defaultProduct, defaultCancer) {
 window.saveNewSampleReport = function() {
   const title = document.getElementById('srTitle').value.trim();
   const product = document.getElementById('srProduct').value;
-  const cancerType = document.getElementById('srCancerType').value;
+  const cancerType = document.getElementById('srCancerType').value || 'None';
   let sharePointUrl = document.getElementById('srSharePointUrl').value.trim();
   const biomarker = document.getElementById('srBiomarker').value.trim();
   const specimen = document.getElementById('srSpecimen').value;
+  const authorEl = document.getElementById('srAuthor');
+  const author = (authorEl ? authorEl.value.trim() : '') || '1Cell.Ai';
   const version = document.getElementById('srVersion').value.trim() || 'v1.0';
   const status = document.getElementById('srStatus').value;
   const summary = document.getElementById('srSummary').value.trim();
@@ -1606,7 +1634,8 @@ window.saveNewSampleReport = function() {
     version,
     createdDate: new Date().toISOString().split('T')[0],
     updatedDate: new Date().toISOString().split('T')[0],
-    author: sessionStorage.getItem('authUser') || 'Clinical Genomics Laboratory',
+    author: author,
+    owner: author,
     department: 'Medical',
     summary: summary || `Clinical diagnostic test report for ${cancerType} using ${product}.`,
     sharePointUrl,
@@ -2946,13 +2975,14 @@ function handleMockUpload(e) {
   const product = document.getElementById('formProduct').value || null;
   const contentType = document.getElementById('formContentType').value;
   const region = document.getElementById('formRegion').value;
-  const cancerType = document.getElementById('formCancer').value || 'Pan Cancer';
+  const cancerType = document.getElementById('formCancer').value || 'None';
   const biomarker = document.getElementById('formBiomarker').value || null;
   const status = document.getElementById('formStatus').value;
   const version = document.getElementById('formVersion').value || 'v1.0';
   const sharePointUrl = document.getElementById('formSpUrl').value;
-  const author = document.getElementById('formAuthor').value || 'Unknown';
-  const size = document.getElementById('formSize').value || '1.0 MB';
+  const authorEl = document.getElementById('formAuthor');
+  const author = (authorEl ? authorEl.value.trim() : '') || '1Cell.Ai';
+  const size = '2.5 MB';
 
   if (!title || !sharePointUrl) {
     showToast("Please fill in all required fields.");
@@ -2976,7 +3006,7 @@ function handleMockUpload(e) {
     year: "2026",
     version,
     author,
-    owner: userProfiles[currentRole].name,
+    owner: author || '1Cell.Ai',
     createdDate: new Date().toISOString().split('T')[0],
     updatedDate: new Date().toISOString().split('T')[0],
     sharePointUrl,
@@ -2998,7 +3028,7 @@ function handleMockUpload(e) {
       id: `report-${Date.now()}`,
       title,
       product: product || 'oncoindx',
-      cancerType: cancerType || 'Pan Cancer',
+      cancerType: cancerType || 'None',
       biomarker: biomarker || 'Comprehensive Solid Tumor Profile',
       specimen: 'FFPE Tumor Tissue',
       status: status || 'Approved',
@@ -3006,6 +3036,7 @@ function handleMockUpload(e) {
       createdDate: new Date().toISOString().split('T')[0],
       updatedDate: new Date().toISOString().split('T')[0],
       author,
+      owner: author,
       department,
       summary: description,
       sharePointUrl,
@@ -3661,12 +3692,12 @@ window.openEditAssetModal = function(id) {
     document.getElementById('editDocContentType').value = cat;
 
     document.getElementById('editDocDept').value = doc.department || 'Marketing';
-    if (ownerEl) ownerEl.value = doc.owner || doc.author || '';
+    if (ownerEl) ownerEl.value = doc.owner || doc.author || '1Cell.Ai';
     document.getElementById('editDocVersion').value = doc.version || 'v1.0';
     document.getElementById('editDocStatus').value = doc.status || 'Approved';
     document.getElementById('editDocDesc').value = doc.description || '';
     const cancerEl = document.getElementById('editDocCancer');
-    if (cancerEl) cancerEl.value = doc.cancerType || 'Pan Cancer';
+    if (cancerEl) cancerEl.value = doc.cancerType || 'None';
   } else {
     // Check if case study
     const c = db.cases.find(item => item.id === id);
@@ -3679,7 +3710,7 @@ window.openEditAssetModal = function(id) {
       document.getElementById('editDocProduct').value = c.relatedProduct || '';
       document.getElementById('editDocContentType').value = 'Case Studies';
       document.getElementById('editDocDept').value = 'Medical';
-      if (ownerEl) ownerEl.value = c.doctor || c.owner || '';
+      if (ownerEl) ownerEl.value = c.doctor || c.owner || '1Cell.Ai';
       document.getElementById('editDocVersion').value = 'v1.0';
       document.getElementById('editDocStatus').value = 'Approved';
       document.getElementById('editDocDesc').value = c.summary || '';
@@ -3695,7 +3726,7 @@ window.openEditAssetModal = function(id) {
         document.getElementById('editDocProduct').value = pub.relatedProduct || '';
         document.getElementById('editDocContentType').value = 'Others';
         document.getElementById('editDocDept').value = 'Scientific';
-        if (ownerEl) ownerEl.value = pub.authors || pub.owner || '';
+        if (ownerEl) ownerEl.value = pub.authors || pub.owner || '1Cell.Ai';
         document.getElementById('editDocVersion').value = 'v1.0';
         document.getElementById('editDocStatus').value = 'Approved';
         document.getElementById('editDocDesc').value = pub.abstract || '';
@@ -3711,7 +3742,7 @@ window.openEditAssetModal = function(id) {
           document.getElementById('editDocProduct').value = vid.product || '';
           document.getElementById('editDocContentType').value = 'Others';
           document.getElementById('editDocDept').value = 'Marketing';
-          if (ownerEl) ownerEl.value = vid.speaker || vid.owner || '';
+          if (ownerEl) ownerEl.value = vid.speaker || vid.owner || '1Cell.Ai';
           document.getElementById('editDocVersion').value = 'v1.0';
           document.getElementById('editDocStatus').value = 'Approved';
           document.getElementById('editDocDesc').value = vid.description || '';
@@ -3727,9 +3758,9 @@ window.openEditAssetModal = function(id) {
             document.getElementById('editDocProduct').value = rep.product || '';
             document.getElementById('editDocContentType').value = 'Others';
             const cancerEl = document.getElementById('editDocCancer');
-            if (cancerEl) cancerEl.value = rep.cancerType || 'Pan Cancer';
+            if (cancerEl) cancerEl.value = rep.cancerType || 'None';
             document.getElementById('editDocDept').value = 'Medical';
-            if (ownerEl) ownerEl.value = rep.author || rep.owner || 'Clinical Genomics Laboratory';
+            if (ownerEl) ownerEl.value = rep.author || rep.owner || '1Cell.Ai';
             document.getElementById('editDocVersion').value = rep.version || 'v1.0';
             document.getElementById('editDocStatus').value = rep.status || 'Approved';
             document.getElementById('editDocDesc').value = rep.summary || rep.description || '';

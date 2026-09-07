@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>1Cell.Ai Content Hub</title>
-  <link rel="stylesheet" href="styles.css?v=20260907-v14">
+  <link rel="stylesheet" href="styles.css?v=20260907-v15">
 </head>
 <body>
   <div class="app-container">
@@ -381,6 +381,7 @@
           <div class="form-group">
             <label for="editDocCancer">Cancer Type</label>
             <select id="editDocCancer">
+              <option value="None">None</option>
               <option value="Pan Cancer">Pan Cancer</option>
               <option value="Lung Cancer">Lung Cancer</option>
               <option value="Breast Cancer">Breast Cancer</option>
@@ -530,6 +531,7 @@
           <div class="form-group">
             <label for="srCancerType">Cancer Type *</label>
             <select id="srCancerType" required>
+              <option value="None" selected>None</option>
               <option value="Lung Cancer">Lung Cancer</option>
               <option value="Breast Cancer">Breast Cancer</option>
               <option value="Colorectal Cancer">Colorectal Cancer</option>
@@ -566,10 +568,14 @@
             </select>
           </div>
           <div class="form-group">
+            <label for="srAuthor">Owner / Author</label>
+            <input type="text" id="srAuthor" placeholder="e.g. 1Cell.Ai" value="1Cell.Ai">
+          </div>
+          <div class="form-group">
             <label for="srVersion">Version Label</label>
             <input type="text" id="srVersion" placeholder="v1.0" value="v1.0">
           </div>
-          <div class="form-group">
+          <div class="form-group full-width">
             <label for="srStatus">Status</label>
             <select id="srStatus">
               <option value="Approved" selected>Approved</option>
@@ -701,12 +707,18 @@
           <div class="form-group">
             <label for="formCancer">Cancer Type</label>
             <select id="formCancer">
+              <option value="None" selected>None</option>
               <option value="Pan Cancer">Pan Cancer</option>
-              <option value="Breast">Breast</option>
-              <option value="Lung">Lung</option>
-              <option value="Colorectal">Colorectal</option>
-              <option value="Ovarian">Ovarian</option>
-              <option value="Endometrium">Endometrium</option>
+              <option value="Breast Cancer">Breast Cancer</option>
+              <option value="Lung Cancer">Lung Cancer</option>
+              <option value="Colorectal Cancer">Colorectal Cancer</option>
+              <option value="Ovarian Cancer">Ovarian Cancer</option>
+              <option value="Endometrial Cancer">Endometrial Cancer</option>
+              <option value="Prostate Cancer">Prostate Cancer</option>
+              <option value="Gastric Cancer">Gastric Cancer</option>
+              <option value="Melanoma">Melanoma</option>
+              <option value="Hematologic / Blood Cancer">Hematologic / Blood Cancer</option>
+              <option value="Other">Other</option>
             </select>
           </div>
           <div class="form-group">
@@ -739,13 +751,9 @@
             <label for="formSpUrl">SharePoint Document URL *</label>
             <input type="url" id="formSpUrl" required placeholder="https://1cellai.sharepoint.com/sites/content/Shared%20Documents/..." value="https://1cellai.sharepoint.com/sites/content/Shared%20Documents/">
           </div>
-          <div class="form-group">
-            <label for="formAuthor">Author / Contributor</label>
-            <input type="text" id="formAuthor" placeholder="e.g. Rajesh Kumar" value="Sarah Jenkins">
-          </div>
-          <div class="form-group">
-            <label for="formSize">Mock File Size</label>
-            <input type="text" id="formSize" placeholder="e.g. 4.2 MB" value="3.5 MB">
+          <div class="form-group full-width">
+            <label for="formAuthor">Owner / Author</label>
+            <input type="text" id="formAuthor" placeholder="e.g. 1Cell.Ai, Rajesh Kumar" value="1Cell.Ai">
           </div>
         </form>
       </div>
@@ -797,6 +805,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script type="module" src="app.js?v=20260907-v14"></script>
+  <script type="module" src="app.js?v=20260907-v15"></script>
 </body>
 </html>
