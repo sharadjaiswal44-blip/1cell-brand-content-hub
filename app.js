@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v13';
+import db from './db.js?v=20260907-v14';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -911,7 +911,7 @@ function renderDocumentCard(doc) {
           </div>
           <div class="meta-row">
             <span>Owner:</span>
-            <span class="meta-value">${doc.owner}</span>
+            <span class="meta-value">${doc.owner || doc.author || '1Cell.Ai Team'}</span>
           </div>
         </div>
       </div>
@@ -1459,9 +1459,9 @@ window.updateReportLibraryCards = function() {
               ${r.summary || r.description || ''}
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-tertiary); padding-top:8px; border-top:1px solid var(--border-color);">
-              <span>Version: <strong>${r.version || 'v1.0'}</strong> • ${r.size || '3.0 MB'}</span>
-              <span>${r.updatedDate || '2026'}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-tertiary); padding-top:8px; border-top:1px solid var(--border-color); flex-wrap:wrap; gap:4px;">
+              <span>Author: <strong style="color:var(--text-primary);">${r.author || r.owner || 'Clinical Genomics Laboratory'}</strong></span>
+              <span>v<strong>${r.version || '1.0'}</strong> • ${r.updatedDate || '2026'}</span>
             </div>
           </div>
         </div>
@@ -2722,6 +2722,7 @@ window.previewDocument = function(docId) {
         <div style="display:flex; justify-content:space-between; margin-bottom:14px; font-size:11px; background:var(--bg-tertiary); padding:8px 12px; border-radius:6px; flex-wrap:wrap; gap:6px;">
           <span><strong>Product:</strong> ${doc.product ? doc.product.toUpperCase() : '1Cell NGS'}</span>
           <span><strong>Cancer Type:</strong> ${doc.cancerType || 'Solid Tumor'}</span>
+          <span><strong>Author:</strong> ${doc.author || doc.owner || 'Clinical Genomics Laboratory'}</span>
           <span><strong>Specimen:</strong> ${doc.specimen || 'FFPE Tissue'}</span>
         </div>
         
@@ -2749,7 +2750,7 @@ window.previewDocument = function(docId) {
           <span style="font-size:9px; color:#94a3b8;">OFFICIAL APPROVED DOCUMENT</span>
         </div>
         <h2 class="mock-pdf-title">${doc.title}</h2>
-        <div style="font-size:11px; margin-bottom:12px; color:var(--text-secondary);"><strong>Target Department:</strong> ${doc.department} | <strong>Biomarker:</strong> ${doc.biomarker || 'General'}</div>
+        <div style="font-size:11px; margin-bottom:12px; color:var(--text-secondary);"><strong>Target Department:</strong> ${doc.department} | <strong>Owner / Author:</strong> ${doc.owner || doc.author || '1Cell.Ai Team'} | <strong>Biomarker:</strong> ${doc.biomarker || 'General'}</div>
         
         <div class="mock-pdf-section-title">Clinical Background</div>
         <p class="mock-pdf-paragraph">1Cell's assays enable clinicians to detect crucial solid tumor variants down to extremely low allele frequencies. By integrating whole transcriptome RNA sequencing, the diagnostic yield expands to target complex fusions, structural variants, and transcriptomic signature patterns.</p>
@@ -2842,12 +2843,16 @@ window.inspectSharepoint = function(docId) {
       <div style="font-family:monospace; font-size:11px;">${doc.folderPath}</div>
     </div>
     <div class="form-group">
+      <label>Owner / Author</label>
+      <div style="font-weight:600; color:var(--text-primary);">${doc.owner || doc.author || doc.doctor || doc.speaker || '1Cell.Ai Team'}</div>
+    </div>
+    <div class="form-group">
       <label>Version Sequence</label>
-      <div>${doc.version}</div>
+      <div>${doc.version || 'v1.0'}</div>
     </div>
     <div class="form-group">
       <label>Approval Status</label>
-      <div style="color:var(--success); font-weight:600;">${doc.status}</div>
+      <div style="color:var(--success); font-weight:600;">${doc.status || 'Approved'}</div>
     </div>
     <div class="form-group">
       <label>Indexed Date</label>
@@ -3637,6 +3642,8 @@ window.openEditAssetModal = function(id) {
   const editModal = document.getElementById('editAssetModal');
   if (!editModal) return;
 
+  const ownerEl = document.getElementById('editDocOwner');
+
   const doc = db.documents.find(d => d.id === id);
   if (doc) {
     document.getElementById('editDocId').value = doc.id;
@@ -3654,6 +3661,7 @@ window.openEditAssetModal = function(id) {
     document.getElementById('editDocContentType').value = cat;
 
     document.getElementById('editDocDept').value = doc.department || 'Marketing';
+    if (ownerEl) ownerEl.value = doc.owner || doc.author || '';
     document.getElementById('editDocVersion').value = doc.version || 'v1.0';
     document.getElementById('editDocStatus').value = doc.status || 'Approved';
     document.getElementById('editDocDesc').value = doc.description || '';
@@ -3671,6 +3679,7 @@ window.openEditAssetModal = function(id) {
       document.getElementById('editDocProduct').value = c.relatedProduct || '';
       document.getElementById('editDocContentType').value = 'Case Studies';
       document.getElementById('editDocDept').value = 'Medical';
+      if (ownerEl) ownerEl.value = c.doctor || c.owner || '';
       document.getElementById('editDocVersion').value = 'v1.0';
       document.getElementById('editDocStatus').value = 'Approved';
       document.getElementById('editDocDesc').value = c.summary || '';
@@ -3686,6 +3695,7 @@ window.openEditAssetModal = function(id) {
         document.getElementById('editDocProduct').value = pub.relatedProduct || '';
         document.getElementById('editDocContentType').value = 'Others';
         document.getElementById('editDocDept').value = 'Scientific';
+        if (ownerEl) ownerEl.value = pub.authors || pub.owner || '';
         document.getElementById('editDocVersion').value = 'v1.0';
         document.getElementById('editDocStatus').value = 'Approved';
         document.getElementById('editDocDesc').value = pub.abstract || '';
@@ -3701,6 +3711,7 @@ window.openEditAssetModal = function(id) {
           document.getElementById('editDocProduct').value = vid.product || '';
           document.getElementById('editDocContentType').value = 'Others';
           document.getElementById('editDocDept').value = 'Marketing';
+          if (ownerEl) ownerEl.value = vid.speaker || vid.owner || '';
           document.getElementById('editDocVersion').value = 'v1.0';
           document.getElementById('editDocStatus').value = 'Approved';
           document.getElementById('editDocDesc').value = vid.description || '';
@@ -3718,9 +3729,44 @@ window.openEditAssetModal = function(id) {
             const cancerEl = document.getElementById('editDocCancer');
             if (cancerEl) cancerEl.value = rep.cancerType || 'Pan Cancer';
             document.getElementById('editDocDept').value = 'Medical';
+            if (ownerEl) ownerEl.value = rep.author || rep.owner || 'Clinical Genomics Laboratory';
             document.getElementById('editDocVersion').value = rep.version || 'v1.0';
             document.getElementById('editDocStatus').value = rep.status || 'Approved';
             document.getElementById('editDocDesc').value = rep.summary || rep.description || '';
+          } else {
+            // Check if brand asset
+            const brand = (db.brandAssets || []).find(b => b.id === id);
+            if (brand) {
+              document.getElementById('editDocId').value = brand.id;
+              document.getElementById('editItemType').value = 'brand';
+              document.getElementById('editDocTitle').value = brand.title || '';
+              document.getElementById('editDocSpUrl').value = brand.sharePointUrl || brand.downloadUrl || '';
+              document.getElementById('editDocFolderPath').value = brand.folderPath || 'Brand Guidelines & Assets';
+              document.getElementById('editDocProduct').value = '';
+              document.getElementById('editDocContentType').value = 'Brand Asset';
+              document.getElementById('editDocDept').value = 'Corporate';
+              if (ownerEl) ownerEl.value = brand.owner || brand.author || 'Brand Team';
+              document.getElementById('editDocVersion').value = brand.version || 'v1.0';
+              document.getElementById('editDocStatus').value = brand.status || 'Approved';
+              document.getElementById('editDocDesc').value = brand.description || '';
+            } else {
+              // Check if template
+              const temp = (db.templates || []).find(t => t.id === id);
+              if (temp) {
+                document.getElementById('editDocId').value = temp.id;
+                document.getElementById('editItemType').value = 'template';
+                document.getElementById('editDocTitle').value = temp.title || '';
+                document.getElementById('editDocSpUrl').value = temp.sharePointUrl || temp.downloadUrl || '';
+                document.getElementById('editDocFolderPath').value = temp.folderPath || 'Templates';
+                document.getElementById('editDocProduct').value = '';
+                document.getElementById('editDocContentType').value = 'Others';
+                document.getElementById('editDocDept').value = temp.department || 'Corporate';
+                if (ownerEl) ownerEl.value = temp.owner || temp.author || 'Corporate Team';
+                document.getElementById('editDocVersion').value = temp.version || 'v1.0';
+                document.getElementById('editDocStatus').value = temp.status || 'Approved';
+                document.getElementById('editDocDesc').value = temp.description || '';
+              }
+            }
           }
         }
       }
@@ -3740,6 +3786,8 @@ window.saveAssetEdit = function() {
   const product = document.getElementById('editDocProduct').value || null;
   const contentType = document.getElementById('editDocContentType').value;
   const department = document.getElementById('editDocDept').value;
+  const ownerEl = document.getElementById('editDocOwner');
+  const owner = ownerEl ? ownerEl.value.trim() : '';
   const version = document.getElementById('editDocVersion').value.trim() || 'v1.0';
   const status = document.getElementById('editDocStatus').value;
   const desc = document.getElementById('editDocDesc').value.trim();
@@ -3762,6 +3810,10 @@ window.saveAssetEdit = function() {
       doc.product = product;
       doc.contentType = contentType;
       doc.department = department;
+      if (owner) {
+        doc.owner = owner;
+        doc.author = owner;
+      }
       doc.version = version;
       doc.status = status;
       doc.description = desc;
@@ -3781,6 +3833,10 @@ window.saveAssetEdit = function() {
       c.title = title;
       c.readMoreUrl = spUrl;
       c.relatedProduct = product || c.relatedProduct;
+      if (owner) {
+        c.doctor = owner;
+        c.owner = owner;
+      }
       c.summary = desc || c.summary;
       try {
         localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases));
@@ -3792,6 +3848,10 @@ window.saveAssetEdit = function() {
       pub.title = title;
       pub.link = spUrl;
       pub.relatedProduct = product || pub.relatedProduct;
+      if (owner) {
+        pub.authors = owner;
+        pub.owner = owner;
+      }
       pub.abstract = desc || pub.abstract;
       try {
         localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications));
@@ -3803,6 +3863,10 @@ window.saveAssetEdit = function() {
       vid.title = title;
       vid.videoUrl = spUrl;
       vid.product = product || vid.product;
+      if (owner) {
+        vid.speaker = owner;
+        vid.owner = owner;
+      }
       vid.description = desc || vid.description;
       try {
         localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
@@ -3817,12 +3881,46 @@ window.saveAssetEdit = function() {
       rep.product = product || rep.product;
       const cancerEl = document.getElementById('editDocCancer');
       if (cancerEl) rep.cancerType = cancerEl.value;
+      if (owner) {
+        rep.author = owner;
+        rep.owner = owner;
+      }
       rep.summary = desc || rep.summary;
       rep.version = version || rep.version;
       rep.status = status || rep.status;
       rep.updatedDate = new Date().toISOString().split('T')[0];
       try {
         localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
+      } catch (e) {}
+    }
+  } else if (itemType === 'brand') {
+    const brand = (db.brandAssets || []).find(b => b.id === id);
+    if (brand) {
+      brand.title = title;
+      brand.sharePointUrl = spUrl;
+      brand.downloadUrl = spUrl;
+      if (owner) {
+        brand.owner = owner;
+        brand.author = owner;
+      }
+      brand.description = desc || brand.description;
+      try {
+        localStorage.setItem('1cell_custom_brandAssets', JSON.stringify(db.brandAssets));
+      } catch (e) {}
+    }
+  } else if (itemType === 'template') {
+    const temp = (db.templates || []).find(t => t.id === id);
+    if (temp) {
+      temp.title = title;
+      temp.sharePointUrl = spUrl;
+      temp.downloadUrl = spUrl;
+      if (owner) {
+        temp.owner = owner;
+        temp.author = owner;
+      }
+      temp.description = desc || temp.description;
+      try {
+        localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates));
       } catch (e) {}
     }
   }
