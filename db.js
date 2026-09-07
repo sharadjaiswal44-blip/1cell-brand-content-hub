@@ -14,7 +14,7 @@ const db = {
                   "Actionable therapeutic recommendations aligned with ACMG, AMP, ASCO, and CAP guidelines, with global clinical trial traceability."
             ],
             "competitiveAdvantage": "Dual-specimen validation (tissue & blood), comprehensive resistance mutation mapping (350 genes), and integrated AI analysis through iCare\u2122 providing rapid, evidence-backed treatment choices.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncoindx.png"
       },
       {
             "id": "primeplus",
@@ -29,7 +29,7 @@ const db = {
                   "Combines 1080-gene DNA sequencing (2000x tissue / 10000x liquid) with PD-L1 IHC and CTC enumeration."
             ],
             "competitiveAdvantage": "Resolves diagnostic ambiguity in Cancers of Unknown Primary (CUP) via RNA-based gene expression while filtering out age-related CHIP mutations that confound standard tumor-only NGS.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_primeplus.png"
       },
       {
             "id": "oncoindxtbx",
@@ -44,7 +44,7 @@ const db = {
                   "Ultra-deep 2000x mean sequencing depth with >99% on-target coverage and iCare\u2122 AI reporting."
             ],
             "competitiveAdvantage": "Empirically validated RNA fusion detection (100% PPV, 100% specificity) that rescues actionable fusion alterations invisible to DNA-only hybrid-capture panels.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncoindxtbx.png"
       },
       {
             "id": "oncoindx360",
@@ -56,10 +56,10 @@ const db = {
                   "Definitive risk stratification into WHO-aligned molecular subtypes: POLE-mutated, MMRd/MSI-H, TP53-abnormal, NSMP, and HER2+.",
                   "Enables safe treatment de-escalation in POLE-mutated disease (avoiding unnecessary chemotherapy despite high-grade histology).",
                   "Guides treatment escalation: immunotherapy prioritization for MMRd/MSI-H, intensive chemo \u00b1 HER2-targeted agents for TP53-abnormal.",
-                  "Accelerated turnaround time of 10-12 days (compared to 2-3 weeks for traditional sequential lab testing)."
+                  "Accelerated turnaround time of 10-12 days (compared to 2-3 weeks for traditional sequential lab testing).",
             ],
             "competitiveAdvantage": "Replaces fragmented sequential testing with a single unified report aligning with ESGO/ESTRO/ESP guidelines and clinical trial protocols.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncoindx360.png"
       },
       {
             "id": "oncotarget",
@@ -74,7 +74,7 @@ const db = {
                   "Rapid turnaround time (48-72 hours) designed for urgent therapeutic decision-making."
             ],
             "competitiveAdvantage": "Highly cost-effective, disease-focused architecture that delivers essential actionable therapeutic targets without the expense and delay of large uncurated panels.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncotarget.png"
       },
       {
             "id": "oncohrd",
@@ -89,7 +89,7 @@ const db = {
                   "AI-powered dynamic reporting through iCARE\u2122 with peer-reviewed literature and clinical trial associations."
             ],
             "competitiveAdvantage": "Captures epigenetic promoter methylation and subtle genomic scar signatures that conventional BRCA-only tests completely overlook.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncohrd.png"
       },
       {
             "id": "oncorisk",
@@ -104,7 +104,7 @@ const db = {
                   "AI-powered clinical curation ensuring minimal rates of Variants of Uncertain Significance (VUS)."
             ],
             "competitiveAdvantage": "Broadest guideline-concordant germline coverage paired with dedicated genetic counseling and family cascade testing protocols.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncorisk.png"
       },
       {
             "id": "oncomonitor",
@@ -119,7 +119,7 @@ const db = {
                   "Simple non-invasive peripheral blood draw (2 PAXgene tubes + 1 K2EDTA tube; 10 ml each) with AI-powered reporting via iCARE\u2122."
             ],
             "competitiveAdvantage": "Uniquely integrates live CTC capture with ctDNA methylation profiling, providing high sensitivity even in low-shedding tumors where ctDNA alone is undetectable.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncomonitor.png"
       },
       {
             "id": "oncopredikt",
@@ -133,7 +133,7 @@ const db = {
                   "Rapid turnaround within hours, delivering preliminary prognostic insights before NGS results are finalized."
             ],
             "competitiveAdvantage": "Instant computational biomarker inference that conserves precious tumor biopsy tissue blocks for downstream NGS testing.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncopredikt.png"
       },
       {
             "id": "oncoctc",
@@ -147,7 +147,7 @@ const db = {
                   "Detects actionable alterations in low-shedding cancers where cell-free DNA (ctDNA) is inadequate."
             ],
             "competitiveAdvantage": "Unlike conventional EpCAM-dependent capture or fragmented apoptotic ctDNA, OncoCTC\u00ae captures living, metastatic tumor cells and clusters, preserving functional biology and intact single-cell genomic integrity.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncoctc.png"
       },
       {
             "id": "icore",
@@ -160,7 +160,7 @@ const db = {
                   "Seamless bi-directional integration with hospital laboratory information systems (LIS) and electronic medical records (EMR)."
             ],
             "competitiveAdvantage": "Unifies multi-omic clinical data into clean, evidence-backed reports with active therapy matching, significantly reducing clinician interpretation time.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_icore.png"
       },
       {
             "id": "oncoalibrex",
@@ -175,9 +175,9 @@ const db = {
                   "Offers an additional molecular signal to complement imaging and guide timely therapy adjustments."
             ],
             "competitiveAdvantage": "Unlike conventional serum tumor markers that fail when tumors do not express the target antigen, OncoAlibrex® follows disease behavior molecularly with zero antigen dependence, empowering clinicians with actionable real-time response data.",
-            "logo": "logo.svg"
+            "logo": "assets/logos/logo_oncoalibrex.png"
       }
-],
+    ],
 
   documents: [
 
@@ -1833,9 +1833,21 @@ const db = {
   ],
 
   brandAssets: [
-    { id: "brand-001", title: "1Cell.Ai Corporate Primary Logo (Positive)", category: "Logos", fileType: "SVG", downloadUrl: "https://1cell.ai/wp-content/uploads/2024/06/1CellAi-logo.svg" },
+    { id: "brand-001", title: "1Cell.Ai Corporate Primary Logo (Positive)", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_1cell.png" },
     { id: "brand-002", title: "1Cell.Ai Corporate Reverse Logo (White)", category: "Logos", fileType: "SVG", downloadUrl: "https://1cell.ai/wp-content/uploads/2026/06/1CellAi-Reverse-logo.svg" },
-    { id: "brand-003", title: "1Cell.Ai Application Icon PNG", category: "Logos", fileType: "PNG", downloadUrl: "https://1cell.ai/wp-content/uploads/2024/06/OneCellAi-Icon-300x300.png" }
+    { id: "brand-003", title: "1Cell.Ai 3D Sphere Application Icon", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/sphere_icon.png" },
+    { id: "brand-004", title: "OncoIndx® Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncoindx.png" },
+    { id: "brand-005", title: "OncoIndx® Prime+ Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_primeplus.png" },
+    { id: "brand-006", title: "OncoIndx® TBx Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncoindxtbx.png" },
+    { id: "brand-007", title: "OncoIndx® 360° Endometrium Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncoindx360.png" },
+    { id: "brand-008", title: "OncoTarget® Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncotarget.png" },
+    { id: "brand-009", title: "OncoHRD® Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncohrd.png" },
+    { id: "brand-010", title: "OncoRisk® Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncorisk.png" },
+    { id: "brand-011", title: "OncoMonitor® Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncomonitor.png" },
+    { id: "brand-012", title: "OncoAlibrex® Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncoalibrex.png" },
+    { id: "brand-013", title: "OncoPredikt® Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncopredikt.png" },
+    { id: "brand-014", title: "OncoCTC® Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_oncoctc.png" },
+    { id: "brand-015", title: "iCore® / iCare™ Official HD Logo", category: "Logos", fileType: "PNG", downloadUrl: "assets/logos/logo_icore.png" }
   ],
 
   templates: [

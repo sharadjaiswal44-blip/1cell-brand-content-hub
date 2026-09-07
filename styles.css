@@ -2230,5 +2230,56 @@ body.authenticated .login-overlay {
   color: var(--accent-color);
 }
 
+/* Product HD Logo Badges and Containers */
+.product-tile-logo-badge {
+  background: #ffffff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  max-width: 100%;
+  transition: all var(--transition-fast);
+}
 
+.quick-tile-card:hover .product-tile-logo-badge {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
 
+.product-card-brand-logo {
+  height: 32px;
+  max-width: 160px;
+  object-fit: contain;
+  display: block;
+}
+
+.product-microsite-logo-badge {
+  background: #ffffff;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  max-width: 100%;
+}
+
+.product-header-brand-logo {
+  height: 40px;
+  max-width: 200px;
+  object-fit: contain;
+  display: block;
+}
+
+[data-theme="dark"] .product-tile-logo-badge,
+[data-theme="dark"] .product-microsite-logo-badge {
+  background: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}

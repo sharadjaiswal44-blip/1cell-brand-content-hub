@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v15';
+import db from './db.js?v=20260907-v16';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -593,6 +593,7 @@ function renderDashboardProductDocs(productName) {
   if (!container) return;
 
   const relatedDocs = db.documents.filter(d => d.product === productName);
+  const productObj = db.products.find(p => p.id === productName);
   
   if (relatedDocs.length === 0) {
     container.innerHTML = `<div style="grid-column: 1 / -1; color: var(--text-tertiary); font-size: 13px; text-align: center; padding: 24px;">No documents registered in this product folder.</div>`;
@@ -600,6 +601,23 @@ function renderDashboardProductDocs(productName) {
   }
 
   let html = '';
+  if (productObj) {
+    html += `
+      <div style="grid-column: 1 / -1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:10px 16px; margin-bottom:6px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="product-tile-logo-badge" style="height:38px; padding:4px 10px;">
+            <img src="${productObj.logo}" alt="${productObj.name}" style="height:26px; max-width:140px; object-fit:contain;" onerror="this.onerror=null;this.src='assets/logos/logo_1cell.png';" />
+          </div>
+          <div>
+            <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">${productObj.name} SharePoint Assets Directory</div>
+            <div style="font-size:12px; color:var(--text-secondary);">${relatedDocs.length} files available in folder</div>
+          </div>
+        </div>
+        <button class="btn-primary" style="padding:5px 14px; font-size:11.5px; font-weight:600;" onclick="window.openProductMicrosite('${productObj.id}')">Open Product Hub Workspace →</button>
+      </div>
+    `;
+  }
+
   relatedDocs.forEach(doc => {
     let icon = '📄';
     if (doc.contentType === 'Brochure') icon = '📖';
@@ -892,7 +910,7 @@ function renderDocumentCard(doc) {
   const isFav = userFavorites.has(doc.id);
   const biomarkerBadge = doc.biomarker ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
   const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
-  const productTag = productObj ? `<span class="badge badge-prod">${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : '');
+  const productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : '');
 
   return `
     <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in SharePoint">
@@ -1031,7 +1049,12 @@ function renderProductHub() {
         const pubCount = db.publications.filter(pub => pub.relatedProduct === p.id).length;
         return `
           <div class="quick-tile-card" style="align-items: flex-start; text-align: left; padding: 24px;" onclick="window.openProductMicrosite('${p.id}')">
-            <div class="tile-icon-wrapper" style="width: 42px; height: 42px; font-size:20px;">🔬</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 16px;">
+              <div class="product-tile-logo-badge">
+                <img src="${p.logo}" alt="${p.name}" class="product-card-brand-logo" onerror="this.onerror=null;this.src='assets/logos/logo_1cell.png';" />
+              </div>
+              <span style="font-size: 11px; font-weight: 700; color: var(--accent-color); background: var(--accent-light); padding: 4px 10px; border-radius: 6px;">Explore →</span>
+            </div>
             <h3 style="font-size:18px; margin-bottom: 8px; font-weight:700;">${p.name}</h3>
             <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-bottom: 20px;">${p.description}</p>
             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; font-size:11px; font-weight:600; color:var(--text-tertiary);">
@@ -1071,10 +1094,15 @@ window.openProductMicrosite = function(prodId) {
 
   workspaceViewport.innerHTML = `
     <div class="product-workspace-header">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:12px;">
-        <div>
-          <div class="product-tagline">1Cell.Ai Genomic Assays • Product Hub Workspace</div>
-          <h1 class="product-name" style="margin-top:4px;">${product.name}</h1>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div class="product-microsite-logo-badge">
+            <img src="${product.logo}" alt="${product.name} Logo" class="product-header-brand-logo" onerror="this.onerror=null;this.src='assets/logos/logo_1cell.png';" />
+          </div>
+          <div>
+            <div class="product-tagline">1Cell.Ai Genomic Assays • Product Hub Workspace</div>
+            <h1 class="product-name" style="margin-top:2px;">${product.name}</h1>
+          </div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
           <button class="btn-primary" onclick="window.triggerRegisterProductAsset('${prodId}', '${currentMicrositeTab}')" style="display:flex; align-items:center; gap:6px; padding:9px 18px; font-weight:600; box-shadow:var(--shadow-md);">
@@ -1860,7 +1888,9 @@ ${window.renderCategoryHeader('Corporate Brand Assets & Guidelines', 'Core logos
       ${db.brandAssets.map(asset => `
         <div class="doc-card" onclick="window.openSharePoint('${asset.id}')" style="cursor:pointer;" title="Click to view brand asset in SharePoint">
           <div class="card-header-bar">
-            <div class="card-type-icon">🎨</div>
+            <div class="card-type-icon" style="overflow:hidden; display:flex; align-items:center; justify-content:center; background:#ffffff; border:1px solid rgba(0,0,0,0.06); padding:3px; border-radius:6px; width:44px; height:44px;">
+              ${asset.category === 'Logos' && asset.downloadUrl && asset.downloadUrl.endsWith('.png') ? `<img src="${asset.downloadUrl}" alt="${asset.title}" style="max-height:28px; max-width:40px; object-fit:contain;" onerror="this.onerror=null;this.parentElement.innerHTML='🎨';" />` : '🎨'}
+            </div>
             <span class="badge badge-dept">Corporate</span>
           </div>
           <div class="card-body">
@@ -3570,9 +3600,9 @@ window.openSharePoint = function(id) {
   const brand = (db.brandAssets || []).find(b => b.id === id);
   if (brand && (brand.downloadUrl || brand.sharePointUrl)) {
     let url = (brand.sharePointUrl || brand.downloadUrl).trim();
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    if (!/^https?:\/\//i.test(url) && !url.startsWith('assets/') && !url.startsWith('/')) url = 'https://' + url;
     window.open(url, '_blank');
-    showToast(`Opening in SharePoint: ${brand.title}`);
+    showToast(`Opening: ${brand.title}`);
     return;
   }
   const temp = (db.templates || []).find(t => t.id === id);
