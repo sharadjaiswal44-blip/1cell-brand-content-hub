@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v17';
+import db from './db.js?v=20260907-v18';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -86,8 +86,8 @@ function getProductAssetCategory(doc) {
 // Application State
 let currentRole = 'marketing_admin';
 let currentTheme = 'light';
-let userFavorites = new Set(['doc-001', 'doc-004', 'doc-005']); // Default mock favorites
-let recentAssets = ['doc-001', 'doc-007', 'doc-013'];
+let userFavorites = new Set(['doc-041', 'doc-046', 'doc-051']); // Default mock favorites (OncoCTC, OncoAlibrex, OncoIncytes)
+let recentAssets = ['doc-041', 'doc-046', 'doc-051'];
 let activeSearchQuery = '';
 let activeQuizTab = 'quiz';
 let currentMicrositeId = null;
@@ -1424,7 +1424,7 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
           </div>
           <div class="card-actions-bar">
             <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${c.id}')">Edit Link</button>
-            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
+            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : (db.documents[0] ? db.documents[0].id : 'doc-041'))">Preview Metadata</button>
             <button class="btn-primary" style="padding:6px 16px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${c.id}')">View</button>
           </div>
         </div>
@@ -1739,7 +1739,7 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
             <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
             <div style="display:flex; gap:8px;">
               <button class="btn-outline" style="padding:8px 14px; font-size:12px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit Link</button>
-              <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${pub.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : 'doc-001')">Preview Metadata</button>
+              <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${pub.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : (db.documents[0] ? db.documents[0].id : 'doc-041'))">Preview Metadata</button>
               <button class="btn-primary" style="padding:8px 16px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">
                 <span>View</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
@@ -1880,7 +1880,7 @@ ${window.renderCategoryHeader('Speaker Profiles & Medical Experts', 'Academic pr
                 ${spk.publications ? spk.publications.map(p => {
                   const title = typeof p === 'object' ? p.title : p;
                   const doc = db.documents.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15)));
-                  const docId = doc ? doc.id : 'doc-001';
+                  const docId = doc ? doc.id : (db.documents[0] ? db.documents[0].id : 'doc-041');
                   const link = typeof p === 'object' ? (p.link || p.sharePointUrl) : '';
                   if (link) {
                     return `<div class="relation-item"><span>📄</span> <span style="cursor:pointer;" onclick="window.open('${link}', '_blank')">${title}</span></div>`;
@@ -1891,7 +1891,7 @@ ${window.renderCategoryHeader('Speaker Profiles & Medical Experts', 'Academic pr
                 ${spk.presentations ? spk.presentations.map(p => {
                   const title = typeof p === 'object' ? p.title : p;
                   const doc = db.documents.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15)));
-                  const docId = doc ? doc.id : 'doc-001';
+                  const docId = doc ? doc.id : (db.documents[0] ? db.documents[0].id : 'doc-041');
                   const link = typeof p === 'object' ? (p.link || p.sharePointUrl) : '';
                   if (link) {
                     return `<div class="relation-item"><span>📊</span> <span style="cursor:pointer;" onclick="window.open('${link}', '_blank')">${title}</span></div>`;
