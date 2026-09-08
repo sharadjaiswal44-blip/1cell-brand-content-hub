@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260907-v18';
+import db from './db.js?v=20260908-v19';
 window.db = db;
 
 // Hydrate custom edits and uploads from localStorage
@@ -682,19 +682,39 @@ window.triggerRegisterAssetModal = function(routeName) {
   
   const categorySelect = document.getElementById('formCategory');
   if (categorySelect) {
-    if (routeName === 'dashboard' || routeName === 'favorites') {
+    if (routeName === 'dashboard' || routeName === 'favorites' || routeName === 'company-assets') {
       categorySelect.value = 'company-assets';
     } else {
       categorySelect.value = routeName;
     }
   }
 
-  // Pre-fill department based on user department
+  // Pre-fill department based on user department or Corporate for company-assets
   const authDept = sessionStorage.getItem("authDept");
   const deptSelect = document.getElementById('formDept');
-  if (deptSelect && authDept) {
-    if (["Marketing", "Medical", "Product", "Scientific", "Sales", "HR", "Corporate"].includes(authDept)) {
+  if (deptSelect) {
+    if (routeName === 'company-assets') {
+      deptSelect.value = 'Corporate';
+    } else if (authDept && ["Marketing", "Medical", "Product", "Scientific", "Sales", "HR", "Corporate"].includes(authDept)) {
       deptSelect.value = authDept;
+    }
+  }
+
+  // Preset product to None (General / Corporate) for company-assets
+  const productSelect = document.getElementById('formProduct');
+  if (productSelect) {
+    if (routeName === 'company-assets') {
+      productSelect.value = '';
+    }
+  }
+
+  // Update modal title for clarity
+  const modalTitle = document.querySelector('#uploadModal .modal-title');
+  if (modalTitle) {
+    if (routeName === 'company-assets') {
+      modalTitle.innerText = 'Register New Company Asset';
+    } else {
+      modalTitle.innerText = 'Create / Update Metadata Record';
     }
   }
 
@@ -914,7 +934,7 @@ function renderDocumentCard(doc) {
   const isFav = userFavorites.has(doc.id);
   const biomarkerBadge = doc.biomarker ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
   const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
-  const productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : '');
+  const productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : `<span class="badge badge-prod" style="background:#e8edf5; color:#1a365d; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />Corporate</span>`);
 
   return `
     <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in SharePoint">
@@ -983,12 +1003,20 @@ function renderDocumentCard(doc) {
 
 // 2. Company Assets View
 function renderCompanyAssets() {
-  const assets = db.documents.filter(d => d.product === null);
+  const assets = db.documents.filter(d => !d.product || d.product === 'company' || d.category === 'company-assets');
   workspaceViewport.innerHTML = `
-    <div class="welcome-banner">
+    <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
       <div>
         <h1 class="welcome-title">Company Profile & Corporate Assets</h1>
-        <p class="welcome-subtitle">All general brand, deck, and legal summaries at a corporate wide level.</p>
+        <p class="welcome-subtitle">Central repository for all company-wide documentation, brand identity assets, corporate presentations, legal agreements, and general resources.</p>
+      </div>
+      <div class="welcome-banner-actions">
+        <button class="btn-primary" onclick="window.triggerRegisterAssetModal('company-assets')" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:600; box-shadow: var(--shadow-sm);">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>+ Add Company Asset</span>
+        </button>
       </div>
     </div>
 
@@ -1026,9 +1054,27 @@ function renderCompanyAssets() {
     </div>
 
     <div class="dashboard-section">
-      <h2 class="section-headline" style="margin-bottom: 20px;">Corporate Materials & Assets</h2>
+      <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom: 20px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h2 class="section-headline" style="margin:0;">Corporate Materials & Company Documents</h2>
+          <span class="badge badge-dept" style="font-size:12px; padding:4px 10px; font-weight:600;">${assets.length} Documents</span>
+        </div>
+        <button class="btn-outline" onclick="window.triggerRegisterAssetModal('company-assets')" style="font-size:12px; padding:6px 14px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>+ Add Asset</span>
+        </button>
+      </div>
       <div class="assets-grid">
-        ${assets.map(d => renderDocumentCard(d)).join('')}
+        ${assets.length > 0 ? assets.map(d => renderDocumentCard(d)).join('') : `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; background: var(--bg-secondary); border: 2px dashed var(--border-color); border-radius: var(--radius-md);">
+            <div style="font-size: 38px; margin-bottom: 12px;">📁</div>
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">No Company Documents Found</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 16px;">This tab holds all company-wide documents, corporate presentations, brand guidelines, and legal agreements. Click below to add the first asset.</p>
+            <button class="btn-primary" onclick="window.triggerRegisterAssetModal('company-assets')">+ Add First Company Asset</button>
+          </div>
+        `}
       </div>
     </div>
   `;
@@ -3035,8 +3081,8 @@ function handleMockUpload(e) {
     else if (currentRole === 'leadership') dept = 'Leadership';
   }
 
-  if (dept !== 'Marketing' && dept !== 'Leadership') {
-    showToast("Access denied: Only Marketing and Leadership are permitted to register content.");
+  if (dept !== 'Marketing' && dept !== 'Leadership' && dept !== 'Corporate' && category !== 'company-assets') {
+    showToast("Access denied: Only authorized team members are permitted to register content.");
     closeModal(uploadModal);
     return;
   }
@@ -3083,7 +3129,7 @@ function handleMockUpload(e) {
     createdDate: new Date().toISOString().split('T')[0],
     updatedDate: new Date().toISOString().split('T')[0],
     sharePointUrl,
-    folderPath: `${department}/${contentType}s`,
+    folderPath: product ? `${department}/${contentType}s` : `Shared Documents/Corporate/${contentType}s`,
     size,
     downloadCount: 0,
     viewCount: 1,
@@ -3227,7 +3273,7 @@ function handleMockUpload(e) {
   }
 
   closeModal(uploadModal);
-  showToast(`Successfully registered "${title}" under ${product ? product.toUpperCase() : 'General'}!`);
+  showToast(`Successfully registered "${title}" under ${product ? product.toUpperCase() : 'Company Assets'}!`);
 
   // Refresh current view (microsite or active route)
   window.refreshCurrentView();
