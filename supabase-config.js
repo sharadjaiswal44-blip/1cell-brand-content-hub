@@ -8,10 +8,10 @@
 
 export const DEFAULT_SUPABASE_CONFIG = {
   // Enter your Supabase Project URL, e.g. "https://abcdefghijklmnopqrst.supabase.co"
-  supabaseUrl: '',
+  supabaseUrl: 'https://johgrqbintnmzdabyddq.supabase.co',
 
   // Enter your Supabase Public 'anon' Key (starts with "eyJhbGciOi...")
-  supabaseAnonKey: '',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvaGdycWJpbnRubXpkYWJ5ZGRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTg3NTAsImV4cCI6MjEwNDQzNDc1MH0.9IoIo0VtTcKSRyhoUYtKT8QVkIqkzVWcVWI96m2vM9o',
 
   // Primary database table for Content Hub cards
   tableName: 'content_assets',
