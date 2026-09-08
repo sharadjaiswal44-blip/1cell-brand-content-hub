@@ -6,12 +6,20 @@ import {
   TEAMS,
   VISIBILITY
 } from './cloud-config.js';
+import { supabaseService } from './supabase-service.js';
+import { 
+  getActiveSupabaseConfig, 
+  saveActiveSupabaseConfig, 
+  isSupabaseConfigured,
+  clearSupabaseConfig 
+} from './supabase-config.js';
 
 window.db = db;
 window.normalizeTeam = normalizeTeam;
 window.canTeamViewVisibility = canTeamViewVisibility;
 window.TEAMS = TEAMS;
 window.VISIBILITY = VISIBILITY;
+window.supabaseService = supabaseService;
 
 function getCurrentUserTeam() {
   const authTeam = sessionStorage.getItem("authTeam");
@@ -26,73 +34,223 @@ function getCurrentUserTeam() {
 }
 window.getCurrentUserTeam = getCurrentUserTeam;
 
-// Hydrate custom edits and uploads from localStorage
-function hydrateCustomStorage() {
-  try {
-    const deletedIds = JSON.parse(localStorage.getItem('1cell_deleted_asset_ids') || '[]');
-    if (deletedIds && deletedIds.length > 0) {
-      const delSet = new Set(deletedIds);
-      db.documents = db.documents.filter(d => !delSet.has(d.id));
-      db.cases = db.cases.filter(c => !delSet.has(c.id));
-      db.publications = db.publications.filter(p => !delSet.has(p.id));
-      db.videos = db.videos.filter(v => !delSet.has(v.id));
-      db.reports = (db.reports || []).filter(r => !delSet.has(r.id));
-    }
+// Map a Supabase row to the format expected by the Content Hub frontend
+function mapSupabaseRowToCard(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    title: row.title || '',
+    description: row.description || '',
+    category: row.category || 'company-assets',
+    department: row.department || 'Corporate',
+    product: row.product_workspace || null,
+    contentType: row.content_type || 'Brochure',
+    region: row.region || 'Global',
+    cancerType: row.cancer_type || 'None',
+    biomarker: row.biomarkers || 'None',
+    owner: row.owner_author || '1Cell.Ai',
+    author: row.owner_author || '1Cell.Ai',
+    version: row.version || 'v1.0',
+    status: row.status || 'Approved',
+    team_id: row.target_team || 'marketing',
+    visibility: row.collaboration_scope || 'all',
+    sharePointUrl: row.sharepoint_url || '',
+    oneDriveUrl: row.sharepoint_url || '',
+    folderPath: row.sharepoint_folder_path || 'Shared Documents',
+    created_by: row.created_by || 'Team Member',
+    created_by_email: row.created_by_email || '',
+    createdDate: (row.created_at || '').split('T')[0],
+    updatedDate: (row.updated_at || '').split('T')[0],
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    is_deleted: Boolean(row.is_deleted),
+    ...(row.extra_metadata || {})
+  };
+}
 
-    const savedDocs = localStorage.getItem('1cell_custom_documents');
-    if (savedDocs) {
-      const parsed = JSON.parse(savedDocs);
-      parsed.forEach(savedDoc => {
-        if (deletedIds.includes(savedDoc.id)) return;
-        const idx = db.documents.findIndex(d => d.id === savedDoc.id);
-        if (idx >= 0) {
-          db.documents[idx] = { ...db.documents[idx], ...savedDoc };
-        } else {
-          db.documents.unshift(savedDoc);
-        }
+// Injects or updates an asset card inside the in-memory collections
+function applyAssetToLocalDb(card) {
+  if (!card || card.is_deleted) return;
+  const cat = (card.category || '').toLowerCase();
+  
+  if (cat === 'case-library' || card.contentType === 'Case Study') {
+    if (!db.cases) db.cases = [];
+    const idx = db.cases.findIndex(c => c.id === card.id);
+    const caseObj = {
+      ...card,
+      doctor: card.owner || card.author,
+      hospital: card.department || '1Cell Clinical Specialist',
+      relatedProduct: card.product || 'oncoindx',
+      readMoreUrl: card.sharePointUrl,
+      summary: card.description
+    };
+    if (idx >= 0) db.cases[idx] = { ...db.cases[idx], ...caseObj };
+    else db.cases.unshift(caseObj);
+  } else if (cat === 'publications' || card.contentType === 'Publication') {
+    if (!db.publications) db.publications = [];
+    const idx = db.publications.findIndex(p => p.id === card.id);
+    const pubObj = {
+      ...card,
+      authors: card.owner || card.author,
+      link: card.sharePointUrl,
+      abstract: card.description,
+      relatedProduct: card.product || 'oncoindx'
+    };
+    if (idx >= 0) db.publications[idx] = { ...db.publications[idx], ...pubObj };
+    else db.publications.unshift(pubObj);
+  } else if (cat === 'videos' || card.contentType === 'Video') {
+    if (!db.videos) db.videos = [];
+    const idx = db.videos.findIndex(v => v.id === card.id);
+    const vidObj = {
+      ...card,
+      speaker: card.owner || card.author,
+      videoUrl: card.sharePointUrl
+    };
+    if (idx >= 0) db.videos[idx] = { ...db.videos[idx], ...vidObj };
+    else db.videos.unshift(vidObj);
+  } else if (cat === 'report-library' || card.contentType === 'Sample Report') {
+    if (!db.reports) db.reports = [];
+    const idx = db.reports.findIndex(r => r.id === card.id);
+    const repObj = {
+      ...card,
+      author: card.owner || card.author,
+      downloadUrl: card.sharePointUrl,
+      summary: card.description
+    };
+    if (idx >= 0) db.reports[idx] = { ...db.reports[idx], ...repObj };
+    else db.reports.unshift(repObj);
+  }
+
+  // Always keep in db.documents as canonical searchable index
+  if (!db.documents) db.documents = [];
+  const dIdx = db.documents.findIndex(d => d.id === card.id);
+  if (dIdx >= 0) db.documents[dIdx] = { ...db.documents[dIdx], ...card };
+  else db.documents.unshift(card);
+}
+
+// Removes an asset from all in-memory collections
+function removeAssetFromLocalDb(id) {
+  if (!id) return;
+  if (db.documents) db.documents = db.documents.filter(d => d.id !== id);
+  if (db.cases) db.cases = db.cases.filter(c => c.id !== id);
+  if (db.publications) db.publications = db.publications.filter(p => p.id !== id);
+  if (db.videos) db.videos = db.videos.filter(v => v.id !== id);
+  if (db.reports) db.reports = db.reports.filter(r => r.id !== id);
+  if (db.brandAssets) db.brandAssets = db.brandAssets.filter(b => b.id !== id);
+  if (db.templates) db.templates = db.templates.filter(t => t.id !== id);
+}
+
+// Synchronize cards from central Supabase database
+async function syncFromCentralDatabase(silent = false) {
+  updateCloudDbUI('connecting');
+  const res = await supabaseService.fetchActiveAssets();
+  
+  if (!res.configured) {
+    updateCloudDbUI('unconfigured');
+    return false;
+  }
+
+  if (res.success && Array.isArray(res.data)) {
+    if (res.data.length > 0) {
+      res.data.forEach(row => {
+        const card = mapSupabaseRowToCard(row);
+        if (card) applyAssetToLocalDb(card);
       });
+      if (!silent) {
+        showToast(`Synchronized ${res.data.length} shared assets from Central Hub.`);
+      }
     }
-    const savedCases = localStorage.getItem('1cell_custom_cases');
-    if (savedCases) {
-      const parsedCases = JSON.parse(savedCases);
-      parsedCases.forEach(savedCase => {
-        if (deletedIds.includes(savedCase.id)) return;
-        const idx = db.cases.findIndex(c => c.id === savedCase.id);
-        if (idx >= 0) {
-          db.cases[idx] = { ...db.cases[idx], ...savedCase };
-        } else {
-          db.cases.unshift(savedCase);
-        }
-      });
+    updateCloudDbUI('connected', res.data.length);
+
+    // Subscribe to realtime changes for instant updates across team browsers
+    supabaseService.subscribeToRealtime((event) => {
+      handleRealtimeEvent(event);
+    });
+
+    return true;
+  } else {
+    console.warn('[Central DB] Could not fetch assets:', res.error);
+    updateCloudDbUI('error', 0, res.error);
+    return false;
+  }
+}
+
+// Handles incoming real-time events from Supabase
+function handleRealtimeEvent(event) {
+  if (!event) return;
+  const userTeam = getCurrentUserTeam();
+
+  if (event.type === 'INSERT') {
+    const card = mapSupabaseRowToCard(event.item);
+    if (!card) return;
+    applyAssetToLocalDb(card);
+
+    if (canTeamViewVisibility(userTeam, card.visibility || card.department)) {
+      showToast(`New shared card: "${card.title}" added by ${card.created_by}!`);
+      window.refreshCurrentView();
     }
-    const savedPubs = localStorage.getItem('1cell_custom_pubs');
-    if (savedPubs) {
-      const parsedPubs = JSON.parse(savedPubs);
-      parsedPubs.forEach(savedPub => {
-        if (deletedIds.includes(savedPub.id)) return;
-        const idx = db.publications.findIndex(p => p.id === savedPub.id);
-        if (idx >= 0) {
-          db.publications[idx] = { ...db.publications[idx], ...savedPub };
-        } else {
-          db.publications.unshift(savedPub);
-        }
-      });
+  } else if (event.type === 'UPDATE') {
+    const card = mapSupabaseRowToCard(event.item);
+    if (!card) return;
+    applyAssetToLocalDb(card);
+
+    if (canTeamViewVisibility(userTeam, card.visibility || card.department)) {
+      showToast(`Card updated: "${card.title}"`);
+      window.refreshCurrentView();
+    } else {
+      window.refreshCurrentView();
     }
-    const savedVideos = localStorage.getItem('1cell_custom_videos');
-    if (savedVideos) {
-      const parsedVideos = JSON.parse(savedVideos);
-      parsedVideos.forEach(savedVid => {
-        if (deletedIds.includes(savedVid.id)) return;
-        const idx = db.videos.findIndex(v => v.id === savedVid.id);
-        if (idx >= 0) {
-          db.videos[idx] = { ...db.videos[idx], ...savedVid };
-        } else {
-          db.videos.unshift(savedVid);
-        }
-      });
+  } else if (event.type === 'DELETE') {
+    removeAssetFromLocalDb(event.id);
+    showToast('A content card was removed from the Central Hub.');
+    window.refreshCurrentView();
+  }
+}
+
+// Update UI badge and modal telemetry for cloud database
+function updateCloudDbUI(status, count = null, err = null) {
+  const dot = document.getElementById('cloudDbDot');
+  const label = document.getElementById('cloudDbLabel');
+  const modalStatusDot = document.getElementById('modalDbStatusDot');
+  const modalStatusTitle = document.getElementById('modalDbStatusTitle');
+  const modalAssetCount = document.getElementById('modalDbAssetCount');
+
+  if (dot && label) {
+    if (status === 'connected') {
+      dot.style.backgroundColor = '#10b981';
+      dot.style.boxShadow = '0 0 0 2px rgba(16, 185, 129, 0.25)';
+      label.textContent = count !== null ? `Cloud Live (${count})` : 'Cloud Live';
+    } else if (status === 'connecting') {
+      dot.style.backgroundColor = '#3b82f6';
+      dot.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.25)';
+      label.textContent = 'Connecting...';
+    } else if (status === 'error') {
+      dot.style.backgroundColor = '#ef4444';
+      dot.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.25)';
+      label.textContent = 'Cloud Error';
+    } else {
+      dot.style.backgroundColor = '#f59e0b';
+      dot.style.boxShadow = 'none';
+      label.textContent = 'Connect Cloud';
     }
-  } catch (err) {
-    console.warn('Could not load custom stored documents:', err);
+  }
+
+  if (modalStatusDot && modalStatusTitle) {
+    if (status === 'connected') {
+      modalStatusDot.style.backgroundColor = '#10b981';
+      modalStatusTitle.textContent = 'Connected & Synchronized (Supabase Realtime Live)';
+      if (modalAssetCount && count !== null) modalAssetCount.textContent = `${count} cards`;
+    } else if (status === 'connecting') {
+      modalStatusDot.style.backgroundColor = '#3b82f6';
+      modalStatusTitle.textContent = 'Connecting to Supabase...';
+    } else if (status === 'error') {
+      modalStatusDot.style.backgroundColor = '#ef4444';
+      modalStatusTitle.textContent = `Connection Notice: ${err || 'Disconnected'}`;
+    } else {
+      modalStatusDot.style.backgroundColor = '#f59e0b';
+      modalStatusTitle.textContent = 'Cloud Database Not Configured';
+      if (modalAssetCount) modalAssetCount.textContent = '0 cards';
+    }
   }
 }
 
@@ -218,9 +376,124 @@ function getInitials(name) {
   return parts[0].substring(0, 2).toUpperCase();
 }
 
+// Bind Cloud Database Setup Modal & Connection Controls
+function bindCloudDbModalEvents() {
+  const cloudDbBtn = document.getElementById('cloudDbBtn');
+  const cloudDbModal = document.getElementById('cloudDbModal');
+  const cloudDbModalClose = document.getElementById('cloudDbModalClose');
+  const cloudDbModalCloseBtn = document.getElementById('cloudDbModalCloseBtn');
+  const form = document.getElementById('cloudDbConfigForm');
+  const btnReset = document.getElementById('btnResetCloudDb');
+  const btnSeedDb = document.getElementById('btnSeedCloudDb');
+  const btnCopySql = document.getElementById('btnCopyCloudSql');
+
+  if (cloudDbBtn && cloudDbModal) {
+    cloudDbBtn.addEventListener('click', () => {
+      const cfg = getActiveSupabaseConfig();
+      const urlInput = document.getElementById('cfgSupabaseUrl');
+      const keyInput = document.getElementById('cfgSupabaseAnonKey');
+      if (urlInput) urlInput.value = cfg.supabaseUrl || '';
+      if (keyInput) keyInput.value = cfg.supabaseAnonKey || '';
+      openModal(cloudDbModal);
+    });
+  }
+
+  if (cloudDbModalClose && cloudDbModal) {
+    cloudDbModalClose.addEventListener('click', () => closeModal(cloudDbModal));
+  }
+  if (cloudDbModalCloseBtn && cloudDbModal) {
+    cloudDbModalCloseBtn.addEventListener('click', () => closeModal(cloudDbModal));
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = (document.getElementById('cfgSupabaseUrl')?.value || '').trim();
+      const key = (document.getElementById('cfgSupabaseAnonKey')?.value || '').trim();
+
+      if (!url || !key) {
+        showToast('Please provide both Supabase Project URL and Public Anon Key.');
+        return;
+      }
+
+      saveActiveSupabaseConfig({ supabaseUrl: url, supabaseAnonKey: key });
+      showToast('Connecting to Supabase...');
+      const ok = await syncFromCentralDatabase(false);
+      if (ok) {
+        showToast('Successfully connected to Supabase Central Database!');
+        window.refreshCurrentView();
+      } else {
+        showToast('Could not connect to Supabase. Check credentials and ensure table exists.');
+      }
+    });
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
+      if (confirm('Disconnect from central Supabase database and reset credentials?')) {
+        clearSupabaseConfig();
+        const urlInput = document.getElementById('cfgSupabaseUrl');
+        const keyInput = document.getElementById('cfgSupabaseAnonKey');
+        if (urlInput) urlInput.value = '';
+        if (keyInput) keyInput.value = '';
+        updateCloudDbUI('unconfigured');
+        showToast('Database disconnected.');
+      }
+    });
+  }
+
+  if (btnSeedDb) {
+    btnSeedDb.addEventListener('click', async () => {
+      if (!isSupabaseConfigured()) {
+        showToast('Please connect to Supabase first before seeding.');
+        return;
+      }
+      btnSeedDb.disabled = true;
+      btnSeedDb.textContent = 'Seeding Cloud Database...';
+      try {
+        const resp = await fetch('backup_seed_assets.json');
+        if (!resp.ok) throw new Error('Could not load backup_seed_assets.json');
+        const seedData = await resp.json();
+        
+        let inserted = 0;
+        const client = await supabaseService.getClient();
+        if (!client) throw new Error('Supabase client unavailable.');
+
+        for (const item of seedData) {
+          const { error } = await client.from('content_assets').upsert([item], { onConflict: 'id' });
+          if (!error) inserted++;
+        }
+        showToast(`Successfully seeded ${inserted} cards to Supabase!`);
+        await syncFromCentralDatabase(true);
+        window.refreshCurrentView();
+      } catch (err) {
+        showToast(`Seed error: ${err.message}`);
+      } finally {
+        btnSeedDb.disabled = false;
+        btnSeedDb.textContent = 'Seed All Existing Cards to Database';
+      }
+    });
+  }
+
+  if (btnCopySql) {
+    btnCopySql.addEventListener('click', async () => {
+      try {
+        const resp = await fetch('supabase_schema_and_seed.sql');
+        const sqlText = await resp.text();
+        await navigator.clipboard.writeText(sqlText);
+        showToast('Complete SQL Schema & Seed script copied to clipboard!');
+      } catch (e) {
+        showToast('Could not copy SQL. You can open supabase_schema_and_seed.sql in the repo.');
+      }
+    });
+  }
+}
+
 // Initialize Application
 function init() {
-  hydrateCustomStorage();
+  // Sync cards from central Supabase database
+  syncFromCentralDatabase(true);
+  bindCloudDbModalEvents();
   // Check session authentication status on start
   checkAuth();
 
@@ -3192,8 +3465,8 @@ window.triggerDownload = function(title) {
   showToast(`Downloaded: ${title}`);
 };
 
-// Marketing Admin mock upload new files
-function handleMockUpload(e) {
+// Universal Asset Registration function (persisted to Central Supabase Database)
+async function handleMockUpload(e) {
   e.preventDefault();
 
   const category = document.getElementById('formCategory').value;
@@ -3219,6 +3492,7 @@ function handleMockUpload(e) {
   const userTeam = getCurrentUserTeam();
   const authDept = sessionStorage.getItem("authDept");
   const authName = sessionStorage.getItem("authName") || authorInput;
+  const authEmail = sessionStorage.getItem("authEmail") || 'marketing@1cell.ai';
   let dept = authDept;
   if (!dept) {
     if (userTeam === 'marketing') dept = 'Marketing';
@@ -3228,7 +3502,6 @@ function handleMockUpload(e) {
   }
 
   // Permission policy: ANY team member can add content inside Company Assets and Product Hub!
-  // Restricted marketing campaigns and brand guideline administrative uploads require Marketing or Leadership
   if (category !== 'company-assets' && category !== 'product-hub' && category !== 'case-library' && category !== 'report-library') {
     if (dept !== 'Marketing' && dept !== 'Leadership' && dept !== 'Corporate') {
       showToast("Access restricted: Only authorized team members may register content in this section.");
@@ -3242,222 +3515,104 @@ function handleMockUpload(e) {
     return;
   }
 
-  if (!/^https?:\/\//i.test(sharePointUrl)) {
-    sharePointUrl = 'https://' + sharePointUrl;
+  // Validate SharePoint / OneDrive URL
+  const urlValidation = supabaseService.validateDocumentUrl(sharePointUrl);
+  if (!urlValidation.valid) {
+    showToast(urlValidation.message);
+    const spInput = document.getElementById('formSpUrl');
+    if (spInput) spInput.focus();
+    return;
+  }
+  sharePointUrl = urlValidation.url;
+
+  // Duplicate URL Protection
+  const duplicate = await supabaseService.checkDuplicateUrl(sharePointUrl);
+  if (duplicate) {
+    showToast(`Duplicate Document: This OneDrive/SharePoint link is already registered under "${duplicate.title}".`);
+    return;
   }
 
-  // Create new document item
-  const newDocId = `doc-${Date.now()}`;
-  const newDoc = {
+  const saveBtn = document.getElementById('uploadModalSave');
+  const originalBtnText = saveBtn ? saveBtn.innerHTML : 'Register & Synchronize Card';
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span>Saving to Central Hub...</span>';
+  }
+
+  const newDocId = `asset-${Date.now()}`;
+  const assetData = {
     id: newDocId,
     title,
     description,
     category,
     department,
-    product,
-    cancerType,
-    biomarker,
-    contentType,
+    product_workspace: product,
+    content_type: contentType,
     region,
-    status,
-    year: "2026",
+    cancer_type: cancerType,
+    biomarkers: biomarker,
+    owner_author: authName,
     version,
-    author: authName,
-    owner: authName,
+    status,
+    target_team: userTeam,
+    collaboration_scope: visibility,
+    sharepoint_url: sharePointUrl,
+    sharepoint_folder_path: product ? `${department}/${contentType}s` : `Shared Documents/Corporate/${contentType}s`,
     created_by: authName,
-    team_id: userTeam,
-    visibility: visibility,
-    createdDate: new Date().toISOString().split('T')[0],
-    updatedDate: new Date().toISOString().split('T')[0],
+    created_by_email: authEmail,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    sharePointUrl,
-    oneDriveUrl: sharePointUrl,
-    folderPath: product ? `${department}/${contentType}s` : `Shared Documents/Corporate/${contentType}s`,
-    size,
-    downloadCount: 0,
-    viewCount: 1,
-    isPinned: false,
-    isTrending: false
+    is_deleted: false,
+    extra_metadata: {
+      size,
+      downloadCount: 0,
+      viewCount: 1,
+      isPinned: false,
+      isTrending: false,
+      year: "2026"
+    }
   };
 
-  // Push to local database
-  db.documents.unshift(newDoc);
-
-  // Sync to respective sub-array to ensure rendering works instantly in specific categories:
-  if (category === 'report-library' || contentType === 'Sample Report') {
-    if (!db.reports) db.reports = [];
-    db.reports.unshift({
-      id: `report-${Date.now()}`,
-      title,
-      product: product || 'oncoindx',
-      cancerType: cancerType || 'None',
-      biomarker: biomarker || 'Comprehensive Solid Tumor Profile',
-      specimen: 'FFPE Tumor Tissue',
-      status: status || 'Approved',
-      version: version || 'v1.0',
-      createdDate: new Date().toISOString().split('T')[0],
-      updatedDate: new Date().toISOString().split('T')[0],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      author: authName,
-      owner: authName,
-      created_by: authName,
-      team_id: userTeam,
-      visibility: visibility,
-      department,
-      summary: description,
-      sharePointUrl,
-      oneDriveUrl: sharePointUrl,
-      folderPath: `Shared Documents/Report Library/${cancerType}`,
-      size,
-      viewCount: 1
-    });
-    try {
-      localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
-    } catch (e) {}
-  } else if (category === 'case-library') {
-    db.cases.unshift({
-      id: `case-${Date.now()}`,
-      title,
-      doctor: authName,
-      hospital: department,
-      relatedProduct: product || 'oncoindx',
-      biomarker: biomarker || 'CGP',
-      cancerType,
-      outcome: 'Guided Therapy',
-      summary: description,
-      readMoreUrl: sharePointUrl,
-      oneDriveUrl: sharePointUrl,
-      created_by: authName,
-      team_id: userTeam,
-      visibility: visibility,
-      updated_at: new Date().toISOString()
-    });
-  } else if (category === 'publications') {
-    db.publications.unshift({
-      id: `pub-${Date.now()}`,
-      title,
-      journal: '1Cell.Ai Research',
-      publishedDate: '2026',
-      relatedProduct: product || 'oncoindx',
-      authors: authName,
-      abstract: description,
-      citation: `1Cell.Ai 2026; Abstract #${Date.now().toString().slice(-4)}`,
-      link: sharePointUrl,
-      oneDriveUrl: sharePointUrl,
-      created_by: authName,
-      team_id: userTeam,
-      visibility: visibility,
-      updated_at: new Date().toISOString()
-    });
-  } else if (category === 'videos') {
-    db.videos.unshift({
-      id: `vid-${Date.now()}`,
-      title,
-      duration: '10:00',
-      speaker: authName,
-      type: contentType,
-      product: product,
-      videoUrl: sharePointUrl,
-      oneDriveUrl: sharePointUrl,
-      created_by: authName,
-      team_id: userTeam,
-      visibility: visibility,
-      updated_at: new Date().toISOString()
-    });
-  } else if (category === 'brand-assets') {
-    db.brandAssets.unshift({
-      id: `brand-${Date.now()}`,
-      title,
-      category: 'Brand Guidelines',
-      fileType: 'PDF',
-      downloadUrl: sharePointUrl,
-      sharePointUrl,
-      oneDriveUrl: sharePointUrl,
-      created_by: authName,
-      team_id: userTeam,
-      visibility: visibility,
-      updated_at: new Date().toISOString()
-    });
-  } else if (category === 'templates') {
-    db.templates.unshift({
-      id: `temp-${Date.now()}`,
-      title,
-      category: department,
-      fileType: 'DOCX',
-      downloadUrl: sharePointUrl,
-      sharePointUrl,
-      oneDriveUrl: sharePointUrl,
-      created_by: authName,
-      team_id: userTeam,
-      visibility: visibility,
-      updated_at: new Date().toISOString()
-    });
-  } else if (category === 'speakers') {
-    // If the registered asset is a speaker publication/link, let's look for doctor matching author or hospital:
-    const spk = db.speakers.find(s => s.name.toLowerCase().includes(authName.toLowerCase()) || authName.toLowerCase().includes(s.name.toLowerCase()));
-    if (spk) {
-      if (!spk.publications) spk.publications = [];
-      spk.publications.push({
-        title,
-        link: sharePointUrl
-      });
-    }
-  } else if (category === 'newsletters') {
-    db.newsletters.unshift({
-      id: `news-${Date.now()}`,
-      title,
-      description,
-      department,
-      product,
-      contentType: 'Newsletter',
-      status: 'Approved',
-      version,
-      updatedDate: new Date().toISOString().split('T')[0],
-      owner: authName,
-      created_by: authName,
-      team_id: userTeam,
-      visibility: visibility,
-      sharePointUrl,
-      oneDriveUrl: sharePointUrl,
-      folderPath: `Shared Documents/${department}`
-    });
-  }
-  
-  // Update analytics telemetry
-  db.analytics.totalAssets++;
-  db.analytics.assetsAddedThisMonth++;
-  
-  if (db.analytics.assetsByDepartment[department]) {
-    db.analytics.assetsByDepartment[department]++;
-  } else {
-    db.analytics.assetsByDepartment[department] = 1;
-  }
-
-  if (product) {
-    if (db.analytics.assetsByProduct[product]) {
-      db.analytics.assetsByProduct[product]++;
-    } else {
-      db.analytics.assetsByProduct[product] = 1;
-    }
-  }
-
-  // Save updated collections to localStorage
   try {
-    localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
-    localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases));
-    localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications));
-    localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
-  } catch (e) {
-    console.warn('LocalStorage save error:', e);
+    let createdRecord = null;
+    if (isSupabaseConfigured()) {
+      createdRecord = await supabaseService.createAsset(assetData);
+    } else {
+      createdRecord = assetData;
+      console.warn('[Central DB] Supabase not yet configured. Card added locally in session.');
+    }
+
+    const card = mapSupabaseRowToCard(createdRecord);
+    applyAssetToLocalDb(card);
+
+    // Update analytics telemetry
+    db.analytics.totalAssets++;
+    db.analytics.assetsAddedThisMonth++;
+    if (db.analytics.assetsByDepartment[department]) {
+      db.analytics.assetsByDepartment[department]++;
+    } else {
+      db.analytics.assetsByDepartment[department] = 1;
+    }
+    if (product) {
+      if (db.analytics.assetsByProduct[product]) {
+        db.analytics.assetsByProduct[product]++;
+      } else {
+        db.analytics.assetsByProduct[product] = 1;
+      }
+    }
+
+    closeModal(uploadModal);
+    showToast(`Successfully registered "${title}" under ${product ? product.toUpperCase() : 'Company Assets'}!`);
+    window.refreshCurrentView();
+  } catch (err) {
+    console.error('[handleMockUpload error]:', err);
+    showToast(`Unable to save card: ${err.message}`);
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalBtnText;
+    }
   }
-
-  closeModal(uploadModal);
-  showToast(`Successfully registered "${title}" under ${product ? product.toUpperCase() : 'Company Assets'}!`);
-
-  // Refresh current view (microsite or active route)
-  window.refreshCurrentView();
 }
 
 // 6.7. Quiz & Leaderboard Portal Route
@@ -3887,35 +4042,39 @@ window.openSharePoint = function(id) {
 };
 
 // Universal Delete Asset function
-window.deleteAsset = function(id) {
+window.deleteAsset = async function(id) {
   if (!id) return;
   
   let itemTitle = 'this content card';
   let isOneDrive = false;
-  const doc = db.documents.find(d => d.id === id);
+  const doc = (db.documents || []).find(d => d.id === id);
   if (doc) {
     itemTitle = doc.title;
     if (doc.oneDriveUrl || (doc.sharePointUrl && (doc.sharePointUrl.includes('sharepoint.com') || doc.sharePointUrl.includes('onedrive') || doc.sharePointUrl.includes('1drv.ms')))) {
       isOneDrive = true;
     }
   }
-  const c = db.cases.find(item => item.id === id);
+  const c = (db.cases || []).find(item => item.id === id);
   if (c) {
     itemTitle = c.title;
     if (c.oneDriveUrl || (c.readMoreUrl && (c.readMoreUrl.includes('sharepoint.com') || c.readMoreUrl.includes('onedrive')))) isOneDrive = true;
   }
-  const pub = db.publications.find(item => item.id === id);
+  const pub = (db.publications || []).find(item => item.id === id);
   if (pub) {
     itemTitle = pub.title;
     if (pub.oneDriveUrl || (pub.link && (pub.link.includes('sharepoint.com') || pub.link.includes('onedrive')))) isOneDrive = true;
   }
-  const vid = db.videos.find(item => item.id === id);
+  const vid = (db.videos || []).find(item => item.id === id);
   if (vid) itemTitle = vid.title;
   const rep = (db.reports || []).find(r => r.id === id);
   if (rep) {
     itemTitle = rep.title;
     if (rep.oneDriveUrl || (rep.sharePointUrl && (rep.sharePointUrl.includes('sharepoint.com') || rep.sharePointUrl.includes('onedrive')))) isOneDrive = true;
   }
+  const brand = (db.brandAssets || []).find(b => b.id === id);
+  if (brand) itemTitle = brand.title;
+  const temp = (db.templates || []).find(t => t.id === id);
+  if (temp) itemTitle = temp.title;
 
   const safetyNote = isOneDrive
     ? '\n\nSafety Guarantee: Your underlying Microsoft OneDrive / SharePoint file will NOT be deleted or modified. Only this reference card is removed from the Content Hub.'
@@ -3925,58 +4084,33 @@ window.deleteAsset = function(id) {
     return;
   }
 
-  // Delete from db.documents
-  const docIdx = db.documents.findIndex(d => d.id === id);
-  if (docIdx >= 0) {
-    db.documents.splice(docIdx, 1);
+  showToast(`Removing card "${itemTitle}" from Hub...`);
+
+  // Central Database deletion via Supabase Free Tier
+  if (supabaseService.isConfigured()) {
     try {
-      localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
-    } catch (e) {}
+      await supabaseService.deleteAsset(id);
+    } catch (dbErr) {
+      console.warn('Central Supabase delete warning:', dbErr);
+      showToast(`Warning: Cloud delete encountered an issue: ${dbErr.message}`);
+    }
   }
 
-  // Delete from db.cases
-  const caseIdx = db.cases.findIndex(item => item.id === id);
-  if (caseIdx >= 0) {
-    db.cases.splice(caseIdx, 1);
-    try {
-      localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases));
-    } catch (e) {}
-  }
+  // Remove from local in-memory collections
+  removeAssetFromLocalDb(id);
 
-  // Delete from db.publications
-  const pubIdx = db.publications.findIndex(item => item.id === id);
-  if (pubIdx >= 0) {
-    db.publications.splice(pubIdx, 1);
-    try {
-      localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications));
-    } catch (e) {}
-  }
-
-  // Delete from db.videos
-  const vidIdx = db.videos.findIndex(item => item.id === id);
-  if (vidIdx >= 0) {
-    db.videos.splice(vidIdx, 1);
-    try {
-      localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
-    } catch (e) {}
-  }
-
-  // Delete from db.reports
-  const repIdx = (db.reports || []).findIndex(r => r.id === id);
-  if (repIdx >= 0) {
-    db.reports.splice(repIdx, 1);
-    try {
-      localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
-    } catch (e) {}
-  }
-
-  // Persist deleted IDs so deleted items stay deleted across browser reloads
+  // Sync fallback localStorage
   try {
     const deletedIds = JSON.parse(localStorage.getItem('1cell_deleted_asset_ids') || '[]');
     if (!deletedIds.includes(id)) {
       deletedIds.push(id);
       localStorage.setItem('1cell_deleted_asset_ids', JSON.stringify(deletedIds));
     }
+    if (db.documents) localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
+    if (db.cases) localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases));
+    if (db.publications) localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications));
+    if (db.videos) localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
+    if (db.reports) localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
   } catch (e) {}
 
   // Close Edit modal if open
@@ -4151,7 +4285,7 @@ window.openEditAssetModal = function(id) {
 };
 
 // Save edited asset and SharePoint URL
-window.saveAssetEdit = function() {
+window.saveAssetEdit = async function() {
   const id = document.getElementById('editDocId').value;
   const itemType = document.getElementById('editItemType').value;
   const title = document.getElementById('editDocTitle').value.trim();
@@ -4182,8 +4316,59 @@ window.saveAssetEdit = function() {
     spUrl = 'https://' + spUrl;
   }
 
+  // Validate Document URL format
+  const urlCheck = supabaseService.validateDocumentUrl(spUrl);
+  if (!urlCheck.valid) {
+    showToast(urlCheck.message || "Please provide a valid document URL.");
+    return;
+  }
+
+  const saveBtn = document.getElementById('editAssetModalSave') || document.getElementById('editModalSave');
+  const originalBtnText = saveBtn ? saveBtn.innerHTML : 'Save Changes';
+
+  // Central Database update via Supabase Free Tier
+  if (supabaseService.isConfigured()) {
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Central Hub...';
+    }
+
+    try {
+      const cancerEl = document.getElementById('editDocCancer');
+      const biomarkerEl = document.getElementById('editDocBiomarker');
+      const cancerVal = (cancerEl && cancerEl.value && cancerEl.value !== 'None') ? cancerEl.value : 'None';
+      const biomarkerVal = (biomarkerEl && biomarkerEl.value && biomarkerEl.value !== 'None') ? biomarkerEl.value : 'None';
+
+      await supabaseService.updateAsset(id, {
+        title: title,
+        description: desc,
+        department: department,
+        product_workspace: product,
+        content_type: contentType,
+        cancer_type: cancerVal,
+        biomarkers: biomarkerVal,
+        owner_author: owner || authName,
+        version: version,
+        status: status,
+        target_team: visibility === 'all' ? 'marketing' : visibility,
+        collaboration_scope: visibility,
+        sharepoint_url: spUrl,
+        sharepoint_folder_path: folderPath || 'Shared Documents'
+      });
+    } catch (dbErr) {
+      console.warn('Central Supabase update error:', dbErr);
+      showToast(`Central Hub update warning: ${dbErr.message}`);
+    } finally {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalBtnText;
+      }
+    }
+  }
+
+  // Update in local in-memory collections
   if (itemType === 'document') {
-    const doc = db.documents.find(d => d.id === id);
+    const doc = (db.documents || []).find(d => d.id === id);
     if (doc) {
       doc.title = title;
       doc.sharePointUrl = spUrl;
@@ -4214,7 +4399,7 @@ window.saveAssetEdit = function() {
       }
     }
   } else if (itemType === 'case') {
-    const c = db.cases.find(item => item.id === id);
+    const c = (db.cases || []).find(item => item.id === id);
     if (c) {
       c.title = title;
       c.readMoreUrl = spUrl;
@@ -4236,7 +4421,7 @@ window.saveAssetEdit = function() {
       } catch (e) {}
     }
   } else if (itemType === 'publication') {
-    const pub = db.publications.find(item => item.id === id);
+    const pub = (db.publications || []).find(item => item.id === id);
     if (pub) {
       pub.title = title;
       pub.link = spUrl;
@@ -4254,7 +4439,7 @@ window.saveAssetEdit = function() {
       } catch (e) {}
     }
   } else if (itemType === 'video') {
-    const vid = db.videos.find(item => item.id === id);
+    const vid = (db.videos || []).find(item => item.id === id);
     if (vid) {
       vid.title = title;
       vid.videoUrl = spUrl;
