@@ -195,6 +195,31 @@ const db = {
 
   documents: [
     {
+        "id": "doc-107",
+        "title": "1Cell.Ai Cross-Functional Collaboration & Standard Operating Guidelines",
+        "description": "Company-wide operating manual and standard operating guidelines for seamless cross-functional content sharing and asset creation across Marketing, Sales, Medical, Scientific, and Leadership teams.",
+        "department": "Corporate",
+        "product": null,
+        "category": "company-assets",
+        "cancerType": "None",
+        "biomarker": "None",
+        "contentType": "Others",
+        "status": "Approved",
+        "year": "2026",
+        "version": "v1.0",
+        "author": "Cross-Functional Operations",
+        "owner": "1Cell.Ai",
+        "createdDate": "2026-09-08",
+        "updatedDate": "2026-09-08",
+        "sharePointUrl": "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/Corporate/1Cell_CrossFunctional_Collaboration_Guidelines.pdf",
+        "folderPath": "Shared Documents/Corporate",
+        "size": "3.5 MB",
+        "downloadCount": 110,
+        "viewCount": 320,
+        "isPinned": true,
+        "isTrending": true
+    },
+    {
         "id": "doc-101",
         "title": "1Cell.Ai Corporate Overview & Pitch Deck",
         "description": "Official corporate pitch deck articulating 1Cell.Ai's mission to impact 1,000,000 cancer patients, our single-cell multi-omic liquid biopsy platforms, AI bioinformatics pipeline, and global clinical validation milestones.",

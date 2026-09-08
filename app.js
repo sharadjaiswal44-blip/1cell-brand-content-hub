@@ -75,12 +75,13 @@ function hydrateCustomStorage() {
   }
 }
 
-// Map document content type to standard 5 product categories: brochure, cases, whitepaper, sales, others
+// Map document content type to standard product categories: brochure, cases, whitepaper, sample-report, sales, others
 function getProductAssetCategory(doc) {
   const ct = (doc.contentType || '').toLowerCase().trim();
   if (ct === 'brochure') return 'brochure';
   if (ct === 'case study' || ct === 'case studies' || ct === 'cases') return 'cases';
   if (ct === 'whitepaper') return 'whitepaper';
+  if (ct === 'sample report' || ct === 'sample reports' || ct === 'report' || ct === 'patient report' || ct.includes('sample report')) return 'sample-report';
   if (ct === 'sales enablement' || ct === 'battlecard' || ct === 'presentation' || ct === 'sales deck' || ct === 'one pager' || ct === 'two pager' || ct === 'playbook' || doc.isSalesAsset) return 'sales';
   return 'others';
 }
@@ -1398,14 +1399,17 @@ window.openProductMicrosite = function(prodId) {
   const brochureDocs = allDocs.filter(d => getProductAssetCategory(d) === 'brochure');
   const caseDocs = allDocs.filter(d => getProductAssetCategory(d) === 'cases');
   const whitepaperDocs = allDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
+  const sampleReportDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sample-report');
   const salesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sales');
   const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'others');
 
   const relatedCases = db.cases.filter(c => c.relatedProduct === prodId);
   const relatedPubs = db.publications.filter(p => p.relatedProduct === prodId);
   const relatedVideos = db.videos.filter(v => v.product === prodId);
+  const relatedReports = (db.reports || []).filter(r => r.product === prodId);
 
   const totalCasesCount = caseDocs.length + relatedCases.length;
+  const totalReportsCount = sampleReportDocs.length + relatedReports.length;
   const totalOthersCount = otherDocs.length + relatedPubs.length + relatedVideos.length;
 
   workspaceViewport.innerHTML = `
@@ -1449,6 +1453,10 @@ window.openProductMicrosite = function(prodId) {
             <div class="product-stat-num">${whitepaperDocs.length}</div>
             <div class="product-stat-lbl">Whitepapers</div>
           </div>
+          <div class="product-stat-box">
+            <div class="product-stat-num">${totalReportsCount}</div>
+            <div class="product-stat-lbl">Sample Reports</div>
+          </div>
         </div>
       </div>
 
@@ -1457,6 +1465,7 @@ window.openProductMicrosite = function(prodId) {
         <button class="product-tab-btn ${currentMicrositeTab === 'brochure' ? 'active' : ''}" data-tab="brochure" onclick="window.switchProductTab(event, '${prodId}', 'brochure')">Brochure (${brochureDocs.length})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'cases' ? 'active' : ''}" data-tab="cases" onclick="window.switchProductTab(event, '${prodId}', 'cases')">Case Studies (${totalCasesCount})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'whitepaper' ? 'active' : ''}" data-tab="whitepaper" onclick="window.switchProductTab(event, '${prodId}', 'whitepaper')">WhitePaper (${whitepaperDocs.length})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'sample-report' ? 'active' : ''}" data-tab="sample-report" onclick="window.switchProductTab(event, '${prodId}', 'sample-report')">Sample Report (${totalReportsCount})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'sales' ? 'active' : ''}" data-tab="sales" onclick="window.switchProductTab(event, '${prodId}', 'sales')">Sales Enablement (${salesDocs.length})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'others' ? 'active' : ''}" data-tab="others" onclick="window.switchProductTab(event, '${prodId}', 'others')">Others (${totalOthersCount})</button>
       </div>
@@ -1478,12 +1487,14 @@ function renderProductTabContent(prodId, tabName) {
   const brochureDocs = allDocs.filter(d => getProductAssetCategory(d) === 'brochure');
   const caseDocs = allDocs.filter(d => getProductAssetCategory(d) === 'cases');
   const whitepaperDocs = allDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
+  const sampleReportDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sample-report');
   const salesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sales');
   const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'others');
 
   const relatedCases = db.cases.filter(c => c.relatedProduct === prodId);
   const relatedPubs = db.publications.filter(p => p.relatedProduct === prodId);
   const relatedVideos = db.videos.filter(v => v.product === prodId);
+  const relatedReports = (db.reports || []).filter(r => r.product === prodId);
 
   const emptyState = (catName) => `
     <div style="text-align:center; padding:48px 24px; background:var(--card-bg); border:1px dashed var(--border-color); border-radius:12px; width:100%;">
@@ -1566,6 +1577,40 @@ function renderProductTabContent(prodId, tabName) {
           ${whitepaperDocs.map(d => renderDocumentCard(d)).join('')}
         </div>
       `;
+    }
+  } else if (tabName === 'sample-report') {
+    const totalCount = sampleReportDocs.length + relatedReports.length;
+    if (totalCount === 0) {
+      container.innerHTML = emptyState('Sample Report');
+    } else {
+      let html = '<div class="assets-grid">';
+      if (sampleReportDocs.length > 0) {
+        html += sampleReportDocs.map(d => renderDocumentCard(d)).join('');
+      }
+      if (relatedReports.length > 0) {
+        const docIds = new Set(sampleReportDocs.map(d => d.id));
+        relatedReports.filter(r => !docIds.has(r.id)).forEach(r => {
+          html += renderDocumentCard({
+            id: r.id,
+            title: r.title,
+            description: r.summary,
+            department: r.department || 'Medical',
+            product: r.product,
+            contentType: 'Sample Report',
+            cancerType: r.cancerType,
+            biomarker: r.biomarker,
+            status: r.status || 'Approved',
+            year: '2026',
+            version: r.version || 'v1.0',
+            author: r.author || '1Cell.Ai',
+            owner: r.owner || '1Cell.Ai',
+            sharePointUrl: r.sharePointUrl,
+            size: r.size || '2.5 MB'
+          });
+        });
+      }
+      html += '</div>';
+      container.innerHTML = html;
     }
   } else if (tabName === 'sales') {
     if (salesDocs.length === 0) {
@@ -1671,6 +1716,7 @@ window.triggerRegisterProductAsset = function(prodId, categoryTab) {
     if (currentTab === 'brochure') formContentType.value = 'Brochure';
     else if (currentTab === 'cases') formContentType.value = 'Case Studies';
     else if (currentTab === 'whitepaper') formContentType.value = 'WhitePaper';
+    else if (currentTab === 'sample-report') formContentType.value = 'Sample Report';
     else if (currentTab === 'sales') formContentType.value = 'Sales Enablement';
     else if (currentTab === 'others') formContentType.value = 'Others';
     else formContentType.value = 'Brochure';
@@ -3338,27 +3384,12 @@ window.triggerDownload = function(title) {
 function handleMockUpload(e) {
   e.preventDefault();
 
-  const authDept = sessionStorage.getItem("authDept");
-  let dept = authDept;
-  if (!dept) {
-    if (currentRole === 'marketing_admin') dept = 'Marketing';
-    else if (currentRole === 'sales') dept = 'Sales';
-    else if (currentRole === 'medical') dept = 'Genomic Scientist';
-    else if (currentRole === 'leadership') dept = 'Leadership';
-  }
-
-  if (dept !== 'Marketing' && dept !== 'Leadership' && dept !== 'Corporate' && category !== 'company-assets') {
-    showToast("Access denied: Only authorized team members are permitted to register content.");
-    closeModal(uploadModal);
-    return;
-  }
-  
-  const title = document.getElementById('formTitle').value.trim();
-  const description = document.getElementById('formDesc').value.trim() || 'No description provided.';
   const category = document.getElementById('formCategory').value;
   const department = document.getElementById('formDept').value;
   const product = document.getElementById('formProduct').value || null;
   const contentType = document.getElementById('formContentType').value;
+  const title = document.getElementById('formTitle').value.trim();
+  const description = document.getElementById('formDesc').value.trim() || 'No description provided.';
   const region = document.getElementById('formRegion').value;
   const cancerType = document.getElementById('formCancer').value || 'None';
   const biomarker = document.getElementById('formBiomarker').value || 'None';
@@ -3368,6 +3399,25 @@ function handleMockUpload(e) {
   const authorEl = document.getElementById('formAuthor');
   const author = (authorEl ? authorEl.value.trim() : '') || '1Cell.Ai';
   const size = '2.5 MB';
+
+  const authDept = sessionStorage.getItem("authDept");
+  let dept = authDept;
+  if (!dept) {
+    if (currentRole === 'marketing_admin') dept = 'Marketing';
+    else if (currentRole === 'sales') dept = 'Sales';
+    else if (currentRole === 'medical') dept = 'Genomic Scientist';
+    else if (currentRole === 'leadership') dept = 'Leadership';
+  }
+
+  // Permission policy: ANY team member can add content inside Company Assets and Product Hub!
+  // Restricted marketing campaigns and brand guideline administrative uploads require Marketing or Leadership
+  if (category !== 'company-assets' && category !== 'product-hub' && category !== 'case-library' && category !== 'report-library') {
+    if (dept !== 'Marketing' && dept !== 'Leadership' && dept !== 'Corporate') {
+      showToast("Access restricted: Only authorized team members may register content in this section.");
+      closeModal(uploadModal);
+      return;
+    }
+  }
 
   if (!title || !sharePointUrl) {
     showToast("Please fill in all required fields.");
@@ -3407,7 +3457,7 @@ function handleMockUpload(e) {
   db.documents.unshift(newDoc);
 
   // Sync to respective sub-array to ensure rendering works instantly in specific categories:
-  if (category === 'report-library') {
+  if (category === 'report-library' || contentType === 'Sample Report') {
     if (!db.reports) db.reports = [];
     db.reports.unshift({
       id: `report-${Date.now()}`,
