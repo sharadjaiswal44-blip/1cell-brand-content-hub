@@ -3485,9 +3485,8 @@ async function handleMockUpload(e) {
   const authorInput = (authorEl ? authorEl.value.trim() : '') || '1Cell.Ai';
   const size = '2.5 MB';
 
-  // Read Target Team & Collaboration Scope
-  const visibilityEl = document.getElementById('formVisibility');
-  const visibility = visibilityEl ? visibilityEl.value : 'all';
+  // Target Team & Collaboration Scope defaults to 'all'
+  const visibility = 'all';
 
   const userTeam = getCurrentUserTeam();
   const authDept = sessionStorage.getItem("authDept");
@@ -4127,7 +4126,6 @@ window.openEditAssetModal = function(id) {
   if (!editModal) return;
 
   const ownerEl = document.getElementById('editDocOwner');
-  const visEl = document.getElementById('editDocVisibility');
 
   const doc = db.documents.find(d => d.id === id);
   if (doc) {
@@ -4147,7 +4145,6 @@ window.openEditAssetModal = function(id) {
 
     document.getElementById('editDocDept').value = doc.department || 'Marketing';
     if (ownerEl) ownerEl.value = doc.owner || doc.author || '1Cell.Ai';
-    if (visEl) visEl.value = doc.visibility || 'all';
     document.getElementById('editDocVersion').value = doc.version || 'v1.0';
     document.getElementById('editDocStatus').value = doc.status || 'Approved';
     document.getElementById('editDocDesc').value = doc.description || '';
@@ -4300,9 +4297,8 @@ window.saveAssetEdit = async function() {
   const status = document.getElementById('editDocStatus').value;
   const desc = document.getElementById('editDocDesc').value.trim();
 
-  // Read Target Team & Collaboration Scope
-  const visibilityEl = document.getElementById('editDocVisibility');
-  const visibility = visibilityEl ? visibilityEl.value : 'all';
+  // Target Team & Collaboration Scope defaults to 'all'
+  const visibility = 'all';
 
   const userTeam = getCurrentUserTeam();
   const authName = sessionStorage.getItem("authName") || owner || 'Team Member';
@@ -4520,7 +4516,7 @@ window.saveAssetEdit = async function() {
     }
   }
 
-  showToast(`Updated "${title}"! Direct link & team collaboration scope saved.`);
+  showToast(`Updated "${title}"! Direct link & metadata saved.`);
   const editModal = document.getElementById('editAssetModal');
   if (editModal) closeModal(editModal);
 
