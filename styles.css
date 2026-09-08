@@ -726,43 +726,6 @@ button, input, select {
   pointer-events: none;
 }
 
-/* Team Filter Toggle Bar */
-.team-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.team-filter-btn {
-  padding: 4px 12px;
-  font-size: 11.5px;
-  font-family: 'Outfit', sans-serif;
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.team-filter-btn:hover {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--accent-color);
-}
-
-.team-filter-btn.active {
-  background: var(--accent-color);
-  color: #ffffff;
-  border-color: var(--accent-color);
-}
-
 .card-body {
   padding: 0 16px 16px;
   flex: 1;

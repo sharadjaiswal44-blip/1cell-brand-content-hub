@@ -18,12 +18,6 @@ window.canTeamViewVisibility = canTeamViewVisibility;
 window.TEAMS = TEAMS;
 window.VISIBILITY = VISIBILITY;
 
-let activeTeamScope = 'all'; // 'all' | 'my_team' | 'cross_team'
-window.setTeamFilterScope = function(scope) {
-  activeTeamScope = scope;
-  window.refreshCurrentView();
-};
-
 function getCurrentUserTeam() {
   const authTeam = sessionStorage.getItem("authTeam");
   if (authTeam) return authTeam;
@@ -1062,28 +1056,17 @@ function renderDashboardProductDocs(productName) {
   if (!container) return;
 
   const userTeam = getCurrentUserTeam();
-  const allRelatedDocs = db.documents.filter(d => d.product === productName && canTeamViewVisibility(userTeam, d.visibility || d.department));
-
-  // Filter according to active team scope
-  let relatedDocs = allRelatedDocs;
-  if (activeTeamScope === 'my_team') {
-    relatedDocs = allRelatedDocs.filter(d => normalizeTeam(d.team_id || d.department) === userTeam && (d.visibility === userTeam || d.team_id === userTeam));
-  } else if (activeTeamScope === 'cross_team') {
-    relatedDocs = allRelatedDocs.filter(d => (d.visibility || 'all') === 'all');
-  }
+  const relatedDocs = db.documents.filter(d => d.product === productName && canTeamViewVisibility(userTeam, d.visibility || d.department));
 
   const productObj = db.products.find(p => p.id === productName);
   
-  if (allRelatedDocs.length === 0) {
+  if (relatedDocs.length === 0) {
     container.innerHTML = `<div style="grid-column: 1 / -1; color: var(--text-tertiary); font-size: 13px; text-align: center; padding: 24px;">No documents registered in this product folder for your team (${userTeam === 'scientific' ? 'Scientific Team' : 'Marketing Team'}).</div>`;
     return;
   }
 
   let html = '';
   if (productObj) {
-    const myTeamCount = allRelatedDocs.filter(d => normalizeTeam(d.team_id || d.department) === userTeam).length;
-    const crossTeamCount = allRelatedDocs.filter(d => (d.visibility || 'all') === 'all').length;
-
     html += `
       <div style="grid-column: 1 / -1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:10px 16px; margin-bottom:6px;">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -1092,15 +1075,10 @@ function renderDashboardProductDocs(productName) {
           </div>
           <div>
             <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">${productObj.name} SharePoint & OneDrive Assets</div>
-            <div style="font-size:12px; color:var(--text-secondary);">${allRelatedDocs.length} collaborative files accessible to your team</div>
+            <div style="font-size:12px; color:var(--text-secondary);">${relatedDocs.length} files accessible to your team</div>
           </div>
         </div>
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <div class="team-filter-bar" style="margin-bottom:0;">
-            <button class="team-filter-btn ${activeTeamScope === 'all' ? 'active' : ''}" onclick="window.setTeamFilterScope('all')">🌐 All Accessible (${allRelatedDocs.length})</button>
-            <button class="team-filter-btn ${activeTeamScope === 'my_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('my_team')">${userTeam === 'scientific' ? '🧬 My Team' : '📢 My Team'} (${myTeamCount})</button>
-            <button class="team-filter-btn ${activeTeamScope === 'cross_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('cross_team')">🤝 Cross-Team (${crossTeamCount})</button>
-          </div>
+        <div style="display:flex; align-items:center; gap:8px;">
           <button class="btn-primary" style="padding:5px 14px; font-size:11.5px; font-weight:600;" onclick="window.openProductMicrosite('${productObj.id}')">Open Product Hub Workspace →</button>
         </div>
       </div>
@@ -1531,17 +1509,7 @@ function renderDocumentCard(doc) {
 // 2. Company Assets View
 function renderCompanyAssets() {
   const userTeam = getCurrentUserTeam();
-  const allAssets = db.documents.filter(d => (!d.product || d.product === 'company' || d.category === 'company-assets') && canTeamViewVisibility(userTeam, d.visibility || d.department));
-
-  let assets = allAssets;
-  if (activeTeamScope === 'my_team') {
-    assets = allAssets.filter(d => normalizeTeam(d.team_id || d.department) === userTeam && (d.visibility === userTeam || d.team_id === userTeam));
-  } else if (activeTeamScope === 'cross_team') {
-    assets = allAssets.filter(d => (d.visibility || 'all') === 'all');
-  }
-
-  const myTeamCount = allAssets.filter(d => normalizeTeam(d.team_id || d.department) === userTeam).length;
-  const crossTeamCount = allAssets.filter(d => (d.visibility || 'all') === 'all').length;
+  const assets = db.documents.filter(d => (!d.product || d.product === 'company' || d.category === 'company-assets') && canTeamViewVisibility(userTeam, d.visibility || d.department));
 
   workspaceViewport.innerHTML = `
     <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
@@ -1596,14 +1564,9 @@ function renderCompanyAssets() {
       <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom: 16px;">
         <div style="display:flex; align-items:center; gap:12px;">
           <h2 class="section-headline" style="margin:0;">Corporate Materials & Company Documents</h2>
-          <span class="badge badge-dept" style="font-size:12px; padding:4px 10px; font-weight:600;">${allAssets.length} Accessible</span>
+          <span class="badge badge-dept" style="font-size:12px; padding:4px 10px; font-weight:600;">${assets.length} Accessible</span>
         </div>
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <div class="team-filter-bar" style="margin-bottom:0;">
-            <button class="team-filter-btn ${activeTeamScope === 'all' ? 'active' : ''}" onclick="window.setTeamFilterScope('all')">🌐 All Accessible (${allAssets.length})</button>
-            <button class="team-filter-btn ${activeTeamScope === 'my_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('my_team')">${userTeam === 'scientific' ? '🧬 My Team' : '📢 My Team'} (${myTeamCount})</button>
-            <button class="team-filter-btn ${activeTeamScope === 'cross_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('cross_team')">🤝 Cross-Team (${crossTeamCount})</button>
-          </div>
+        <div style="display:flex; align-items:center; gap:8px;">
           <button class="btn-outline" onclick="window.triggerRegisterAssetModal('company-assets')" style="font-size:12px; padding:6px 14px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -1766,44 +1729,19 @@ function renderProductTabContent(prodId, tabName) {
   const product = db.products.find(p => p.id === prodId);
   const allDocs = db.documents.filter(d => d.product === prodId && canTeamViewVisibility(userTeam, d.visibility || d.department));
 
-  let filteredDocs = allDocs;
-  if (activeTeamScope === 'my_team') {
-    filteredDocs = allDocs.filter(d => normalizeTeam(d.team_id || d.department) === userTeam && (d.visibility === userTeam || d.team_id === userTeam));
-  } else if (activeTeamScope === 'cross_team') {
-    filteredDocs = allDocs.filter(d => (d.visibility || 'all') === 'all');
-  }
-
-  const brochureDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'brochure');
-  const caseDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'cases');
-  const whitepaperDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
-  const sampleReportDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'sample-report');
-  const salesDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'sales');
-  const otherDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'others');
+  const brochureDocs = allDocs.filter(d => getProductAssetCategory(d) === 'brochure');
+  const caseDocs = allDocs.filter(d => getProductAssetCategory(d) === 'cases');
+  const whitepaperDocs = allDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
+  const sampleReportDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sample-report');
+  const salesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sales');
+  const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'others');
 
   const relatedCases = db.cases.filter(c => c.relatedProduct === prodId);
   const relatedPubs = db.publications.filter(p => p.relatedProduct === prodId);
   const relatedVideos = db.videos.filter(v => v.product === prodId);
   const relatedReports = (db.reports || []).filter(r => r.product === prodId);
 
-  const myTeamCount = allDocs.filter(d => normalizeTeam(d.team_id || d.department) === userTeam).length;
-  const crossTeamCount = allDocs.filter(d => (d.visibility || 'all') === 'all').length;
-
-  const teamScopeBar = `
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
-      <div class="team-filter-bar" style="margin-bottom:0;">
-        <span style="font-size:11px; font-weight:700; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.04em;">Team Scope:</span>
-        <button class="team-filter-btn ${activeTeamScope === 'all' ? 'active' : ''}" onclick="window.setTeamFilterScope('all')">🌐 All Accessible (${allDocs.length})</button>
-        <button class="team-filter-btn ${activeTeamScope === 'my_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('my_team')">${userTeam === 'scientific' ? '🧬 My Team' : '📢 My Team'} (${myTeamCount})</button>
-        <button class="team-filter-btn ${activeTeamScope === 'cross_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('cross_team')">🤝 Cross-Team (${crossTeamCount})</button>
-      </div>
-      <button class="btn-primary" onclick="window.triggerRegisterProductAsset('${prodId}', '${tabName}')" style="font-size:11.5px; padding:5px 14px; font-weight:600;">
-        + Add ${product ? product.name : ''} Card
-      </button>
-    </div>
-  `;
-
   const emptyState = (catName) => `
-    ${teamScopeBar}
     <div style="text-align:center; padding:48px 24px; background:var(--card-bg); border:1px dashed var(--border-color); border-radius:12px; width:100%;">
       <div style="font-size:36px; margin-bottom:10px;">📁</div>
       <h3 style="font-size:16px; font-weight:700; margin-bottom:6px; color:var(--text-primary);">No ${catName} files registered for ${product.name}</h3>
@@ -1815,13 +1753,12 @@ function renderProductTabContent(prodId, tabName) {
   `;
 
   if (tabName === 'all') {
-    if (filteredDocs.length === 0) {
+    if (allDocs.length === 0) {
       container.innerHTML = emptyState('All Assets');
     } else {
       container.innerHTML = `
-        ${teamScopeBar}
         <div class="assets-grid">
-          ${filteredDocs.map(d => renderDocumentCard(d)).join('')}
+          ${allDocs.map(d => renderDocumentCard(d)).join('')}
         </div>
       `;
     }
@@ -1830,7 +1767,6 @@ function renderProductTabContent(prodId, tabName) {
       container.innerHTML = emptyState('Brochure');
     } else {
       container.innerHTML = `
-        ${teamScopeBar}
         <div class="assets-grid">
           ${brochureDocs.map(d => renderDocumentCard(d)).join('')}
         </div>
