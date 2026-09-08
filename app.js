@@ -1,6 +1,9 @@
 // 1Cell.Ai Content Hub Application Controller
 import db from './db.js?v=20260908-v19';
+import { cloudSync } from './cloud-sync.js';
+import { getActiveCloudConfig, saveActiveCloudConfig, isCloudConfigured } from './cloud-config.js';
 window.db = db;
+window.cloudSync = cloudSync;
 
 // Hydrate custom edits and uploads from localStorage
 function hydrateCustomStorage() {
@@ -193,9 +196,272 @@ function getInitials(name) {
   return parts[0].substring(0, 2).toUpperCase();
 }
 
+// ============================================================================
+// Cloud Synchronization Service Integration
+// ============================================================================
+
+function initCloudSyncService() {
+  cloudSync.subscribe(updateCloudSyncUI);
+  cloudSync.init(db, (event) => {
+    updateCloudSyncUI();
+    if (event.type === 'REALTIME_EVENT') {
+      if (event.message) showToast(event.message);
+      window.refreshCurrentView();
+    } else if (event.type === 'INITIAL_SYNC') {
+      if (event.count > 0) {
+        showToast(`Cloud Sync: Synchronized ${event.count} team assets from database`);
+        window.refreshCurrentView();
+      }
+    } else if (event.type === 'IMPORT_COMPLETE') {
+      showToast(`Merged ${event.count} team assets into Content Hub!`);
+      window.refreshCurrentView();
+    }
+  });
+
+  bindCloudSyncEvents();
+}
+
+function updateCloudSyncUI() {
+  const dot = document.getElementById('cloudSyncDot');
+  const label = document.getElementById('cloudSyncBtnText');
+  const modalDot = document.getElementById('modalStatusDot');
+  const modalTitle = document.getElementById('modalStatusTitle');
+  const modalLastSync = document.getElementById('modalLastSyncText');
+  const modalRemoteCount = document.getElementById('modalRemoteCountText');
+  const modalProvider = document.getElementById('modalProviderText');
+  const cfgUrlInput = document.getElementById('cfgSupabaseUrl');
+  const cfgKeyInput = document.getElementById('cfgSupabaseAnonKey');
+  const sqlCode = document.getElementById('sqlSnippetCode');
+
+  const state = cloudSync.getState();
+  const config = getActiveCloudConfig();
+
+  if (cfgUrlInput && !cfgUrlInput.value) cfgUrlInput.value = config.supabaseUrl || '';
+  if (cfgKeyInput && !cfgKeyInput.value) cfgKeyInput.value = config.supabaseAnonKey || '';
+
+  if (sqlCode && !sqlCode.textContent) {
+    sqlCode.textContent = `-- Run this once in your Supabase SQL Editor:
+create table if not exists public.content_hub_assets (
+  id text primary key,
+  collection text not null,
+  data jsonb not null,
+  created_by text,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter publication supabase_realtime add table public.content_hub_assets;
+
+alter table public.content_hub_assets enable row level security;
+create policy "Allow team read" on public.content_hub_assets for select using (true);
+create policy "Allow team insert" on public.content_hub_assets for insert with check (true);
+create policy "Allow team update" on public.content_hub_assets for update using (true);
+create policy "Allow team delete" on public.content_hub_assets for delete using (true);`;
+  }
+
+  const statusClasses = ['connected', 'syncing', 'error', 'unconfigured'];
+  if (dot) {
+    statusClasses.forEach(c => dot.classList.remove(c));
+    dot.classList.add(state.status);
+  }
+  if (modalDot) {
+    statusClasses.forEach(c => modalDot.classList.remove(c));
+    modalDot.classList.add(state.status);
+  }
+
+  if (label) {
+    if (state.status === 'connected') label.textContent = 'Cloud Live';
+    else if (state.status === 'syncing') label.textContent = 'Syncing...';
+    else if (state.status === 'error') label.textContent = 'Sync Error';
+    else label.textContent = 'Cloud Sync';
+  }
+
+  if (modalTitle) {
+    if (state.status === 'connected') modalTitle.textContent = 'Connected (Real-Time Live)';
+    else if (state.status === 'syncing') modalTitle.textContent = 'Synchronizing with Cloud...';
+    else if (state.status === 'error') modalTitle.textContent = `Sync Notice: ${state.lastError || 'Disconnected'}`;
+    else modalTitle.textContent = 'Setup Cloud Connection';
+  }
+
+  if (modalLastSync) modalLastSync.textContent = state.lastSyncedAt || 'Never';
+  if (modalRemoteCount) modalRemoteCount.textContent = `${state.remoteCount || 0} items`;
+  if (modalProvider) modalProvider.textContent = state.isConfigured ? 'Supabase Live' : 'Not Configured';
+}
+
+function bindCloudSyncEvents() {
+  const cloudSyncBtn = document.getElementById('cloudSyncBtn');
+  const cloudSyncModal = document.getElementById('cloudSyncModal');
+  const cloudSyncModalClose = document.getElementById('cloudSyncModalClose');
+  const cloudSyncModalCloseBtn = document.getElementById('cloudSyncModalCloseBtn');
+  const btnManualSyncNow = document.getElementById('btnManualSyncNow');
+  const syncSpinIcon = document.getElementById('syncSpinIcon');
+  const btnExportData = document.getElementById('btnExportData');
+  const btnToggleImportArea = document.getElementById('btnToggleImportArea');
+  const importAreaContainer = document.getElementById('importAreaContainer');
+  const importFileInput = document.getElementById('importFileInput');
+  const importJsonInput = document.getElementById('importJsonInput');
+  const btnExecuteImport = document.getElementById('btnExecuteImport');
+  const cloudConfigForm = document.getElementById('cloudConfigForm');
+  const btnResetCloudConfig = document.getElementById('btnResetCloudConfig');
+  const btnToggleSqlGuide = document.getElementById('btnToggleSqlGuide');
+  const sqlGuideContainer = document.getElementById('sqlGuideContainer');
+  const btnCopySql = document.getElementById('btnCopySql');
+
+  if (cloudSyncBtn && cloudSyncModal) {
+    cloudSyncBtn.addEventListener('click', () => {
+      openModal(cloudSyncModal);
+      updateCloudSyncUI();
+    });
+  }
+
+  if (cloudSyncModalClose) {
+    cloudSyncModalClose.addEventListener('click', () => closeModal(cloudSyncModal));
+  }
+  if (cloudSyncModalCloseBtn) {
+    cloudSyncModalCloseBtn.addEventListener('click', () => closeModal(cloudSyncModal));
+  }
+
+  if (btnManualSyncNow) {
+    btnManualSyncNow.addEventListener('click', async () => {
+      if (syncSpinIcon) syncSpinIcon.classList.add('spin-animation');
+      await cloudSync.fetchAndApplyRemoteAssets();
+      setTimeout(() => {
+        if (syncSpinIcon) syncSpinIcon.classList.remove('spin-animation');
+        showToast('Database synchronization completed!');
+        window.refreshCurrentView();
+      }, 600);
+    });
+  }
+
+  if (btnExportData) {
+    btnExportData.addEventListener('click', () => {
+      const bundle = cloudSync.exportCustomData();
+      const jsonStr = JSON.stringify(bundle, null, 2);
+
+      // Download file
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `1cell-content-hub-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Copy to clipboard
+      try {
+        navigator.clipboard.writeText(jsonStr);
+      } catch (e) {}
+
+      showToast(`Exported assets! File downloaded & copied to clipboard.`);
+    });
+  }
+
+  if (btnToggleImportArea && importAreaContainer) {
+    btnToggleImportArea.addEventListener('click', () => {
+      importAreaContainer.style.display = importAreaContainer.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+
+  if (importFileInput && importJsonInput) {
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          importJsonInput.value = evt.target.result;
+        };
+        reader.readAsText(file);
+      }
+    });
+  }
+
+  if (btnExecuteImport && importJsonInput) {
+    btnExecuteImport.addEventListener('click', async () => {
+      const text = importJsonInput.value.trim();
+      if (!text) {
+        showToast('Please paste valid JSON or select a file to import.');
+        return;
+      }
+      btnExecuteImport.disabled = true;
+      btnExecuteImport.textContent = 'Importing...';
+      const result = await cloudSync.importCustomData(text);
+      btnExecuteImport.disabled = false;
+      btnExecuteImport.textContent = 'Merge into Content Hub';
+
+      if (result.success) {
+        showToast(`Successfully imported ${result.count} assets into Content Hub!`);
+        importJsonInput.value = '';
+        if (importAreaContainer) importAreaContainer.style.display = 'none';
+        closeModal(cloudSyncModal);
+        window.refreshCurrentView();
+      } else {
+        showToast(`Import error: ${result.error || 'Invalid JSON format'}`);
+      }
+    });
+  }
+
+  if (cloudConfigForm) {
+    cloudConfigForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('cfgSupabaseUrl').value.trim();
+      const key = document.getElementById('cfgSupabaseAnonKey').value.trim();
+
+      saveActiveCloudConfig({ supabaseUrl: url, supabaseAnonKey: key });
+      showToast('Connecting to Supabase...');
+      const ok = await cloudSync.init(db, (event) => {
+        updateCloudSyncUI();
+        if (event.type === 'INITIAL_SYNC' && event.count > 0) {
+          showToast(`Cloud Sync: Synchronized ${event.count} team assets!`);
+          window.refreshCurrentView();
+        }
+      });
+
+      if (ok) {
+        showToast('Successfully connected to Supabase Realtime Database!');
+      } else {
+        showToast('Could not connect to Supabase. Check credentials and SQL table.');
+      }
+      updateCloudSyncUI();
+    });
+  }
+
+  if (btnResetCloudConfig) {
+    btnResetCloudConfig.addEventListener('click', () => {
+      if (confirm('Disconnect from cloud database and return to local-only mode?')) {
+        saveActiveCloudConfig({ supabaseUrl: '', supabaseAnonKey: '' });
+        document.getElementById('cfgSupabaseUrl').value = '';
+        document.getElementById('cfgSupabaseAnonKey').value = '';
+        cloudSync.status = 'unconfigured';
+        cloudSync.client = null;
+        cloudSync.notify();
+        showToast('Cloud database disconnected.');
+      }
+    });
+  }
+
+  if (btnToggleSqlGuide && sqlGuideContainer) {
+    btnToggleSqlGuide.addEventListener('click', () => {
+      sqlGuideContainer.style.display = sqlGuideContainer.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+
+  if (btnCopySql) {
+    btnCopySql.addEventListener('click', () => {
+      const code = document.getElementById('sqlSnippetCode');
+      if (code) {
+        navigator.clipboard.writeText(code.textContent);
+        showToast('SQL setup script copied to clipboard!');
+      }
+    });
+  }
+}
+
 // Initialize Application
 function init() {
   hydrateCustomStorage();
+  // Initialize Cloud Sync Service
+  initCloudSyncService();
   // Check session authentication status on start
   checkAuth();
 
@@ -3272,6 +3538,26 @@ function handleMockUpload(e) {
     console.warn('LocalStorage save error:', e);
   }
 
+  // Push to shared Cloud Database
+  try {
+    cloudSync.syncAddAsset('documents', newDoc, author).catch(e => console.warn('Cloud sync error:', e));
+    if (category === 'case-library' && db.cases[0]) {
+      cloudSync.syncAddAsset('cases', db.cases[0], author).catch(e => console.warn('Cloud sync error:', e));
+    } else if (category === 'publications' && db.publications[0]) {
+      cloudSync.syncAddAsset('publications', db.publications[0], author).catch(e => console.warn('Cloud sync error:', e));
+    } else if (category === 'videos' && db.videos[0]) {
+      cloudSync.syncAddAsset('videos', db.videos[0], author).catch(e => console.warn('Cloud sync error:', e));
+    } else if (category === 'report-library' && db.reports && db.reports[0]) {
+      cloudSync.syncAddAsset('reports', db.reports[0], author).catch(e => console.warn('Cloud sync error:', e));
+    } else if (category === 'brand-assets' && db.brandAssets[0]) {
+      cloudSync.syncAddAsset('brandAssets', db.brandAssets[0], author).catch(e => console.warn('Cloud sync error:', e));
+    } else if (category === 'templates' && db.templates[0]) {
+      cloudSync.syncAddAsset('templates', db.templates[0], author).catch(e => console.warn('Cloud sync error:', e));
+    }
+  } catch (syncErr) {
+    console.warn('Cloud sync dispatch error:', syncErr);
+  }
+
   closeModal(uploadModal);
   showToast(`Successfully registered "${title}" under ${product ? product.toUpperCase() : 'Company Assets'}!`);
 
@@ -3779,6 +4065,11 @@ window.deleteAsset = function(id) {
     }
   } catch (e) {}
 
+  // Sync deletion to cloud database
+  try {
+    cloudSync.syncDeleteAsset('deleted', id).catch(e => console.warn('Cloud delete error:', e));
+  } catch (e) {}
+
   // Close Edit modal if open
   const editModal = document.getElementById('editAssetModal');
   if (editModal) closeModal(editModal);
@@ -4097,6 +4388,34 @@ window.saveAssetEdit = function() {
         localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates));
       } catch (e) {}
     }
+  }
+
+  // Sync edit to cloud database
+  try {
+    if (itemType === 'document') {
+      const doc = db.documents.find(d => d.id === id);
+      if (doc) cloudSync.syncUpdateAsset('documents', doc);
+    } else if (itemType === 'case') {
+      const c = db.cases.find(x => x.id === id);
+      if (c) cloudSync.syncUpdateAsset('cases', c);
+    } else if (itemType === 'publication') {
+      const p = db.publications.find(x => x.id === id);
+      if (p) cloudSync.syncUpdateAsset('publications', p);
+    } else if (itemType === 'video') {
+      const v = db.videos.find(x => x.id === id);
+      if (v) cloudSync.syncUpdateAsset('videos', v);
+    } else if (itemType === 'report') {
+      const r = (db.reports || []).find(x => x.id === id);
+      if (r) cloudSync.syncUpdateAsset('reports', r);
+    } else if (itemType === 'brand-asset') {
+      const b = (db.brandAssets || []).find(x => x.id === id);
+      if (b) cloudSync.syncUpdateAsset('brandAssets', b);
+    } else if (itemType === 'template') {
+      const t = (db.templates || []).find(x => x.id === id);
+      if (t) cloudSync.syncUpdateAsset('templates', t);
+    }
+  } catch (e) {
+    console.warn('Cloud sync update failed:', e);
   }
 
   showToast(`Updated "${title}"! Direct SharePoint link saved.`);

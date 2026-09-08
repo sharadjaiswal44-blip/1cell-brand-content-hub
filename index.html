@@ -225,6 +225,12 @@
             </select>
           </div>
 
+          <!-- Cloud Sync Status & Settings -->
+          <button class="control-btn cloud-sync-btn" id="cloudSyncBtn" title="Team Cloud Sync Status & Settings">
+            <span class="cloud-sync-status-dot" id="cloudSyncDot"></span>
+            <span class="cloud-sync-btn-text" id="cloudSyncBtnText">Cloud Sync</span>
+          </button>
+
           <!-- Theme Toggle -->
           <button class="control-btn" id="themeToggleBtn" title="Switch Theme">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" id="themeSunIcon" style="display:none;">
@@ -895,6 +901,144 @@
       <div class="modal-footer">
         <button class="btn-outline" id="uploadModalCancel">Cancel</button>
         <button class="btn-primary" id="uploadModalSave">Create Metadata Record</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Real-Time Team Cloud Sync & Settings -->
+  <div id="cloudSyncModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="cloud-sync-icon-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px; color: var(--accent-color);">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin: 0;">Team Cloud Synchronization</h3>
+            <p style="font-size: 11.5px; color: var(--text-secondary); margin: 2px 0 0 0;">Real-time asset synchronization across all profiles and devices</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="cloudSyncModalClose">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <!-- Sync Status Dashboard Card -->
+        <div class="sync-status-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="cloud-sync-status-indicator" id="modalStatusDot"></span>
+              <span style="font-weight: 700; font-size: 13.5px;" id="modalStatusTitle">Cloud Database Disconnected</span>
+            </div>
+            <button class="btn-outline" id="btnManualSyncNow" style="padding: 4px 12px; font-size: 11.5px; gap: 6px; display: flex; align-items: center;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" id="syncSpinIcon" style="width: 13px; height: 13px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              <span>Sync Now</span>
+            </button>
+          </div>
+          <div class="sync-telemetry-grid">
+            <div class="telemetry-box">
+              <span class="telemetry-label">PROVIDER</span>
+              <span class="telemetry-value" id="modalProviderText">Supabase Realtime</span>
+            </div>
+            <div class="telemetry-box">
+              <span class="telemetry-label">LAST SYNCED</span>
+              <span class="telemetry-value" id="modalLastSyncText">Never</span>
+            </div>
+            <div class="telemetry-box">
+              <span class="telemetry-label">REMOTE ASSETS</span>
+              <span class="telemetry-value" id="modalRemoteCountText">0 items</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fast Transfer / Immediate Sharing (Export & Import) -->
+        <div class="sync-section-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 15px; height: 15px; color: var(--accent-color);">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 004.5 9.75v7.5a2.25 2.25 0 002.25 2.25h7.5a2.25 2.25 0 002.25-2.25v-7.5a2.25 2.25 0 00-2.25-2.25h-.75m-6 3.75l3 3m0 0l3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 012.25 2.25v7.5a2.25 2.25 0 01-2.25 2.25h-7.5a2.25 2.25 0 01-2.25-2.25v-.75" />
+              </svg>
+              <span style="font-size: 12.5px; font-weight: 700;">Instant Team Transfer (No Database Needed)</span>
+            </div>
+            <span class="tag-badge" style="background: rgba(30,58,138,0.1); color: var(--accent-color); font-size: 10.5px;">Instant Sync</span>
+          </div>
+          <p style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
+            Have your teammate export their newly added assets (like OncoPrediKt) and send the code/file to you, or paste it below to instantly merge it into your Content Hub.
+          </p>
+          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <button class="btn-outline" id="btnExportData" style="flex: 1; font-size: 11.5px; justify-content: center;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 14px; height: 14px; margin-right: 4px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              Export My Added Assets (.json)
+            </button>
+            <button class="btn-outline" id="btnToggleImportArea" style="flex: 1; font-size: 11.5px; justify-content: center;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 14px; height: 14px; margin-right: 4px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              Import Teammate Content
+            </button>
+          </div>
+          <div id="importAreaContainer" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+            <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">PASTE EXPORTED JSON OR LOAD FILE</label>
+            <textarea id="importJsonInput" placeholder='Paste JSON content here or choose a file...' style="width: 100%; height: 75px; font-size: 11px; font-family: monospace; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px; margin-bottom: 8px; background: var(--bg-primary); color: var(--text-primary);"></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <input type="file" id="importFileInput" accept=".json" style="font-size: 11px; max-width: 200px;">
+              <button class="btn-primary" id="btnExecuteImport" style="padding: 4px 14px; font-size: 11.5px;">Merge into Content Hub</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Supabase Cloud Credentials Form -->
+        <div class="sync-section-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 15px; height: 15px; color: var(--accent-color);">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.27.1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.27-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span style="font-size: 12.5px; font-weight: 700;">Supabase Project Configuration</span>
+            </div>
+            <button class="btn-text" id="btnToggleSqlGuide" style="font-size: 11px; color: var(--accent-color); padding: 0; text-decoration: underline;">
+              SQL Setup Script
+            </button>
+          </div>
+
+          <form id="cloudConfigForm" style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label for="cfgSupabaseUrl" style="font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 3px;">SUPABASE PROJECT URL *</label>
+              <input type="url" id="cfgSupabaseUrl" placeholder="https://xyzabcdefg.supabase.co" style="width: 100%; height: 36px; font-size: 12.5px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 10px; background: var(--bg-primary); color: var(--text-primary);">
+            </div>
+            <div>
+              <label for="cfgSupabaseAnonKey" style="font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 3px;">PUBLIC ANON KEY (API KEY) *</label>
+              <input type="password" id="cfgSupabaseAnonKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="width: 100%; height: 36px; font-size: 12.5px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 10px; background: var(--bg-primary); color: var(--text-primary);">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+              <button type="button" class="btn-outline" id="btnResetCloudConfig" style="font-size: 11px; color: var(--danger); border-color: rgba(220,38,38,0.3);">Disconnect Project</button>
+              <button type="submit" class="btn-primary" id="btnSaveCloudConfig" style="font-size: 11.5px; padding: 6px 16px;">Save & Connect Cloud</button>
+            </div>
+          </form>
+
+          <!-- Collapsible SQL Script -->
+          <div id="sqlGuideContainer" style="display: none; margin-top: 12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary);">SUPABASE SQL SETUP (Run once in SQL Editor)</span>
+              <button class="btn-outline" id="btnCopySql" style="padding: 2px 8px; font-size: 10.5px;">Copy SQL</button>
+            </div>
+            <pre id="sqlSnippetCode" style="font-size: 10.5px; color: var(--text-secondary); font-family: monospace; max-height: 120px; overflow-y: auto; background: var(--bg-secondary); padding: 8px; border-radius: 4px; margin: 0;"></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn-primary" id="cloudSyncModalCloseBtn">Done</button>
       </div>
     </div>
   </div>
