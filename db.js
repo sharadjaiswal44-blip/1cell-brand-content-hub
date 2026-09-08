@@ -133,7 +133,7 @@ const db = {
                   "Rapid turnaround within hours, delivering preliminary prognostic insights before NGS results are finalized."
             ],
             "competitiveAdvantage": "Instant computational biomarker inference that conserves precious tumor biopsy tissue blocks for downstream NGS testing.",
-            "logo": "assets/logos/logo_oncopredikt.png"
+            "logo": "assets/logos/logo_oncopredikt.png?v=20260908"
       },
       {
             "id": "oncoctc",
