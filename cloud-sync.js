@@ -1,11 +1,20 @@
-// 1Cell.Ai Content Hub - Real-Time Cloud Synchronization Engine
-// Integrates with Supabase to provide seamless team-wide document and asset collaboration.
+// 1Cell.Ai Content Hub - Multi-Team Real-Time Cloud & Local Synchronization Engine
+// Integrates with Supabase Realtime + browser BroadcastChannel for seamless team collaboration.
 
-import { getActiveCloudConfig, isCloudConfigured } from './cloud-config.js';
+import { 
+  getActiveCloudConfig, 
+  isCloudConfigured, 
+  BROADCAST_CHANNEL_NAME, 
+  canTeamViewVisibility, 
+  normalizeTeam, 
+  TEAMS, 
+  VISIBILITY 
+} from './cloud-config.js';
 
 class CloudSyncService {
   constructor() {
     this.client = null;
+    this.broadcastChannel = null;
     this.status = 'unconfigured'; // 'unconfigured' | 'connecting' | 'connected' | 'syncing' | 'error'
     this.lastSyncedAt = null;
     this.remoteCount = 0;
@@ -49,6 +58,10 @@ class CloudSyncService {
     this.dbRef = db;
     this.onRemoteUpdateCallback = onRemoteUpdate;
 
+    // 1. Establish immediate cross-tab/cross-window BroadcastChannel
+    this.setupBroadcastChannel();
+
+    // 2. If Cloud credentials exist, connect to Supabase Realtime
     if (!isCloudConfigured()) {
       this.status = 'unconfigured';
       this.notify();
@@ -88,6 +101,106 @@ class CloudSyncService {
       this.notify();
       return false;
     }
+  }
+
+  /**
+   * Set up browser BroadcastChannel for instant cross-tab / cross-window real-time collaboration.
+   */
+  setupBroadcastChannel() {
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        if (this.broadcastChannel) {
+          try { this.broadcastChannel.close(); } catch (e) {}
+        }
+        this.broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
+        this.broadcastChannel.onmessage = (event) => {
+          if (event && event.data) {
+            console.log('[CloudSync] BroadcastChannel message received:', event.data);
+            this.handleIncomingBroadcastMessage(event.data);
+          }
+        };
+      }
+    } catch (e) {
+      console.warn('[CloudSync] BroadcastChannel setup error:', e);
+    }
+  }
+
+  /**
+   * Broadcast an event to other open tabs and browser windows.
+   */
+  broadcastLocalEvent(eventType, collection, payload) {
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({
+          eventType,
+          collection,
+          ...payload,
+          timestamp: Date.now()
+        });
+      } catch (err) {
+        console.warn('[CloudSync] broadcastLocalEvent error:', err);
+      }
+    }
+  }
+
+  /**
+   * Handle incoming messages from other tabs/windows.
+   */
+  handleIncomingBroadcastMessage(msg) {
+    if (!this.dbRef || !msg) return;
+    const { eventType, collection, item, id, author, team } = msg;
+
+    let notifyMessage = null;
+
+    if (eventType === 'INSERT') {
+      if (item && item.id) {
+        this.upsertItemToDb(collection || 'documents', item);
+        notifyMessage = `${author || 'Teammate'} added a new card: "${item.title || 'Document'}"`;
+        if (this.onRemoteUpdateCallback) {
+          this.onRemoteUpdateCallback({
+            type: 'REALTIME_INSERT',
+            collection: collection || 'documents',
+            item,
+            author,
+            team,
+            message: notifyMessage
+          });
+        }
+      }
+    } else if (eventType === 'UPDATE') {
+      if (item && item.id) {
+        this.upsertItemToDb(collection || 'documents', item);
+        notifyMessage = `${author || 'Teammate'} updated: "${item.title || 'Document'}"`;
+        if (this.onRemoteUpdateCallback) {
+          this.onRemoteUpdateCallback({
+            type: 'REALTIME_UPDATE',
+            collection: collection || 'documents',
+            item,
+            author,
+            team,
+            message: notifyMessage
+          });
+        }
+      }
+    } else if (eventType === 'DELETE') {
+      const targetId = id || (item && item.id);
+      if (targetId) {
+        this.removeItemFromDb(targetId);
+        notifyMessage = `Card removed by ${author || 'team member'}`;
+        if (this.onRemoteUpdateCallback) {
+          this.onRemoteUpdateCallback({
+            type: 'REALTIME_DELETE',
+            id: targetId,
+            collection: collection || 'documents',
+            author,
+            message: notifyMessage
+          });
+        }
+      }
+    }
+
+    this.lastSyncedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    this.notify();
   }
 
   /**
@@ -190,18 +303,27 @@ class CloudSyncService {
 
     const { eventType, new: newRecord, old: oldRecord } = payload;
     let notifyMessage = null;
+    let dispatchType = null;
+    let assetItem = null;
+    let targetId = null;
 
     if (eventType === 'INSERT' || eventType === 'UPDATE') {
       if (newRecord.collection === 'deleted') {
-        this.removeItemFromDb(newRecord.id);
+        targetId = newRecord.id;
+        this.removeItemFromDb(targetId);
+        dispatchType = 'REALTIME_DELETE';
         notifyMessage = `Asset removed by team member`;
       } else if (newRecord.data) {
-        this.upsertItemToDb(newRecord.collection, newRecord.data);
-        notifyMessage = `New asset synced: "${newRecord.data.title || 'Document'}"`;
+        assetItem = newRecord.data;
+        this.upsertItemToDb(newRecord.collection, assetItem);
+        dispatchType = eventType === 'INSERT' ? 'REALTIME_INSERT' : 'REALTIME_UPDATE';
+        notifyMessage = `${assetItem.created_by || 'Teammate'} ${eventType === 'INSERT' ? 'added' : 'updated'}: "${assetItem.title || 'Document'}"`;
       }
     } else if (eventType === 'DELETE') {
-      if (oldRecord && oldRecord.id) {
-        this.removeItemFromDb(oldRecord.id);
+      targetId = oldRecord && oldRecord.id;
+      if (targetId) {
+        this.removeItemFromDb(targetId);
+        dispatchType = 'REALTIME_DELETE';
         notifyMessage = `Asset deleted by team member`;
       }
     }
@@ -209,21 +331,47 @@ class CloudSyncService {
     this.lastSyncedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     this.notify();
 
-    if (this.onRemoteUpdateCallback) {
-      this.onRemoteUpdateCallback({ type: 'REALTIME_EVENT', eventType, record: newRecord || oldRecord, message: notifyMessage });
+    if (this.onRemoteUpdateCallback && dispatchType) {
+      this.onRemoteUpdateCallback({
+        type: dispatchType,
+        collection: (newRecord && newRecord.collection) || 'documents',
+        item: assetItem,
+        id: targetId,
+        message: notifyMessage
+      });
     }
   }
 
   /**
-   * Push a newly created asset to the cloud database.
+   * Helper to check team permission for a specific card.
    */
-  async syncAddAsset(collection, item, author) {
-    // Always persist to local cache first
+  canUserViewAsset(asset, userTeam) {
+    if (!asset) return false;
+    return canTeamViewVisibility(userTeam, asset.visibility || asset.department);
+  }
+
+  /**
+   * Push a newly created asset to the cloud database & broadcast across tabs.
+   */
+  async syncAddAsset(collection, item, author, team) {
+    if (!item) return { success: false, error: 'No item provided' };
+
+    // Standardize collaborative metadata
+    item.created_by = item.created_by || author || item.owner || '1Cell.Ai User';
+    item.team_id = item.team_id || (team ? normalizeTeam(team) : normalizeTeam(item.department));
+    item.visibility = item.visibility || VISIBILITY.ALL;
+    item.created_at = item.created_at || new Date().toISOString();
+    item.updated_at = new Date().toISOString();
+
+    // 1. Always persist to in-memory db & local cache first
     this.upsertItemToDb(collection, item);
+
+    // 2. Broadcast immediately across all open tabs/windows
+    this.broadcastLocalEvent('INSERT', collection, { item, author: item.created_by, team: item.team_id });
 
     if (!this.client) {
-      console.log('[CloudSync] Offline / Unconfigured - asset saved locally only');
-      return { success: false, offline: true };
+      console.log('[CloudSync] Offline / Broadcast active - asset saved locally and broadcasted to open tabs');
+      return { success: true, offline: true };
     }
 
     const config = getActiveCloudConfig();
@@ -232,8 +380,8 @@ class CloudSyncService {
         id: item.id,
         collection: collection,
         data: item,
-        created_by: author || item.owner || item.author || '1Cell.Ai User',
-        updated_at: new Date().toISOString()
+        created_by: item.created_by,
+        updated_at: item.updated_at
       };
 
       const { error } = await this.client.from(config.tableName).upsert(row);
@@ -243,20 +391,30 @@ class CloudSyncService {
       this.notify();
       return { success: true };
     } catch (err) {
-      console.error('[CloudSync] syncAddAsset error:', err);
+      console.error('[CloudSync] syncAddAsset cloud error:', err);
       this.lastError = err.message;
       this.notify();
-      return { success: false, error: err };
+      return { success: true, cloudError: err };
     }
   }
 
   /**
-   * Push an updated asset to the cloud database.
+   * Push an updated asset to the cloud database & broadcast across tabs.
    */
-  async syncUpdateAsset(collection, item) {
+  async syncUpdateAsset(collection, item, author, team) {
+    if (!item || !item.id) return { success: false, error: 'Invalid item' };
+
+    item.updated_at = new Date().toISOString();
+    if (author && !item.created_by) item.created_by = author;
+    if (team && !item.team_id) item.team_id = normalizeTeam(team);
+
+    // 1. Update in-memory & local cache
     this.upsertItemToDb(collection, item);
 
-    if (!this.client) return { success: false, offline: true };
+    // 2. Broadcast immediately across open tabs
+    this.broadcastLocalEvent('UPDATE', collection, { item, author, team });
+
+    if (!this.client) return { success: true, offline: true };
 
     const config = getActiveCloudConfig();
     try {
@@ -264,7 +422,7 @@ class CloudSyncService {
         id: item.id,
         collection: collection,
         data: item,
-        updated_at: new Date().toISOString()
+        updated_at: item.updated_at
       };
 
       const { error } = await this.client.from(config.tableName).upsert(row);
@@ -274,18 +432,24 @@ class CloudSyncService {
       this.notify();
       return { success: true };
     } catch (err) {
-      console.error('[CloudSync] syncUpdateAsset error:', err);
-      return { success: false, error: err };
+      console.error('[CloudSync] syncUpdateAsset cloud error:', err);
+      return { success: true, cloudError: err };
     }
   }
 
   /**
-   * Remove an asset from the cloud database and broadcast deletion.
+   * Remove an asset from the cloud database and broadcast deletion across tabs.
    */
-  async syncDeleteAsset(collection, id) {
+  async syncDeleteAsset(collection, id, author) {
+    if (!id) return { success: false, error: 'Invalid id' };
+
+    // 1. Remove from in-memory & local cache
     this.removeItemFromDb(id);
 
-    if (!this.client) return { success: false, offline: true };
+    // 2. Broadcast immediately across open tabs
+    this.broadcastLocalEvent('DELETE', collection, { id, author });
+
+    if (!this.client) return { success: true, offline: true };
 
     const config = getActiveCloudConfig();
     try {
@@ -293,7 +457,7 @@ class CloudSyncService {
       await this.client.from(config.tableName).upsert({
         id: id,
         collection: 'deleted',
-        data: { id, deletedAt: new Date().toISOString() },
+        data: { id, deletedAt: new Date().toISOString(), deletedBy: author || 'Team Member' },
         updated_at: new Date().toISOString()
       });
 
@@ -301,8 +465,8 @@ class CloudSyncService {
       this.notify();
       return { success: true };
     } catch (err) {
-      console.error('[CloudSync] syncDeleteAsset error:', err);
-      return { success: false, error: err };
+      console.error('[CloudSync] syncDeleteAsset cloud error:', err);
+      return { success: true, cloudError: err };
     }
   }
 

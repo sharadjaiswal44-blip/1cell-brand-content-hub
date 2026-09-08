@@ -1,9 +1,41 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260908-v19';
+import db from './db.js?v=20260908-v20';
 import { cloudSync } from './cloud-sync.js';
-import { getActiveCloudConfig, saveActiveCloudConfig, isCloudConfigured } from './cloud-config.js';
+import { 
+  getActiveCloudConfig, 
+  saveActiveCloudConfig, 
+  isCloudConfigured,
+  normalizeTeam,
+  canTeamViewVisibility,
+  TEAMS,
+  VISIBILITY
+} from './cloud-config.js';
+
 window.db = db;
 window.cloudSync = cloudSync;
+window.normalizeTeam = normalizeTeam;
+window.canTeamViewVisibility = canTeamViewVisibility;
+window.TEAMS = TEAMS;
+window.VISIBILITY = VISIBILITY;
+
+let activeTeamScope = 'all'; // 'all' | 'my_team' | 'cross_team'
+window.setTeamFilterScope = function(scope) {
+  activeTeamScope = scope;
+  window.refreshCurrentView();
+};
+
+function getCurrentUserTeam() {
+  const authTeam = sessionStorage.getItem("authTeam");
+  if (authTeam) return authTeam;
+  const authDept = sessionStorage.getItem("authDept");
+  if (authDept) return normalizeTeam(authDept);
+  if (currentRole === 'marketing_admin') return TEAMS.MARKETING;
+  if (currentRole === 'medical') return TEAMS.SCIENTIFIC;
+  if (currentRole === 'sales') return TEAMS.SALES;
+  if (currentRole === 'leadership') return TEAMS.LEADERSHIP;
+  return TEAMS.MARKETING;
+}
+window.getCurrentUserTeam = getCurrentUserTeam;
 
 // Hydrate custom edits and uploads from localStorage
 function hydrateCustomStorage() {
@@ -201,22 +233,187 @@ function getInitials(name) {
 // Cloud Synchronization Service Integration
 // ============================================================================
 
+// Incremental Real-Time Card Synchronizer & DOM Updater
+function handleRealtimeSyncEvent(event) {
+  if (!event) return;
+  const userTeam = getCurrentUserTeam();
+
+  if (event.type === 'REALTIME_INSERT') {
+    const item = event.item;
+    if (!item) return;
+
+    // Check if current user has permission to see this card
+    if (!canTeamViewVisibility(userTeam, item.visibility || item.department)) {
+      console.log(`[CollabSync] Card "${item.title}" hidden due to team visibility rules (${item.visibility} vs ${userTeam})`);
+      return;
+    }
+
+    if (event.message) showToast(event.message);
+
+    let injected = false;
+    
+    // 1. If currently inside Dashboard Product folder
+    const dashboardContainer = document.getElementById('dashboardProductDocsContainer');
+    const activeProductTab = document.querySelector('.product-tab.active');
+    const activeProd = activeProductTab ? activeProductTab.getAttribute('data-product') : null;
+    
+    if (dashboardContainer && activeProd && item.product === activeProd) {
+      if (!document.getElementById(`card-${item.id}`) && !document.getElementById(`folder-card-${item.id}`)) {
+        let icon = '📄';
+        if (item.contentType === 'Brochure') icon = '📖';
+        else if (item.contentType === 'Whitepaper') icon = '🧬';
+        else if (item.contentType === 'Case Study') icon = '🔬';
+        else if (item.contentType === 'Sample Report') icon = '📋';
+        
+        let teamBadge = '';
+        const vis = (item.visibility || '').toLowerCase();
+        const docTeam = (item.team_id || '').toLowerCase();
+        if (vis === 'scientific' || docTeam === 'scientific') {
+          teamBadge = `<span class="badge badge-team-scientific">🧬 Scientific</span>`;
+        } else if (vis === 'marketing' || docTeam === 'marketing') {
+          teamBadge = `<span class="badge badge-team-marketing">📢 Marketing</span>`;
+        } else {
+          teamBadge = `<span class="badge badge-team-crossteam">🌐 Cross-Team</span>`;
+        }
+
+        const fileUrl = item.oneDriveUrl || item.sharePointUrl || '';
+        const isOneDrive = fileUrl.toLowerCase().includes('onedrive') || fileUrl.toLowerCase().includes('1drv.ms');
+        const driveBadge = `<span class="badge badge-onedrive">${isOneDrive ? '📁 OneDrive' : '📄 SharePoint'}</span>`;
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+          <div class="folder-doc-card card-highlight-pulse" id="folder-card-${item.id}" onclick="window.openSharePoint('${item.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
+            <div class="folder-doc-header">
+              <span class="folder-doc-icon">${icon}</span>
+              <div style="flex: 1;">
+                <div class="folder-doc-title">${item.title}</div>
+                <div class="folder-doc-path" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:3px;">
+                  ${teamBadge}
+                  ${driveBadge}
+                  <span style="font-size:11px; color:var(--text-tertiary);">${item.folderPath || 'Shared Documents'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="folder-doc-actions">
+              <button onclick="event.stopPropagation(); window.openSharePoint('${item.id}')" class="btn-primary" style="padding:4px 12px; font-size:11px; font-weight:600;" title="Open document">
+                View
+              </button>
+              <button onclick="event.stopPropagation(); window.previewDocument('${item.id}')" title="Preview metadata">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Details
+              </button>
+              <button onclick="event.stopPropagation(); window.openEditAssetModal('${item.id}')" style="color: var(--accent-color);" title="Edit File & Direct Link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+                Edit
+              </button>
+              <button onclick="event.stopPropagation(); window.deleteAsset('${item.id}')" style="color:#ef4444;" title="Delete Content Card">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        `;
+        const newEl = wrapper.firstElementChild;
+        // Insert after folder header banner if present
+        if (dashboardContainer.children.length > 0) {
+          dashboardContainer.insertBefore(newEl, dashboardContainer.children[1] || null);
+        } else {
+          dashboardContainer.appendChild(newEl);
+        }
+        injected = true;
+      }
+    }
+
+    // 2. If inside an assets-grid (product microsite or company assets)
+    const activeGrid = document.querySelector('.assets-grid');
+    if (!injected && activeGrid) {
+      if (!document.getElementById(`card-${item.id}`)) {
+        const temp = document.createElement('div');
+        temp.innerHTML = renderDocumentCard(item);
+        const newCard = temp.firstElementChild;
+        if (newCard) {
+          newCard.classList.add('card-highlight-pulse');
+          activeGrid.insertBefore(newCard, activeGrid.firstElementChild);
+          injected = true;
+        }
+      }
+    }
+
+    // If active view couldn't be incrementally patched, smoothly refresh current view
+    if (!injected) {
+      window.refreshCurrentView();
+    }
+  } else if (event.type === 'REALTIME_UPDATE') {
+    const item = event.item;
+    if (!item) return;
+
+    // If current team can no longer see this card after an edit, remove it from DOM!
+    if (!canTeamViewVisibility(userTeam, item.visibility || item.department)) {
+      const cardEl = document.getElementById(`card-${item.id}`) || document.getElementById(`folder-card-${item.id}`);
+      if (cardEl) {
+        cardEl.classList.add('card-fade-out');
+        setTimeout(() => {
+          try { cardEl.remove(); } catch (e) {}
+        }, 350);
+      }
+      return;
+    }
+
+    if (event.message) showToast(event.message);
+
+    // Find and update card in DOM
+    const existingCard = document.getElementById(`card-${item.id}`);
+    if (existingCard) {
+      const temp = document.createElement('div');
+      temp.innerHTML = renderDocumentCard(item);
+      const updatedCard = temp.firstElementChild;
+      if (updatedCard) {
+        updatedCard.classList.add('card-highlight-pulse');
+        existingCard.replaceWith(updatedCard);
+      }
+    } else {
+      const existingFolderCard = document.getElementById(`folder-card-${item.id}`);
+      if (existingFolderCard) {
+        window.refreshCurrentView();
+      } else {
+        // Card was previously hidden from this team and now became visible: refresh view smoothly
+        window.refreshCurrentView();
+      }
+    }
+  } else if (event.type === 'REALTIME_DELETE') {
+    if (event.message) showToast(event.message);
+    const cardEl = document.getElementById(`card-${event.id}`) || document.getElementById(`folder-card-${event.id}`);
+    if (cardEl) {
+      cardEl.classList.add('card-fade-out');
+      setTimeout(() => {
+        try { cardEl.remove(); } catch (e) {}
+      }, 350);
+    } else {
+      window.refreshCurrentView();
+    }
+  } else if (event.type === 'INITIAL_SYNC') {
+    if (event.count > 0) {
+      showToast(`Cloud Sync: Synchronized ${event.count} team assets from database`);
+      window.refreshCurrentView();
+    }
+  } else if (event.type === 'IMPORT_COMPLETE') {
+    showToast(`Merged ${event.count} team assets into Content Hub!`);
+    window.refreshCurrentView();
+  }
+}
+
 function initCloudSyncService() {
   cloudSync.subscribe(updateCloudSyncUI);
   cloudSync.init(db, (event) => {
     updateCloudSyncUI();
-    if (event.type === 'REALTIME_EVENT') {
-      if (event.message) showToast(event.message);
-      window.refreshCurrentView();
-    } else if (event.type === 'INITIAL_SYNC') {
-      if (event.count > 0) {
-        showToast(`Cloud Sync: Synchronized ${event.count} team assets from database`);
-        window.refreshCurrentView();
-      }
-    } else if (event.type === 'IMPORT_COMPLETE') {
-      showToast(`Merged ${event.count} team assets into Content Hub!`);
-      window.refreshCurrentView();
-    }
+    handleRealtimeSyncEvent(event);
   });
 
   bindCloudSyncEvents();
@@ -626,8 +823,10 @@ function init() {
         return;
       }
 
+      const normTeam = normalizeTeam(dept);
+
       // Marketing team authorization validation
-      if (dept === 'Marketing') {
+      if (normTeam === TEAMS.MARKETING) {
         const cleanEmail = email.toLowerCase().trim();
         if (!authorizedMarketingEmails.includes(cleanEmail)) {
           if (emailInput) emailInput.classList.add('input-error');
@@ -645,12 +844,13 @@ function init() {
         sessionStorage.setItem("authName", name);
         sessionStorage.setItem("authEmail", email);
         sessionStorage.setItem("authDept", dept);
+        sessionStorage.setItem("authTeam", normTeam);
 
-        // Map department to matching role view
+        // Map team to matching role view
         let targetRole = 'marketing_admin';
-        if (dept === 'Sales') targetRole = 'sales';
-        else if (dept === 'Genomic Scientist') targetRole = 'medical';
-        else if (dept === 'Leadership') targetRole = 'leadership';
+        if (normTeam === TEAMS.SCIENTIFIC) targetRole = 'medical';
+        else if (normTeam === TEAMS.SALES) targetRole = 'sales';
+        else if (normTeam === TEAMS.LEADERSHIP) targetRole = 'leadership';
 
         currentRole = targetRole;
         if (roleSelect) {
@@ -661,7 +861,8 @@ function init() {
         updateUserBadge();
         updateSidebarCategories();
         renderRoute('dashboard');
-        showToast(`Welcome to 1Cell.Ai, ${name}!`);
+        const teamLabel = normTeam === 'scientific' ? 'Scientific Team' : normTeam === 'marketing' ? 'Marketing Team' : `${dept} Team`;
+        showToast(`Welcome to 1Cell.Ai, ${name} (${teamLabel})!`);
       }
     });
   }
@@ -672,6 +873,7 @@ function init() {
       sessionStorage.removeItem("authName");
       sessionStorage.removeItem("authEmail");
       sessionStorage.removeItem("authDept");
+      sessionStorage.removeItem("authTeam");
       checkAuth();
       updateUserBadge();
       updateSidebarCategories();
@@ -854,21 +1056,34 @@ function renderRoute(route) {
   }
 }
 
-// Dynamic render for product-wise SharePoint documents directory
+// Dynamic render for product-wise SharePoint & OneDrive documents directory
 function renderDashboardProductDocs(productName) {
   const container = document.getElementById('dashboardProductDocsContainer');
   if (!container) return;
 
-  const relatedDocs = db.documents.filter(d => d.product === productName);
+  const userTeam = getCurrentUserTeam();
+  const allRelatedDocs = db.documents.filter(d => d.product === productName && canTeamViewVisibility(userTeam, d.visibility || d.department));
+
+  // Filter according to active team scope
+  let relatedDocs = allRelatedDocs;
+  if (activeTeamScope === 'my_team') {
+    relatedDocs = allRelatedDocs.filter(d => normalizeTeam(d.team_id || d.department) === userTeam && (d.visibility === userTeam || d.team_id === userTeam));
+  } else if (activeTeamScope === 'cross_team') {
+    relatedDocs = allRelatedDocs.filter(d => (d.visibility || 'all') === 'all');
+  }
+
   const productObj = db.products.find(p => p.id === productName);
   
-  if (relatedDocs.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1 / -1; color: var(--text-tertiary); font-size: 13px; text-align: center; padding: 24px;">No documents registered in this product folder.</div>`;
+  if (allRelatedDocs.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1 / -1; color: var(--text-tertiary); font-size: 13px; text-align: center; padding: 24px;">No documents registered in this product folder for your team (${userTeam === 'scientific' ? 'Scientific Team' : 'Marketing Team'}).</div>`;
     return;
   }
 
   let html = '';
   if (productObj) {
+    const myTeamCount = allRelatedDocs.filter(d => normalizeTeam(d.team_id || d.department) === userTeam).length;
+    const crossTeamCount = allRelatedDocs.filter(d => (d.visibility || 'all') === 'all').length;
+
     html += `
       <div style="grid-column: 1 / -1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:10px 16px; margin-bottom:6px;">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -876,11 +1091,18 @@ function renderDashboardProductDocs(productName) {
             <img src="${productObj.logo}" alt="${productObj.name}" style="height:26px; max-width:140px; object-fit:contain;" onerror="this.onerror=null;this.src='assets/logos/logo_1cell.png';" />
           </div>
           <div>
-            <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">${productObj.name} SharePoint Assets Directory</div>
-            <div style="font-size:12px; color:var(--text-secondary);">${relatedDocs.length} files available in folder</div>
+            <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">${productObj.name} SharePoint & OneDrive Assets</div>
+            <div style="font-size:12px; color:var(--text-secondary);">${allRelatedDocs.length} collaborative files accessible to your team</div>
           </div>
         </div>
-        <button class="btn-primary" style="padding:5px 14px; font-size:11.5px; font-weight:600;" onclick="window.openProductMicrosite('${productObj.id}')">Open Product Hub Workspace →</button>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div class="team-filter-bar" style="margin-bottom:0;">
+            <button class="team-filter-btn ${activeTeamScope === 'all' ? 'active' : ''}" onclick="window.setTeamFilterScope('all')">🌐 All Accessible (${allRelatedDocs.length})</button>
+            <button class="team-filter-btn ${activeTeamScope === 'my_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('my_team')">${userTeam === 'scientific' ? '🧬 My Team' : '📢 My Team'} (${myTeamCount})</button>
+            <button class="team-filter-btn ${activeTeamScope === 'cross_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('cross_team')">🤝 Cross-Team (${crossTeamCount})</button>
+          </div>
+          <button class="btn-primary" style="padding:5px 14px; font-size:11.5px; font-weight:600;" onclick="window.openProductMicrosite('${productObj.id}')">Open Product Hub Workspace →</button>
+        </div>
       </div>
     `;
   }
@@ -892,23 +1114,38 @@ function renderDashboardProductDocs(productName) {
     else if (doc.contentType === 'Case Study') icon = '🔬';
     else if (doc.contentType === 'Battlecard') icon = '⚔️';
     else if (doc.contentType === 'Presentation') icon = '📊';
+    else if (doc.contentType === 'Sample Report') icon = '📋';
+
+    let teamBadge = '';
+    const vis = (doc.visibility || '').toLowerCase();
+    const docTeam = (doc.team_id || '').toLowerCase();
+    if (vis === 'scientific' || docTeam === 'scientific') {
+      teamBadge = `<span class="badge badge-team-scientific">🧬 Scientific</span>`;
+    } else if (vis === 'marketing' || docTeam === 'marketing') {
+      teamBadge = `<span class="badge badge-team-marketing">📢 Marketing</span>`;
+    } else {
+      teamBadge = `<span class="badge badge-team-crossteam">🌐 Cross-Team</span>`;
+    }
+
+    const fileUrl = doc.oneDriveUrl || doc.sharePointUrl || '';
+    const isOneDrive = fileUrl.toLowerCase().includes('onedrive') || fileUrl.toLowerCase().includes('1drv.ms');
+    const driveBadge = `<span class="badge badge-onedrive">${isOneDrive ? '📁 OneDrive' : '📄 SharePoint'}</span>`;
 
     html += `
-      <div class="folder-doc-card" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in SharePoint">
+      <div class="folder-doc-card" id="folder-card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
         <div class="folder-doc-header">
           <span class="folder-doc-icon">${icon}</span>
           <div style="flex: 1;">
             <div class="folder-doc-title">${doc.title}</div>
-            <div class="folder-doc-path">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:11px;height:11px;color:#0078d4;">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-              </svg>
-              ${doc.folderPath}
+            <div class="folder-doc-path" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:3px;">
+              ${teamBadge}
+              ${driveBadge}
+              <span style="font-size:11px; color:var(--text-tertiary);">${doc.folderPath || 'Shared Documents'}</span>
             </div>
           </div>
         </div>
         <div class="folder-doc-actions">
-          <button onclick="event.stopPropagation(); window.openSharePoint('${doc.id}')" class="btn-primary" style="padding:4px 12px; font-size:11px; font-weight:600;" title="Open document in SharePoint">
+          <button onclick="event.stopPropagation(); window.openSharePoint('${doc.id}')" class="btn-primary" style="padding:4px 12px; font-size:11px; font-weight:600;" title="Open document in OneDrive/SharePoint">
             View
           </button>
           <button onclick="event.stopPropagation(); window.previewDocument('${doc.id}')" title="Preview metadata and properties">
@@ -918,13 +1155,13 @@ function renderDashboardProductDocs(productName) {
             </svg>
             Details
           </button>
-          <button onclick="event.stopPropagation(); window.openEditAssetModal('${doc.id}')" style="color: var(--accent-color);" title="Edit File & Direct SharePoint Link">
+          <button onclick="event.stopPropagation(); window.openEditAssetModal('${doc.id}')" style="color: var(--accent-color);" title="Edit File & Direct Link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
             </svg>
             Edit
           </button>
-          <button onclick="event.stopPropagation(); window.deleteAsset('${doc.id}')" style="color:#ef4444;" title="Delete Content Card">
+          <button onclick="event.stopPropagation(); window.deleteAsset('${doc.id}')" style="color:#ef4444;" title="Delete Content Card (Leaves OneDrive file untouched)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
@@ -1203,13 +1440,32 @@ function renderDocumentCard(doc) {
   const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
   const productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : `<span class="badge badge-prod" style="background:#e8edf5; color:#1a365d; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />Corporate</span>`);
 
+  // Multi-Team scope badge
+  let teamBadge = '';
+  const vis = (doc.visibility || '').toLowerCase();
+  const docTeam = (doc.team_id || '').toLowerCase();
+  if (vis === 'scientific' || docTeam === 'scientific') {
+    teamBadge = `<span class="badge badge-team-scientific">🧬 Scientific Team</span>`;
+  } else if (vis === 'marketing' || docTeam === 'marketing') {
+    teamBadge = `<span class="badge badge-team-marketing">📢 Marketing Team</span>`;
+  } else {
+    teamBadge = `<span class="badge badge-team-crossteam">🌐 Cross-Team</span>`;
+  }
+
+  // OneDrive / SharePoint badge
+  const fileUrl = doc.oneDriveUrl || doc.sharePointUrl || doc.downloadUrl || doc.readMoreUrl || '';
+  const isOneDrive = fileUrl.toLowerCase().includes('onedrive') || fileUrl.toLowerCase().includes('1drv.ms');
+  const driveBadge = `<span class="badge badge-onedrive" title="Direct file link hosted in Microsoft OneDrive / SharePoint">${isOneDrive ? '📁 OneDrive' : '📄 SharePoint'}</span>`;
+
   return `
-    <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in SharePoint">
+    <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
       <div class="card-header-bar">
         <div class="card-type-icon">
-          ${doc.contentType === 'Video' ? '🎥' : doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation' ? '📊' : '📄'}
+          ${doc.contentType === 'Video' ? '🎥' : doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation' ? '📊' : doc.contentType === 'Sample Report' ? '📋' : '📄'}
         </div>
         <div class="card-tags">
+          ${teamBadge}
+          ${driveBadge}
           <span class="badge badge-dept">${doc.department}</span>
           ${productTag}
           ${biomarkerBadge}
@@ -1222,27 +1478,31 @@ function renderDocumentCard(doc) {
         <div class="card-metadata">
           <div class="meta-row">
             <span>Version:</span>
-            <span class="meta-value">${doc.version}</span>
+            <span class="meta-value">${doc.version || 'v1.0'}</span>
           </div>
           <div class="meta-row">
             <span>Updated:</span>
-            <span class="meta-value">${doc.updatedDate}</span>
+            <span class="meta-value">${doc.updatedDate || doc.createdDate || 'Recent'}</span>
           </div>
           <div class="meta-row">
-            <span>Owner:</span>
-            <span class="meta-value">${doc.owner || doc.author || '1Cell.Ai Team'}</span>
+            <span>Added By:</span>
+            <span class="meta-value" title="${doc.created_by || doc.owner || '1Cell.Ai'}">${doc.created_by || doc.owner || doc.author || '1Cell.Ai Team'}</span>
+          </div>
+          <div class="meta-row">
+            <span>Scope:</span>
+            <span class="meta-value" style="font-weight:600;">${vis === 'scientific' ? 'Scientific Team' : vis === 'marketing' ? 'Marketing Team' : 'Cross-Team (All)'}</span>
           </div>
         </div>
       </div>
       <div class="card-actions-bar" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-        <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${doc.id}')" title="View Document in SharePoint">
+        <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${doc.id}')" title="View Document in OneDrive/SharePoint (View Only)">
           <span>View</span>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
           </svg>
         </button>
         <div style="display:flex; gap: 4px; align-items:center;">
-          <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${doc.id}')" title="Edit File & SharePoint Link">
+          <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${doc.id}')" title="Edit File & Direct Link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
             </svg>
@@ -1257,7 +1517,7 @@ function renderDocumentCard(doc) {
               <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186l5.572 3.285m-5.572-3.285L12.79 6.94m0 0a2.25 2.25 0 103.504-1.408 2.25 2.25 0 00-3.504 1.408zm0 10.12l3.504 1.409a2.25 2.25 0 101.076-2.186l-4.58-1.833z" />
             </svg>
           </button>
-          <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${doc.id}')" title="Delete / Remove Content Card" style="color:#ef4444;">
+          <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${doc.id}')" title="Remove Card from Hub (Leaves OneDrive file untouched)" style="color:#ef4444;">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
@@ -1270,12 +1530,24 @@ function renderDocumentCard(doc) {
 
 // 2. Company Assets View
 function renderCompanyAssets() {
-  const assets = db.documents.filter(d => !d.product || d.product === 'company' || d.category === 'company-assets');
+  const userTeam = getCurrentUserTeam();
+  const allAssets = db.documents.filter(d => (!d.product || d.product === 'company' || d.category === 'company-assets') && canTeamViewVisibility(userTeam, d.visibility || d.department));
+
+  let assets = allAssets;
+  if (activeTeamScope === 'my_team') {
+    assets = allAssets.filter(d => normalizeTeam(d.team_id || d.department) === userTeam && (d.visibility === userTeam || d.team_id === userTeam));
+  } else if (activeTeamScope === 'cross_team') {
+    assets = allAssets.filter(d => (d.visibility || 'all') === 'all');
+  }
+
+  const myTeamCount = allAssets.filter(d => normalizeTeam(d.team_id || d.department) === userTeam).length;
+  const crossTeamCount = allAssets.filter(d => (d.visibility || 'all') === 'all').length;
+
   workspaceViewport.innerHTML = `
     <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
       <div>
         <h1 class="welcome-title">Company Profile & Corporate Assets</h1>
-        <p class="welcome-subtitle">Central repository for all company-wide documentation, brand identity assets, corporate presentations, legal agreements, and general resources.</p>
+        <p class="welcome-subtitle">Central collaborative repository for all company-wide documentation, brand identity assets, corporate presentations, legal agreements, and general resources.</p>
       </div>
       <div class="welcome-banner-actions">
         <button class="btn-primary" onclick="window.triggerRegisterAssetModal('company-assets')" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:600; box-shadow: var(--shadow-sm);">
@@ -1288,7 +1560,7 @@ function renderCompanyAssets() {
     </div>
 
     <!-- Brand Story & Mission/Vision Section from Guidelines v3.0 -->
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 24px; margin-bottom: 40px; align-items: stretch;">
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 24px; margin-bottom: 30px; align-items: stretch;">
       <!-- About Us -->
       <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: flex; flex-direction: column; justify-content: center;">
         <h3 style="font-size: 18px; color: var(--accent-color); margin-bottom: 12px; font-weight: 700;">About 1Cell.Ai</h3>
@@ -1321,17 +1593,24 @@ function renderCompanyAssets() {
     </div>
 
     <div class="dashboard-section">
-      <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom: 20px;">
+      <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom: 16px;">
         <div style="display:flex; align-items:center; gap:12px;">
           <h2 class="section-headline" style="margin:0;">Corporate Materials & Company Documents</h2>
-          <span class="badge badge-dept" style="font-size:12px; padding:4px 10px; font-weight:600;">${assets.length} Documents</span>
+          <span class="badge badge-dept" style="font-size:12px; padding:4px 10px; font-weight:600;">${allAssets.length} Accessible</span>
         </div>
-        <button class="btn-outline" onclick="window.triggerRegisterAssetModal('company-assets')" style="font-size:12px; padding:6px 14px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          <span>+ Add Asset</span>
-        </button>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div class="team-filter-bar" style="margin-bottom:0;">
+            <button class="team-filter-btn ${activeTeamScope === 'all' ? 'active' : ''}" onclick="window.setTeamFilterScope('all')">🌐 All Accessible (${allAssets.length})</button>
+            <button class="team-filter-btn ${activeTeamScope === 'my_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('my_team')">${userTeam === 'scientific' ? '🧬 My Team' : '📢 My Team'} (${myTeamCount})</button>
+            <button class="team-filter-btn ${activeTeamScope === 'cross_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('cross_team')">🤝 Cross-Team (${crossTeamCount})</button>
+          </div>
+          <button class="btn-outline" onclick="window.triggerRegisterAssetModal('company-assets')" style="font-size:12px; padding:6px 14px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>+ Add Asset</span>
+          </button>
+        </div>
       </div>
       <div class="assets-grid">
         ${assets.length > 0 ? assets.map(d => renderDocumentCard(d)).join('') : `
@@ -1395,7 +1674,8 @@ window.openProductMicrosite = function(prodId) {
   const product = db.products.find(p => p.id === prodId);
   if (!product) return;
 
-  const allDocs = db.documents.filter(d => d.product === prodId);
+  const userTeam = getCurrentUserTeam();
+  const allDocs = db.documents.filter(d => d.product === prodId && canTeamViewVisibility(userTeam, d.visibility || d.department));
   const brochureDocs = allDocs.filter(d => getProductAssetCategory(d) === 'brochure');
   const caseDocs = allDocs.filter(d => getProductAssetCategory(d) === 'cases');
   const whitepaperDocs = allDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
@@ -1439,7 +1719,7 @@ window.openProductMicrosite = function(prodId) {
         <div class="product-stats" style="margin-left:auto;">
           <div class="product-stat-box">
             <div class="product-stat-num">${allDocs.length}</div>
-            <div class="product-stat-lbl">Total Assets</div>
+            <div class="product-stat-lbl">Accessible</div>
           </div>
           <div class="product-stat-box">
             <div class="product-stat-num">${brochureDocs.length}</div>
@@ -1482,25 +1762,52 @@ function renderProductTabContent(prodId, tabName) {
   const container = document.getElementById('productTabContent');
   if (!container) return;
 
+  const userTeam = getCurrentUserTeam();
   const product = db.products.find(p => p.id === prodId);
-  const allDocs = db.documents.filter(d => d.product === prodId);
-  const brochureDocs = allDocs.filter(d => getProductAssetCategory(d) === 'brochure');
-  const caseDocs = allDocs.filter(d => getProductAssetCategory(d) === 'cases');
-  const whitepaperDocs = allDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
-  const sampleReportDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sample-report');
-  const salesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sales');
-  const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'others');
+  const allDocs = db.documents.filter(d => d.product === prodId && canTeamViewVisibility(userTeam, d.visibility || d.department));
+
+  let filteredDocs = allDocs;
+  if (activeTeamScope === 'my_team') {
+    filteredDocs = allDocs.filter(d => normalizeTeam(d.team_id || d.department) === userTeam && (d.visibility === userTeam || d.team_id === userTeam));
+  } else if (activeTeamScope === 'cross_team') {
+    filteredDocs = allDocs.filter(d => (d.visibility || 'all') === 'all');
+  }
+
+  const brochureDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'brochure');
+  const caseDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'cases');
+  const whitepaperDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
+  const sampleReportDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'sample-report');
+  const salesDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'sales');
+  const otherDocs = filteredDocs.filter(d => getProductAssetCategory(d) === 'others');
 
   const relatedCases = db.cases.filter(c => c.relatedProduct === prodId);
   const relatedPubs = db.publications.filter(p => p.relatedProduct === prodId);
   const relatedVideos = db.videos.filter(v => v.product === prodId);
   const relatedReports = (db.reports || []).filter(r => r.product === prodId);
 
+  const myTeamCount = allDocs.filter(d => normalizeTeam(d.team_id || d.department) === userTeam).length;
+  const crossTeamCount = allDocs.filter(d => (d.visibility || 'all') === 'all').length;
+
+  const teamScopeBar = `
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+      <div class="team-filter-bar" style="margin-bottom:0;">
+        <span style="font-size:11px; font-weight:700; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.04em;">Team Scope:</span>
+        <button class="team-filter-btn ${activeTeamScope === 'all' ? 'active' : ''}" onclick="window.setTeamFilterScope('all')">🌐 All Accessible (${allDocs.length})</button>
+        <button class="team-filter-btn ${activeTeamScope === 'my_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('my_team')">${userTeam === 'scientific' ? '🧬 My Team' : '📢 My Team'} (${myTeamCount})</button>
+        <button class="team-filter-btn ${activeTeamScope === 'cross_team' ? 'active' : ''}" onclick="window.setTeamFilterScope('cross_team')">🤝 Cross-Team (${crossTeamCount})</button>
+      </div>
+      <button class="btn-primary" onclick="window.triggerRegisterProductAsset('${prodId}', '${tabName}')" style="font-size:11.5px; padding:5px 14px; font-weight:600;">
+        + Add ${product ? product.name : ''} Card
+      </button>
+    </div>
+  `;
+
   const emptyState = (catName) => `
+    ${teamScopeBar}
     <div style="text-align:center; padding:48px 24px; background:var(--card-bg); border:1px dashed var(--border-color); border-radius:12px; width:100%;">
       <div style="font-size:36px; margin-bottom:10px;">📁</div>
       <h3 style="font-size:16px; font-weight:700; margin-bottom:6px; color:var(--text-primary);">No ${catName} files registered for ${product.name}</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;">Add a new ${catName} card with its direct SharePoint link to make it accessible.</p>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;">Add a new ${catName} card with its direct OneDrive / SharePoint link to make it accessible to your team.</p>
       <button class="btn-primary" onclick="window.triggerRegisterProductAsset('${prodId}', '${tabName}')">
         + Add ${catName} Asset
       </button>
@@ -1508,12 +1815,13 @@ function renderProductTabContent(prodId, tabName) {
   `;
 
   if (tabName === 'all') {
-    if (allDocs.length === 0) {
+    if (filteredDocs.length === 0) {
       container.innerHTML = emptyState('All Assets');
     } else {
       container.innerHTML = `
+        ${teamScopeBar}
         <div class="assets-grid">
-          ${allDocs.map(d => renderDocumentCard(d)).join('')}
+          ${filteredDocs.map(d => renderDocumentCard(d)).join('')}
         </div>
       `;
     }
@@ -1522,6 +1830,7 @@ function renderProductTabContent(prodId, tabName) {
       container.innerHTML = emptyState('Brochure');
     } else {
       container.innerHTML = `
+        ${teamScopeBar}
         <div class="assets-grid">
           ${brochureDocs.map(d => renderDocumentCard(d)).join('')}
         </div>
@@ -3395,17 +3704,23 @@ function handleMockUpload(e) {
   const biomarker = document.getElementById('formBiomarker').value || 'None';
   const status = document.getElementById('formStatus').value;
   const version = document.getElementById('formVersion').value || 'v1.0';
-  const sharePointUrl = document.getElementById('formSpUrl').value;
+  let sharePointUrl = document.getElementById('formSpUrl').value.trim();
   const authorEl = document.getElementById('formAuthor');
-  const author = (authorEl ? authorEl.value.trim() : '') || '1Cell.Ai';
+  const authorInput = (authorEl ? authorEl.value.trim() : '') || '1Cell.Ai';
   const size = '2.5 MB';
 
+  // Read Target Team & Collaboration Scope
+  const visibilityEl = document.getElementById('formVisibility');
+  const visibility = visibilityEl ? visibilityEl.value : 'all';
+
+  const userTeam = getCurrentUserTeam();
   const authDept = sessionStorage.getItem("authDept");
+  const authName = sessionStorage.getItem("authName") || authorInput;
   let dept = authDept;
   if (!dept) {
-    if (currentRole === 'marketing_admin') dept = 'Marketing';
+    if (userTeam === 'marketing') dept = 'Marketing';
+    else if (userTeam === 'scientific') dept = 'Genomic Scientist';
     else if (currentRole === 'sales') dept = 'Sales';
-    else if (currentRole === 'medical') dept = 'Genomic Scientist';
     else if (currentRole === 'leadership') dept = 'Leadership';
   }
 
@@ -3424,6 +3739,10 @@ function handleMockUpload(e) {
     return;
   }
 
+  if (!/^https?:\/\//i.test(sharePointUrl)) {
+    sharePointUrl = 'https://' + sharePointUrl;
+  }
+
   // Create new document item
   const newDocId = `doc-${Date.now()}`;
   const newDoc = {
@@ -3440,11 +3759,17 @@ function handleMockUpload(e) {
     status,
     year: "2026",
     version,
-    author,
-    owner: author || '1Cell.Ai',
+    author: authName,
+    owner: authName,
+    created_by: authName,
+    team_id: userTeam,
+    visibility: visibility,
     createdDate: new Date().toISOString().split('T')[0],
     updatedDate: new Date().toISOString().split('T')[0],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
     sharePointUrl,
+    oneDriveUrl: sharePointUrl,
     folderPath: product ? `${department}/${contentType}s` : `Shared Documents/Corporate/${contentType}s`,
     size,
     downloadCount: 0,
@@ -3470,11 +3795,17 @@ function handleMockUpload(e) {
       version: version || 'v1.0',
       createdDate: new Date().toISOString().split('T')[0],
       updatedDate: new Date().toISOString().split('T')[0],
-      author,
-      owner: author,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      author: authName,
+      owner: authName,
+      created_by: authName,
+      team_id: userTeam,
+      visibility: visibility,
       department,
       summary: description,
       sharePointUrl,
+      oneDriveUrl: sharePointUrl,
       folderPath: `Shared Documents/Report Library/${cancerType}`,
       size,
       viewCount: 1
@@ -3486,14 +3817,19 @@ function handleMockUpload(e) {
     db.cases.unshift({
       id: `case-${Date.now()}`,
       title,
-      doctor: author,
+      doctor: authName,
       hospital: department,
       relatedProduct: product || 'oncoindx',
       biomarker: biomarker || 'CGP',
       cancerType,
       outcome: 'Guided Therapy',
       summary: description,
-      readMoreUrl: sharePointUrl
+      readMoreUrl: sharePointUrl,
+      oneDriveUrl: sharePointUrl,
+      created_by: authName,
+      team_id: userTeam,
+      visibility: visibility,
+      updated_at: new Date().toISOString()
     });
   } else if (category === 'publications') {
     db.publications.unshift({
@@ -3502,20 +3838,30 @@ function handleMockUpload(e) {
       journal: '1Cell.Ai Research',
       publishedDate: '2026',
       relatedProduct: product || 'oncoindx',
-      authors: author,
+      authors: authName,
       abstract: description,
       citation: `1Cell.Ai 2026; Abstract #${Date.now().toString().slice(-4)}`,
-      link: sharePointUrl
+      link: sharePointUrl,
+      oneDriveUrl: sharePointUrl,
+      created_by: authName,
+      team_id: userTeam,
+      visibility: visibility,
+      updated_at: new Date().toISOString()
     });
   } else if (category === 'videos') {
     db.videos.unshift({
       id: `vid-${Date.now()}`,
       title,
       duration: '10:00',
-      speaker: author,
+      speaker: authName,
       type: contentType,
       product: product,
-      videoUrl: sharePointUrl
+      videoUrl: sharePointUrl,
+      oneDriveUrl: sharePointUrl,
+      created_by: authName,
+      team_id: userTeam,
+      visibility: visibility,
+      updated_at: new Date().toISOString()
     });
   } else if (category === 'brand-assets') {
     db.brandAssets.unshift({
@@ -3523,7 +3869,13 @@ function handleMockUpload(e) {
       title,
       category: 'Brand Guidelines',
       fileType: 'PDF',
-      downloadUrl: sharePointUrl
+      downloadUrl: sharePointUrl,
+      sharePointUrl,
+      oneDriveUrl: sharePointUrl,
+      created_by: authName,
+      team_id: userTeam,
+      visibility: visibility,
+      updated_at: new Date().toISOString()
     });
   } else if (category === 'templates') {
     db.templates.unshift({
@@ -3531,11 +3883,17 @@ function handleMockUpload(e) {
       title,
       category: department,
       fileType: 'DOCX',
-      downloadUrl: sharePointUrl
+      downloadUrl: sharePointUrl,
+      sharePointUrl,
+      oneDriveUrl: sharePointUrl,
+      created_by: authName,
+      team_id: userTeam,
+      visibility: visibility,
+      updated_at: new Date().toISOString()
     });
   } else if (category === 'speakers') {
     // If the registered asset is a speaker publication/link, let's look for doctor matching author or hospital:
-    const spk = db.speakers.find(s => s.name.toLowerCase().includes(author.toLowerCase()) || author.toLowerCase().includes(s.name.toLowerCase()));
+    const spk = db.speakers.find(s => s.name.toLowerCase().includes(authName.toLowerCase()) || authName.toLowerCase().includes(s.name.toLowerCase()));
     if (spk) {
       if (!spk.publications) spk.publications = [];
       spk.publications.push({
@@ -3554,8 +3912,12 @@ function handleMockUpload(e) {
       status: 'Approved',
       version,
       updatedDate: new Date().toISOString().split('T')[0],
-      owner: author,
+      owner: authName,
+      created_by: authName,
+      team_id: userTeam,
+      visibility: visibility,
       sharePointUrl,
+      oneDriveUrl: sharePointUrl,
       folderPath: `Shared Documents/${department}`
     });
   }
@@ -3588,28 +3950,28 @@ function handleMockUpload(e) {
     console.warn('LocalStorage save error:', e);
   }
 
-  // Push to shared Cloud Database
+  // Push to shared Cloud Database with team and author metadata
   try {
-    cloudSync.syncAddAsset('documents', newDoc, author).catch(e => console.warn('Cloud sync error:', e));
+    cloudSync.syncAddAsset('documents', newDoc, authName, userTeam).catch(e => console.warn('Cloud sync error:', e));
     if (category === 'case-library' && db.cases[0]) {
-      cloudSync.syncAddAsset('cases', db.cases[0], author).catch(e => console.warn('Cloud sync error:', e));
+      cloudSync.syncAddAsset('cases', db.cases[0], authName, userTeam).catch(e => console.warn('Cloud sync error:', e));
     } else if (category === 'publications' && db.publications[0]) {
-      cloudSync.syncAddAsset('publications', db.publications[0], author).catch(e => console.warn('Cloud sync error:', e));
+      cloudSync.syncAddAsset('publications', db.publications[0], authName, userTeam).catch(e => console.warn('Cloud sync error:', e));
     } else if (category === 'videos' && db.videos[0]) {
-      cloudSync.syncAddAsset('videos', db.videos[0], author).catch(e => console.warn('Cloud sync error:', e));
+      cloudSync.syncAddAsset('videos', db.videos[0], authName, userTeam).catch(e => console.warn('Cloud sync error:', e));
     } else if (category === 'report-library' && db.reports && db.reports[0]) {
-      cloudSync.syncAddAsset('reports', db.reports[0], author).catch(e => console.warn('Cloud sync error:', e));
+      cloudSync.syncAddAsset('reports', db.reports[0], authName, userTeam).catch(e => console.warn('Cloud sync error:', e));
     } else if (category === 'brand-assets' && db.brandAssets[0]) {
-      cloudSync.syncAddAsset('brandAssets', db.brandAssets[0], author).catch(e => console.warn('Cloud sync error:', e));
+      cloudSync.syncAddAsset('brandAssets', db.brandAssets[0], authName, userTeam).catch(e => console.warn('Cloud sync error:', e));
     } else if (category === 'templates' && db.templates[0]) {
-      cloudSync.syncAddAsset('templates', db.templates[0], author).catch(e => console.warn('Cloud sync error:', e));
+      cloudSync.syncAddAsset('templates', db.templates[0], authName, userTeam).catch(e => console.warn('Cloud sync error:', e));
     }
   } catch (syncErr) {
     console.warn('Cloud sync dispatch error:', syncErr);
   }
 
   closeModal(uploadModal);
-  showToast(`Successfully registered "${title}" under ${product ? product.toUpperCase() : 'Company Assets'}!`);
+  showToast(`Successfully registered "${title}" under ${product ? product.toUpperCase() : 'Company Assets'}! (Synced to team)`);
 
   // Refresh current view (microsite or active route)
   window.refreshCurrentView();
@@ -4046,18 +4408,37 @@ window.deleteAsset = function(id) {
   if (!id) return;
   
   let itemTitle = 'this content card';
+  let isOneDrive = false;
   const doc = db.documents.find(d => d.id === id);
-  if (doc) itemTitle = doc.title;
+  if (doc) {
+    itemTitle = doc.title;
+    if (doc.oneDriveUrl || (doc.sharePointUrl && (doc.sharePointUrl.includes('sharepoint.com') || doc.sharePointUrl.includes('onedrive') || doc.sharePointUrl.includes('1drv.ms')))) {
+      isOneDrive = true;
+    }
+  }
   const c = db.cases.find(item => item.id === id);
-  if (c) itemTitle = c.title;
+  if (c) {
+    itemTitle = c.title;
+    if (c.oneDriveUrl || (c.readMoreUrl && (c.readMoreUrl.includes('sharepoint.com') || c.readMoreUrl.includes('onedrive')))) isOneDrive = true;
+  }
   const pub = db.publications.find(item => item.id === id);
-  if (pub) itemTitle = pub.title;
+  if (pub) {
+    itemTitle = pub.title;
+    if (pub.oneDriveUrl || (pub.link && (pub.link.includes('sharepoint.com') || pub.link.includes('onedrive')))) isOneDrive = true;
+  }
   const vid = db.videos.find(item => item.id === id);
   if (vid) itemTitle = vid.title;
   const rep = (db.reports || []).find(r => r.id === id);
-  if (rep) itemTitle = rep.title;
+  if (rep) {
+    itemTitle = rep.title;
+    if (rep.oneDriveUrl || (rep.sharePointUrl && (rep.sharePointUrl.includes('sharepoint.com') || rep.sharePointUrl.includes('onedrive')))) isOneDrive = true;
+  }
 
-  if (!confirm(`Are you sure you want to remove "${itemTitle}"? This will delete the content card.`)) {
+  const safetyNote = isOneDrive
+    ? '\n\nSafety Guarantee: Your underlying Microsoft OneDrive / SharePoint file will NOT be deleted or modified. Only this reference card is removed from the Content Hub.'
+    : '';
+
+  if (!confirm(`Are you sure you want to remove "${itemTitle}"? This will delete the card from the collaborative Content Hub.${safetyNote}`)) {
     return;
   }
 
@@ -4115,16 +4496,17 @@ window.deleteAsset = function(id) {
     }
   } catch (e) {}
 
-  // Sync deletion to cloud database
+  // Sync deletion to cloud database & broadcast across open tabs
+  const authorName = sessionStorage.getItem("authName") || 'Team Member';
   try {
-    cloudSync.syncDeleteAsset('deleted', id).catch(e => console.warn('Cloud delete error:', e));
+    cloudSync.syncDeleteAsset('documents', id, authorName).catch(e => console.warn('Cloud delete error:', e));
   } catch (e) {}
 
   // Close Edit modal if open
   const editModal = document.getElementById('editAssetModal');
   if (editModal) closeModal(editModal);
 
-  showToast(`Successfully removed "${itemTitle}"`);
+  showToast(`Successfully removed "${itemTitle}" (OneDrive file remains untouched)`);
   window.refreshCurrentView();
 };
 
@@ -4134,13 +4516,14 @@ window.openEditAssetModal = function(id) {
   if (!editModal) return;
 
   const ownerEl = document.getElementById('editDocOwner');
+  const visEl = document.getElementById('editDocVisibility');
 
   const doc = db.documents.find(d => d.id === id);
   if (doc) {
     document.getElementById('editDocId').value = doc.id;
     document.getElementById('editItemType').value = 'document';
     document.getElementById('editDocTitle').value = doc.title || '';
-    document.getElementById('editDocSpUrl').value = doc.sharePointUrl || '';
+    document.getElementById('editDocSpUrl').value = doc.sharePointUrl || doc.oneDriveUrl || '';
     document.getElementById('editDocFolderPath').value = doc.folderPath || '';
     document.getElementById('editDocProduct').value = doc.product || '';
     
@@ -4153,6 +4536,7 @@ window.openEditAssetModal = function(id) {
 
     document.getElementById('editDocDept').value = doc.department || 'Marketing';
     if (ownerEl) ownerEl.value = doc.owner || doc.author || '1Cell.Ai';
+    if (visEl) visEl.value = doc.visibility || 'all';
     document.getElementById('editDocVersion').value = doc.version || 'v1.0';
     document.getElementById('editDocStatus').value = doc.status || 'Approved';
     document.getElementById('editDocDesc').value = doc.description || '';
@@ -4167,12 +4551,13 @@ window.openEditAssetModal = function(id) {
       document.getElementById('editDocId').value = c.id;
       document.getElementById('editItemType').value = 'case';
       document.getElementById('editDocTitle').value = c.title || '';
-      document.getElementById('editDocSpUrl').value = c.readMoreUrl || '';
+      document.getElementById('editDocSpUrl').value = c.readMoreUrl || c.oneDriveUrl || '';
       document.getElementById('editDocFolderPath').value = `Clinical Cases/${c.cancerType || 'Solid Tumor'}`;
       document.getElementById('editDocProduct').value = c.relatedProduct || '';
       document.getElementById('editDocContentType').value = 'Case Studies';
       document.getElementById('editDocDept').value = 'Medical';
       if (ownerEl) ownerEl.value = c.doctor || c.owner || '1Cell.Ai';
+      if (visEl) visEl.value = c.visibility || 'all';
       document.getElementById('editDocVersion').value = 'v1.0';
       document.getElementById('editDocStatus').value = 'Approved';
       document.getElementById('editDocDesc').value = c.summary || '';
@@ -4187,12 +4572,13 @@ window.openEditAssetModal = function(id) {
         document.getElementById('editDocId').value = pub.id;
         document.getElementById('editItemType').value = 'publication';
         document.getElementById('editDocTitle').value = pub.title || '';
-        document.getElementById('editDocSpUrl').value = pub.link || '';
+        document.getElementById('editDocSpUrl').value = pub.link || pub.oneDriveUrl || '';
         document.getElementById('editDocFolderPath').value = `Publications/${pub.journal || 'Peer-Reviewed'}`;
         document.getElementById('editDocProduct').value = pub.relatedProduct || '';
         document.getElementById('editDocContentType').value = 'Others';
         document.getElementById('editDocDept').value = 'Scientific';
         if (ownerEl) ownerEl.value = pub.authors || pub.owner || '1Cell.Ai';
+        if (visEl) visEl.value = pub.visibility || 'all';
         document.getElementById('editDocVersion').value = 'v1.0';
         document.getElementById('editDocStatus').value = 'Approved';
         document.getElementById('editDocDesc').value = pub.abstract || '';
@@ -4207,12 +4593,13 @@ window.openEditAssetModal = function(id) {
           document.getElementById('editDocId').value = vid.id;
           document.getElementById('editItemType').value = 'video';
           document.getElementById('editDocTitle').value = vid.title || '';
-          document.getElementById('editDocSpUrl').value = vid.videoUrl || '';
+          document.getElementById('editDocSpUrl').value = vid.videoUrl || vid.oneDriveUrl || '';
           document.getElementById('editDocFolderPath').value = 'Digital Videos';
           document.getElementById('editDocProduct').value = vid.product || '';
           document.getElementById('editDocContentType').value = 'Others';
           document.getElementById('editDocDept').value = 'Marketing';
           if (ownerEl) ownerEl.value = vid.speaker || vid.owner || '1Cell.Ai';
+          if (visEl) visEl.value = vid.visibility || 'all';
           document.getElementById('editDocVersion').value = 'v1.0';
           document.getElementById('editDocStatus').value = 'Approved';
           document.getElementById('editDocDesc').value = vid.description || '';
@@ -4227,7 +4614,7 @@ window.openEditAssetModal = function(id) {
             document.getElementById('editDocId').value = rep.id;
             document.getElementById('editItemType').value = 'report';
             document.getElementById('editDocTitle').value = rep.title || '';
-            document.getElementById('editDocSpUrl').value = rep.sharePointUrl || '';
+            document.getElementById('editDocSpUrl').value = rep.sharePointUrl || rep.oneDriveUrl || '';
             document.getElementById('editDocFolderPath').value = rep.folderPath || `Shared Documents/Report Library/${rep.cancerType || 'Clinical'}`;
             document.getElementById('editDocProduct').value = rep.product || '';
             document.getElementById('editDocContentType').value = 'Others';
@@ -4237,6 +4624,7 @@ window.openEditAssetModal = function(id) {
             if (biomarkerEl) biomarkerEl.value = rep.biomarker || 'None';
             document.getElementById('editDocDept').value = 'Medical';
             if (ownerEl) ownerEl.value = rep.author || rep.owner || '1Cell.Ai';
+            if (visEl) visEl.value = rep.visibility || 'all';
             document.getElementById('editDocVersion').value = rep.version || 'v1.0';
             document.getElementById('editDocStatus').value = rep.status || 'Approved';
             document.getElementById('editDocDesc').value = rep.summary || rep.description || '';
@@ -4247,12 +4635,13 @@ window.openEditAssetModal = function(id) {
               document.getElementById('editDocId').value = brand.id;
               document.getElementById('editItemType').value = 'brand';
               document.getElementById('editDocTitle').value = brand.title || '';
-              document.getElementById('editDocSpUrl').value = brand.sharePointUrl || brand.downloadUrl || '';
+              document.getElementById('editDocSpUrl').value = brand.sharePointUrl || brand.downloadUrl || brand.oneDriveUrl || '';
               document.getElementById('editDocFolderPath').value = brand.folderPath || 'Brand Guidelines & Assets';
               document.getElementById('editDocProduct').value = '';
               document.getElementById('editDocContentType').value = 'Brand Asset';
               document.getElementById('editDocDept').value = 'Corporate';
               if (ownerEl) ownerEl.value = brand.owner || brand.author || 'Brand Team';
+              if (visEl) visEl.value = brand.visibility || 'all';
               document.getElementById('editDocVersion').value = brand.version || 'v1.0';
               document.getElementById('editDocStatus').value = brand.status || 'Approved';
               document.getElementById('editDocDesc').value = brand.description || '';
@@ -4263,12 +4652,13 @@ window.openEditAssetModal = function(id) {
                 document.getElementById('editDocId').value = temp.id;
                 document.getElementById('editItemType').value = 'template';
                 document.getElementById('editDocTitle').value = temp.title || '';
-                document.getElementById('editDocSpUrl').value = temp.sharePointUrl || temp.downloadUrl || '';
+                document.getElementById('editDocSpUrl').value = temp.sharePointUrl || temp.downloadUrl || temp.oneDriveUrl || '';
                 document.getElementById('editDocFolderPath').value = temp.folderPath || 'Templates';
                 document.getElementById('editDocProduct').value = '';
                 document.getElementById('editDocContentType').value = 'Others';
                 document.getElementById('editDocDept').value = temp.department || 'Corporate';
                 if (ownerEl) ownerEl.value = temp.owner || temp.author || 'Corporate Team';
+                if (visEl) visEl.value = temp.visibility || 'all';
                 document.getElementById('editDocVersion').value = temp.version || 'v1.0';
                 document.getElementById('editDocStatus').value = temp.status || 'Approved';
                 document.getElementById('editDocDesc').value = temp.description || '';
@@ -4299,8 +4689,15 @@ window.saveAssetEdit = function() {
   const status = document.getElementById('editDocStatus').value;
   const desc = document.getElementById('editDocDesc').value.trim();
 
+  // Read Target Team & Collaboration Scope
+  const visibilityEl = document.getElementById('editDocVisibility');
+  const visibility = visibilityEl ? visibilityEl.value : 'all';
+
+  const userTeam = getCurrentUserTeam();
+  const authName = sessionStorage.getItem("authName") || owner || 'Team Member';
+
   if (!title || !spUrl) {
-    showToast("Document Title and SharePoint URL are required!");
+    showToast("Document Title and SharePoint / OneDrive URL are required!");
     return;
   }
 
@@ -4313,6 +4710,8 @@ window.saveAssetEdit = function() {
     if (doc) {
       doc.title = title;
       doc.sharePointUrl = spUrl;
+      doc.oneDriveUrl = spUrl;
+      doc.visibility = visibility;
       doc.folderPath = folderPath || doc.folderPath;
       doc.product = product;
       doc.contentType = contentType;
@@ -4329,6 +4728,7 @@ window.saveAssetEdit = function() {
       const biomarkerEl = document.getElementById('editDocBiomarker');
       if (biomarkerEl) doc.biomarker = biomarkerEl.value;
       doc.updatedDate = new Date().toISOString().split('T')[0];
+      doc.updated_at = new Date().toISOString();
 
       try {
         localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
@@ -4341,6 +4741,8 @@ window.saveAssetEdit = function() {
     if (c) {
       c.title = title;
       c.readMoreUrl = spUrl;
+      c.oneDriveUrl = spUrl;
+      c.visibility = visibility;
       c.relatedProduct = product || c.relatedProduct;
       if (owner) {
         c.doctor = owner;
@@ -4351,6 +4753,7 @@ window.saveAssetEdit = function() {
       if (cancerEl && cancerEl.value !== 'None') c.cancerType = cancerEl.value;
       const biomarkerEl = document.getElementById('editDocBiomarker');
       if (biomarkerEl && biomarkerEl.value !== 'None') c.biomarker = biomarkerEl.value;
+      c.updated_at = new Date().toISOString();
       try {
         localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases));
       } catch (e) {}
@@ -4360,12 +4763,15 @@ window.saveAssetEdit = function() {
     if (pub) {
       pub.title = title;
       pub.link = spUrl;
+      pub.oneDriveUrl = spUrl;
+      pub.visibility = visibility;
       pub.relatedProduct = product || pub.relatedProduct;
       if (owner) {
         pub.authors = owner;
         pub.owner = owner;
       }
       pub.abstract = desc || pub.abstract;
+      pub.updated_at = new Date().toISOString();
       try {
         localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications));
       } catch (e) {}
@@ -4375,12 +4781,15 @@ window.saveAssetEdit = function() {
     if (vid) {
       vid.title = title;
       vid.videoUrl = spUrl;
+      vid.oneDriveUrl = spUrl;
+      vid.visibility = visibility;
       vid.product = product || vid.product;
       if (owner) {
         vid.speaker = owner;
         vid.owner = owner;
       }
       vid.description = desc || vid.description;
+      vid.updated_at = new Date().toISOString();
       try {
         localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
       } catch (e) {}
@@ -4390,6 +4799,8 @@ window.saveAssetEdit = function() {
     if (rep) {
       rep.title = title;
       rep.sharePointUrl = spUrl;
+      rep.oneDriveUrl = spUrl;
+      rep.visibility = visibility;
       rep.folderPath = folderPath || rep.folderPath;
       rep.product = product || rep.product;
       const cancerEl = document.getElementById('editDocCancer');
@@ -4404,6 +4815,7 @@ window.saveAssetEdit = function() {
       rep.version = version || rep.version;
       rep.status = status || rep.status;
       rep.updatedDate = new Date().toISOString().split('T')[0];
+      rep.updated_at = new Date().toISOString();
       try {
         localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
       } catch (e) {}
@@ -4414,11 +4826,14 @@ window.saveAssetEdit = function() {
       brand.title = title;
       brand.sharePointUrl = spUrl;
       brand.downloadUrl = spUrl;
+      brand.oneDriveUrl = spUrl;
+      brand.visibility = visibility;
       if (owner) {
         brand.owner = owner;
         brand.author = owner;
       }
       brand.description = desc || brand.description;
+      brand.updated_at = new Date().toISOString();
       try {
         localStorage.setItem('1cell_custom_brandAssets', JSON.stringify(db.brandAssets));
       } catch (e) {}
@@ -4429,46 +4844,49 @@ window.saveAssetEdit = function() {
       temp.title = title;
       temp.sharePointUrl = spUrl;
       temp.downloadUrl = spUrl;
+      temp.oneDriveUrl = spUrl;
+      temp.visibility = visibility;
       if (owner) {
         temp.owner = owner;
         temp.author = owner;
       }
       temp.description = desc || temp.description;
+      temp.updated_at = new Date().toISOString();
       try {
         localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates));
       } catch (e) {}
     }
   }
 
-  // Sync edit to cloud database
+  // Sync edit to cloud database & broadcast across open tabs
   try {
     if (itemType === 'document') {
       const doc = db.documents.find(d => d.id === id);
-      if (doc) cloudSync.syncUpdateAsset('documents', doc);
+      if (doc) cloudSync.syncUpdateAsset('documents', doc, authName, userTeam);
     } else if (itemType === 'case') {
       const c = db.cases.find(x => x.id === id);
-      if (c) cloudSync.syncUpdateAsset('cases', c);
+      if (c) cloudSync.syncUpdateAsset('cases', c, authName, userTeam);
     } else if (itemType === 'publication') {
       const p = db.publications.find(x => x.id === id);
-      if (p) cloudSync.syncUpdateAsset('publications', p);
+      if (p) cloudSync.syncUpdateAsset('publications', p, authName, userTeam);
     } else if (itemType === 'video') {
       const v = db.videos.find(x => x.id === id);
-      if (v) cloudSync.syncUpdateAsset('videos', v);
+      if (v) cloudSync.syncUpdateAsset('videos', v, authName, userTeam);
     } else if (itemType === 'report') {
       const r = (db.reports || []).find(x => x.id === id);
-      if (r) cloudSync.syncUpdateAsset('reports', r);
-    } else if (itemType === 'brand-asset') {
+      if (r) cloudSync.syncUpdateAsset('reports', r, authName, userTeam);
+    } else if (itemType === 'brand-asset' || itemType === 'brand') {
       const b = (db.brandAssets || []).find(x => x.id === id);
-      if (b) cloudSync.syncUpdateAsset('brandAssets', b);
+      if (b) cloudSync.syncUpdateAsset('brandAssets', b, authName, userTeam);
     } else if (itemType === 'template') {
       const t = (db.templates || []).find(x => x.id === id);
-      if (t) cloudSync.syncUpdateAsset('templates', t);
+      if (t) cloudSync.syncUpdateAsset('templates', t, authName, userTeam);
     }
   } catch (e) {
     console.warn('Cloud sync update failed:', e);
   }
 
-  showToast(`Updated "${title}"! Direct SharePoint link saved.`);
+  showToast(`Updated "${title}"! Direct link & team collaboration scope saved.`);
   const editModal = document.getElementById('editAssetModal');
   if (editModal) closeModal(editModal);
 

@@ -678,6 +678,91 @@ button, input, select {
   color: var(--warning);
 }
 
+/* Multi-Team Badges */
+.badge-team-marketing {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.badge-team-scientific {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-team-crossteam {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+
+/* OneDrive Link Badge */
+.badge-onedrive {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+/* Live Synchronization Card Animations */
+@keyframes cardHighlightPulse {
+  0% { transform: scale(0.96); box-shadow: 0 0 0 5px rgba(46, 75, 170, 0.45); }
+  50% { transform: scale(1.01); box-shadow: 0 0 0 8px rgba(46, 75, 170, 0.2); }
+  100% { transform: scale(1); box-shadow: var(--shadow-sm); }
+}
+
+.card-highlight-pulse {
+  animation: cardHighlightPulse 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.card-fade-out {
+  opacity: 0 !important;
+  transform: scale(0.95) translateY(-8px) !important;
+  transition: opacity 0.35s ease, transform 0.35s ease !important;
+  pointer-events: none;
+}
+
+/* Team Filter Toggle Bar */
+.team-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.team-filter-btn {
+  padding: 4px 12px;
+  font-size: 11.5px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.team-filter-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+.team-filter-btn.active {
+  background: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+}
+
 .card-body {
   padding: 0 16px 16px;
   flex: 1;
