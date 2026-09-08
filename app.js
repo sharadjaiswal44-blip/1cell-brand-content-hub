@@ -4127,7 +4127,7 @@ window.openEditAssetModal = function(id) {
 
   const ownerEl = document.getElementById('editDocOwner');
 
-  const doc = db.documents.find(d => d.id === id);
+  const doc = (db.documents || []).find(d => String(d.id) === String(id));
   if (doc) {
     document.getElementById('editDocId').value = doc.id;
     document.getElementById('editItemType').value = 'document';
@@ -4154,7 +4154,7 @@ window.openEditAssetModal = function(id) {
     if (biomarkerEl) biomarkerEl.value = doc.biomarker || 'None';
   } else {
     // Check if case study
-    const c = db.cases.find(item => item.id === id);
+    const c = (db.cases || []).find(item => String(item.id) === String(id));
     if (c) {
       document.getElementById('editDocId').value = c.id;
       document.getElementById('editItemType').value = 'case';
@@ -4165,7 +4165,6 @@ window.openEditAssetModal = function(id) {
       document.getElementById('editDocContentType').value = 'Case Studies';
       document.getElementById('editDocDept').value = 'Medical';
       if (ownerEl) ownerEl.value = c.doctor || c.owner || '1Cell.Ai';
-      if (visEl) visEl.value = c.visibility || 'all';
       document.getElementById('editDocVersion').value = 'v1.0';
       document.getElementById('editDocStatus').value = 'Approved';
       document.getElementById('editDocDesc').value = c.summary || '';
@@ -4175,7 +4174,7 @@ window.openEditAssetModal = function(id) {
       if (biomarkerEl) biomarkerEl.value = c.biomarker || 'None';
     } else {
       // Check if publication
-      const pub = db.publications.find(item => item.id === id);
+      const pub = (db.publications || []).find(item => String(item.id) === String(id));
       if (pub) {
         document.getElementById('editDocId').value = pub.id;
         document.getElementById('editItemType').value = 'publication';
@@ -4186,7 +4185,6 @@ window.openEditAssetModal = function(id) {
         document.getElementById('editDocContentType').value = 'Others';
         document.getElementById('editDocDept').value = 'Scientific';
         if (ownerEl) ownerEl.value = pub.authors || pub.owner || '1Cell.Ai';
-        if (visEl) visEl.value = pub.visibility || 'all';
         document.getElementById('editDocVersion').value = 'v1.0';
         document.getElementById('editDocStatus').value = 'Approved';
         document.getElementById('editDocDesc').value = pub.abstract || '';
@@ -4196,7 +4194,7 @@ window.openEditAssetModal = function(id) {
         if (biomarkerEl) biomarkerEl.value = 'None';
       } else {
         // Check if video
-        const vid = db.videos.find(item => item.id === id);
+        const vid = (db.videos || []).find(item => String(item.id) === String(id));
         if (vid) {
           document.getElementById('editDocId').value = vid.id;
           document.getElementById('editItemType').value = 'video';
@@ -4207,7 +4205,6 @@ window.openEditAssetModal = function(id) {
           document.getElementById('editDocContentType').value = 'Others';
           document.getElementById('editDocDept').value = 'Marketing';
           if (ownerEl) ownerEl.value = vid.speaker || vid.owner || '1Cell.Ai';
-          if (visEl) visEl.value = vid.visibility || 'all';
           document.getElementById('editDocVersion').value = 'v1.0';
           document.getElementById('editDocStatus').value = 'Approved';
           document.getElementById('editDocDesc').value = vid.description || '';
@@ -4217,7 +4214,7 @@ window.openEditAssetModal = function(id) {
           if (biomarkerEl) biomarkerEl.value = 'None';
         } else {
           // Check if clinical sample report
-          const rep = (db.reports || []).find(r => r.id === id);
+          const rep = (db.reports || []).find(r => String(r.id) === String(id));
           if (rep) {
             document.getElementById('editDocId').value = rep.id;
             document.getElementById('editItemType').value = 'report';
@@ -4232,13 +4229,12 @@ window.openEditAssetModal = function(id) {
             if (biomarkerEl) biomarkerEl.value = rep.biomarker || 'None';
             document.getElementById('editDocDept').value = 'Medical';
             if (ownerEl) ownerEl.value = rep.author || rep.owner || '1Cell.Ai';
-            if (visEl) visEl.value = rep.visibility || 'all';
             document.getElementById('editDocVersion').value = rep.version || 'v1.0';
             document.getElementById('editDocStatus').value = rep.status || 'Approved';
             document.getElementById('editDocDesc').value = rep.summary || rep.description || '';
           } else {
             // Check if brand asset
-            const brand = (db.brandAssets || []).find(b => b.id === id);
+            const brand = (db.brandAssets || []).find(b => String(b.id) === String(id));
             if (brand) {
               document.getElementById('editDocId').value = brand.id;
               document.getElementById('editItemType').value = 'brand';
@@ -4249,13 +4245,12 @@ window.openEditAssetModal = function(id) {
               document.getElementById('editDocContentType').value = 'Brand Asset';
               document.getElementById('editDocDept').value = 'Corporate';
               if (ownerEl) ownerEl.value = brand.owner || brand.author || 'Brand Team';
-              if (visEl) visEl.value = brand.visibility || 'all';
               document.getElementById('editDocVersion').value = brand.version || 'v1.0';
               document.getElementById('editDocStatus').value = brand.status || 'Approved';
               document.getElementById('editDocDesc').value = brand.description || '';
             } else {
               // Check if template
-              const temp = (db.templates || []).find(t => t.id === id);
+              const temp = (db.templates || []).find(t => String(t.id) === String(id));
               if (temp) {
                 document.getElementById('editDocId').value = temp.id;
                 document.getElementById('editItemType').value = 'template';
@@ -4266,7 +4261,6 @@ window.openEditAssetModal = function(id) {
                 document.getElementById('editDocContentType').value = 'Others';
                 document.getElementById('editDocDept').value = temp.department || 'Corporate';
                 if (ownerEl) ownerEl.value = temp.owner || temp.author || 'Corporate Team';
-                if (visEl) visEl.value = temp.visibility || 'all';
                 document.getElementById('editDocVersion').value = temp.version || 'v1.0';
                 document.getElementById('editDocStatus').value = temp.status || 'Approved';
                 document.getElementById('editDocDesc').value = temp.description || '';
@@ -4283,25 +4277,34 @@ window.openEditAssetModal = function(id) {
 
 // Save edited asset and SharePoint URL
 window.saveAssetEdit = async function() {
-  const id = document.getElementById('editDocId').value;
-  const itemType = document.getElementById('editItemType').value;
-  const title = document.getElementById('editDocTitle').value.trim();
-  let spUrl = document.getElementById('editDocSpUrl').value.trim();
-  const folderPath = document.getElementById('editDocFolderPath').value.trim();
-  const product = document.getElementById('editDocProduct').value || null;
-  const contentType = document.getElementById('editDocContentType').value;
-  const department = document.getElementById('editDocDept').value;
+  const idEl = document.getElementById('editDocId');
+  if (!idEl || !idEl.value) {
+    showToast("Error: No card ID found to edit.");
+    return;
+  }
+  const id = idEl.value;
+  const itemType = (document.getElementById('editItemType') ? document.getElementById('editItemType').value : 'document');
+  const title = (document.getElementById('editDocTitle') ? document.getElementById('editDocTitle').value.trim() : '');
+  let spUrl = (document.getElementById('editDocSpUrl') ? document.getElementById('editDocSpUrl').value.trim() : '');
+  const folderPath = (document.getElementById('editDocFolderPath') ? document.getElementById('editDocFolderPath').value.trim() : '');
+  const product = (document.getElementById('editDocProduct') ? document.getElementById('editDocProduct').value : null) || null;
+  const contentType = (document.getElementById('editDocContentType') ? document.getElementById('editDocContentType').value : 'Brochure');
+  const department = (document.getElementById('editDocDept') ? document.getElementById('editDocDept').value : 'Marketing');
   const ownerEl = document.getElementById('editDocOwner');
   const owner = ownerEl ? ownerEl.value.trim() : '';
-  const version = document.getElementById('editDocVersion').value.trim() || 'v1.0';
-  const status = document.getElementById('editDocStatus').value;
-  const desc = document.getElementById('editDocDesc').value.trim();
+  const version = (document.getElementById('editDocVersion') ? document.getElementById('editDocVersion').value.trim() : '') || 'v1.0';
+  const status = (document.getElementById('editDocStatus') ? document.getElementById('editDocStatus').value : 'Approved');
+  const desc = (document.getElementById('editDocDesc') ? document.getElementById('editDocDesc').value.trim() : '');
+  const cancerEl = document.getElementById('editDocCancer');
+  const biomarkerEl = document.getElementById('editDocBiomarker');
+  const cancerVal = (cancerEl && cancerEl.value && cancerEl.value !== 'None') ? cancerEl.value : 'None';
+  const biomarkerVal = (biomarkerEl && biomarkerEl.value && biomarkerEl.value !== 'None') ? biomarkerEl.value : 'None';
 
   // Target Team & Collaboration Scope defaults to 'all'
   const visibility = 'all';
 
   const userTeam = getCurrentUserTeam();
-  const authName = sessionStorage.getItem("authName") || owner || 'Team Member';
+  const authName = sessionStorage.getItem("authName") || owner || '1Cell.Ai';
 
   if (!title || !spUrl) {
     showToast("Document Title and SharePoint / OneDrive URL are required!");
@@ -4330,11 +4333,6 @@ window.saveAssetEdit = async function() {
     }
 
     try {
-      const cancerEl = document.getElementById('editDocCancer');
-      const biomarkerEl = document.getElementById('editDocBiomarker');
-      const cancerVal = (cancerEl && cancerEl.value && cancerEl.value !== 'None') ? cancerEl.value : 'None';
-      const biomarkerVal = (biomarkerEl && biomarkerEl.value && biomarkerEl.value !== 'None') ? biomarkerEl.value : 'None';
-
       await supabaseService.updateAsset(id, {
         title: title,
         description: desc,
@@ -4346,14 +4344,13 @@ window.saveAssetEdit = async function() {
         owner_author: owner || authName,
         version: version,
         status: status,
-        target_team: visibility === 'all' ? 'marketing' : visibility,
-        collaboration_scope: visibility,
+        target_team: 'all',
+        collaboration_scope: 'all',
         sharepoint_url: spUrl,
         sharepoint_folder_path: folderPath || 'Shared Documents'
       });
     } catch (dbErr) {
-      console.warn('Central Supabase update error:', dbErr);
-      showToast(`Central Hub update warning: ${dbErr.message}`);
+      console.warn('Central Supabase update warning:', dbErr);
     } finally {
       if (saveBtn) {
         saveBtn.disabled = false;
@@ -4362,157 +4359,158 @@ window.saveAssetEdit = async function() {
     }
   }
 
-  // Update in local in-memory collections
-  if (itemType === 'document') {
-    const doc = (db.documents || []).find(d => d.id === id);
-    if (doc) {
-      doc.title = title;
-      doc.sharePointUrl = spUrl;
-      doc.oneDriveUrl = spUrl;
-      doc.visibility = visibility;
-      doc.folderPath = folderPath || doc.folderPath;
-      doc.product = product;
-      doc.contentType = contentType;
-      doc.department = department;
-      if (owner) {
-        doc.owner = owner;
-        doc.author = owner;
-      }
-      doc.version = version;
-      doc.status = status;
-      doc.description = desc;
-      const cancerEl = document.getElementById('editDocCancer');
-      if (cancerEl) doc.cancerType = cancerEl.value;
-      const biomarkerEl = document.getElementById('editDocBiomarker');
-      if (biomarkerEl) doc.biomarker = biomarkerEl.value;
-      doc.updatedDate = new Date().toISOString().split('T')[0];
-      doc.updated_at = new Date().toISOString();
+  // Update in canonical db.documents
+  if (!db.documents) db.documents = [];
+  const docIdx = db.documents.findIndex(d => String(d.id) === String(id));
+  const updatedDocData = {
+    title: title,
+    sharePointUrl: spUrl,
+    oneDriveUrl: spUrl,
+    visibility: 'all',
+    folderPath: folderPath || 'Shared Documents',
+    product: product,
+    contentType: contentType,
+    department: department,
+    owner: owner || authName,
+    author: owner || authName,
+    version: version,
+    status: status,
+    description: desc,
+    cancerType: cancerVal,
+    biomarker: biomarkerVal,
+    updatedDate: new Date().toISOString().split('T')[0],
+    updated_at: new Date().toISOString()
+  };
 
-      try {
-        localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
-      } catch (e) {
-        console.warn('LocalStorage save failed:', e);
-      }
+  if (docIdx >= 0) {
+    db.documents[docIdx] = { ...db.documents[docIdx], ...updatedDocData };
+  } else {
+    db.documents.unshift({ id: id, ...updatedDocData });
+  }
+  try {
+    localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
+  } catch (e) {}
+
+  // Update in specialized collections if applicable
+  if (db.cases) {
+    const cIdx = db.cases.findIndex(item => String(item.id) === String(id));
+    if (cIdx >= 0) {
+      db.cases[cIdx] = {
+        ...db.cases[cIdx],
+        title: title,
+        readMoreUrl: spUrl,
+        oneDriveUrl: spUrl,
+        visibility: 'all',
+        relatedProduct: product || db.cases[cIdx].relatedProduct,
+        doctor: owner || authName,
+        owner: owner || authName,
+        summary: desc || db.cases[cIdx].summary,
+        cancerType: cancerVal,
+        biomarker: biomarkerVal,
+        updated_at: new Date().toISOString()
+      };
+      try { localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases)); } catch (e) {}
     }
-  } else if (itemType === 'case') {
-    const c = (db.cases || []).find(item => item.id === id);
-    if (c) {
-      c.title = title;
-      c.readMoreUrl = spUrl;
-      c.oneDriveUrl = spUrl;
-      c.visibility = visibility;
-      c.relatedProduct = product || c.relatedProduct;
-      if (owner) {
-        c.doctor = owner;
-        c.owner = owner;
-      }
-      c.summary = desc || c.summary;
-      const cancerEl = document.getElementById('editDocCancer');
-      if (cancerEl && cancerEl.value !== 'None') c.cancerType = cancerEl.value;
-      const biomarkerEl = document.getElementById('editDocBiomarker');
-      if (biomarkerEl && biomarkerEl.value !== 'None') c.biomarker = biomarkerEl.value;
-      c.updated_at = new Date().toISOString();
-      try {
-        localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases));
-      } catch (e) {}
+  }
+
+  if (db.publications) {
+    const pIdx = db.publications.findIndex(item => String(item.id) === String(id));
+    if (pIdx >= 0) {
+      db.publications[pIdx] = {
+        ...db.publications[pIdx],
+        title: title,
+        link: spUrl,
+        oneDriveUrl: spUrl,
+        visibility: 'all',
+        relatedProduct: product || db.publications[pIdx].relatedProduct,
+        authors: owner || authName,
+        owner: owner || authName,
+        abstract: desc || db.publications[pIdx].abstract,
+        updated_at: new Date().toISOString()
+      };
+      try { localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications)); } catch (e) {}
     }
-  } else if (itemType === 'publication') {
-    const pub = (db.publications || []).find(item => item.id === id);
-    if (pub) {
-      pub.title = title;
-      pub.link = spUrl;
-      pub.oneDriveUrl = spUrl;
-      pub.visibility = visibility;
-      pub.relatedProduct = product || pub.relatedProduct;
-      if (owner) {
-        pub.authors = owner;
-        pub.owner = owner;
-      }
-      pub.abstract = desc || pub.abstract;
-      pub.updated_at = new Date().toISOString();
-      try {
-        localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications));
-      } catch (e) {}
+  }
+
+  if (db.videos) {
+    const vIdx = db.videos.findIndex(item => String(item.id) === String(id));
+    if (vIdx >= 0) {
+      db.videos[vIdx] = {
+        ...db.videos[vIdx],
+        title: title,
+        videoUrl: spUrl,
+        oneDriveUrl: spUrl,
+        visibility: 'all',
+        product: product || db.videos[vIdx].product,
+        speaker: owner || authName,
+        owner: owner || authName,
+        description: desc || db.videos[vIdx].description,
+        updated_at: new Date().toISOString()
+      };
+      try { localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos)); } catch (e) {}
     }
-  } else if (itemType === 'video') {
-    const vid = (db.videos || []).find(item => item.id === id);
-    if (vid) {
-      vid.title = title;
-      vid.videoUrl = spUrl;
-      vid.oneDriveUrl = spUrl;
-      vid.visibility = visibility;
-      vid.product = product || vid.product;
-      if (owner) {
-        vid.speaker = owner;
-        vid.owner = owner;
-      }
-      vid.description = desc || vid.description;
-      vid.updated_at = new Date().toISOString();
-      try {
-        localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos));
-      } catch (e) {}
+  }
+
+  if (db.reports) {
+    const rIdx = db.reports.findIndex(r => String(r.id) === String(id));
+    if (rIdx >= 0) {
+      db.reports[rIdx] = {
+        ...db.reports[rIdx],
+        title: title,
+        sharePointUrl: spUrl,
+        oneDriveUrl: spUrl,
+        visibility: 'all',
+        folderPath: folderPath || db.reports[rIdx].folderPath,
+        product: product || db.reports[rIdx].product,
+        cancerType: cancerVal,
+        biomarker: biomarkerVal,
+        author: owner || authName,
+        owner: owner || authName,
+        summary: desc || db.reports[rIdx].summary,
+        version: version || db.reports[rIdx].version,
+        status: status || db.reports[rIdx].status,
+        updatedDate: new Date().toISOString().split('T')[0],
+        updated_at: new Date().toISOString()
+      };
+      try { localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports)); } catch (e) {}
     }
-  } else if (itemType === 'report') {
-    const rep = (db.reports || []).find(r => r.id === id);
-    if (rep) {
-      rep.title = title;
-      rep.sharePointUrl = spUrl;
-      rep.oneDriveUrl = spUrl;
-      rep.visibility = visibility;
-      rep.folderPath = folderPath || rep.folderPath;
-      rep.product = product || rep.product;
-      const cancerEl = document.getElementById('editDocCancer');
-      if (cancerEl) rep.cancerType = cancerEl.value;
-      const biomarkerEl = document.getElementById('editDocBiomarker');
-      if (biomarkerEl) rep.biomarker = biomarkerEl.value;
-      if (owner) {
-        rep.author = owner;
-        rep.owner = owner;
-      }
-      rep.summary = desc || rep.summary;
-      rep.version = version || rep.version;
-      rep.status = status || rep.status;
-      rep.updatedDate = new Date().toISOString().split('T')[0];
-      rep.updated_at = new Date().toISOString();
-      try {
-        localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports));
-      } catch (e) {}
+  }
+
+  if (db.brandAssets) {
+    const bIdx = db.brandAssets.findIndex(b => String(b.id) === String(id));
+    if (bIdx >= 0) {
+      db.brandAssets[bIdx] = {
+        ...db.brandAssets[bIdx],
+        title: title,
+        sharePointUrl: spUrl,
+        downloadUrl: spUrl,
+        oneDriveUrl: spUrl,
+        visibility: 'all',
+        owner: owner || authName,
+        author: owner || authName,
+        description: desc || db.brandAssets[bIdx].description,
+        updated_at: new Date().toISOString()
+      };
+      try { localStorage.setItem('1cell_custom_brandAssets', JSON.stringify(db.brandAssets)); } catch (e) {}
     }
-  } else if (itemType === 'brand') {
-    const brand = (db.brandAssets || []).find(b => b.id === id);
-    if (brand) {
-      brand.title = title;
-      brand.sharePointUrl = spUrl;
-      brand.downloadUrl = spUrl;
-      brand.oneDriveUrl = spUrl;
-      brand.visibility = visibility;
-      if (owner) {
-        brand.owner = owner;
-        brand.author = owner;
-      }
-      brand.description = desc || brand.description;
-      brand.updated_at = new Date().toISOString();
-      try {
-        localStorage.setItem('1cell_custom_brandAssets', JSON.stringify(db.brandAssets));
-      } catch (e) {}
-    }
-  } else if (itemType === 'template') {
-    const temp = (db.templates || []).find(t => t.id === id);
-    if (temp) {
-      temp.title = title;
-      temp.sharePointUrl = spUrl;
-      temp.downloadUrl = spUrl;
-      temp.oneDriveUrl = spUrl;
-      temp.visibility = visibility;
-      if (owner) {
-        temp.owner = owner;
-        temp.author = owner;
-      }
-      temp.description = desc || temp.description;
-      temp.updated_at = new Date().toISOString();
-      try {
-        localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates));
-      } catch (e) {}
+  }
+
+  if (db.templates) {
+    const tIdx = db.templates.findIndex(t => String(t.id) === String(id));
+    if (tIdx >= 0) {
+      db.templates[tIdx] = {
+        ...db.templates[tIdx],
+        title: title,
+        sharePointUrl: spUrl,
+        downloadUrl: spUrl,
+        oneDriveUrl: spUrl,
+        visibility: 'all',
+        owner: owner || authName,
+        author: owner || authName,
+        description: desc || db.templates[tIdx].description,
+        updated_at: new Date().toISOString()
+      };
+      try { localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates)); } catch (e) {}
     }
   }
 

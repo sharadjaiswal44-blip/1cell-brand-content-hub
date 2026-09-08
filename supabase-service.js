@@ -241,18 +241,13 @@ class SupabaseService {
   async updateAsset(id, updatedFields) {
     if (!id) throw new Error('Asset ID is required for updating.');
 
-    // If updating SharePoint URL, validate and check duplicate
+    // If updating SharePoint URL, validate format
     if (updatedFields.sharepoint_url) {
       const urlCheck = this.validateDocumentUrl(updatedFields.sharepoint_url);
       if (!urlCheck.valid) {
         throw new Error(urlCheck.message);
       }
       updatedFields.sharepoint_url = urlCheck.url;
-
-      const duplicate = await this.checkDuplicateUrl(urlCheck.url, id);
-      if (duplicate) {
-        throw new Error(`This SharePoint/OneDrive document is already registered in the Content Hub under "${duplicate.title}".`);
-      }
     }
 
     const client = await this.getClient();
