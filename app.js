@@ -892,26 +892,16 @@ function renderDashboardProductDocs(productName) {
   relatedDocs.forEach(doc => {
     let icon = '📄';
     if (doc.contentType === 'Brochure') icon = '📖';
-    else if (doc.contentType === 'Whitepaper') icon = '🧬';
-    else if (doc.contentType === 'Case Study') icon = '🔬';
+    else if (doc.contentType === 'Whitepaper' || doc.contentType === 'WhitePaper') icon = '🧬';
+    else if (doc.contentType === 'Case Study' || doc.contentType === 'Case Studies') icon = '🔬';
     else if (doc.contentType === 'Battlecard') icon = '⚔️';
-    else if (doc.contentType === 'Presentation') icon = '📊';
+    else if (doc.contentType === 'Presentation' || doc.contentType === 'Sales Deck') icon = '📊';
     else if (doc.contentType === 'Sample Report') icon = '📋';
 
-    let teamBadge = '';
-    const vis = (doc.visibility || '').toLowerCase();
-    const docTeam = (doc.team_id || '').toLowerCase();
-    if (vis === 'scientific' || docTeam === 'scientific') {
-      teamBadge = `<span class="badge badge-team-scientific">🧬 Scientific</span>`;
-    } else if (vis === 'marketing' || docTeam === 'marketing') {
-      teamBadge = `<span class="badge badge-team-marketing">📢 Marketing</span>`;
-    } else {
-      teamBadge = `<span class="badge badge-team-crossteam">🌐 Cross-Team</span>`;
-    }
-
-    const fileUrl = doc.oneDriveUrl || doc.sharePointUrl || '';
-    const isOneDrive = fileUrl.toLowerCase().includes('onedrive') || fileUrl.toLowerCase().includes('1drv.ms');
-    const driveBadge = `<span class="badge badge-onedrive">${isOneDrive ? '📁 OneDrive' : '📄 SharePoint'}</span>`;
+    const categoryLabel = getCardCategoryLabel(doc);
+    const categoryBadge = `<span class="badge badge-category">🏷️ ${categoryLabel}</span>`;
+    const biomarkerBadge = (doc.biomarker && doc.biomarker !== 'None') ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
+    const statusBadge = `<span class="badge badge-status-approved">${doc.status || 'Approved'}</span>`;
 
     html += `
       <div class="folder-doc-card" id="folder-card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
@@ -919,10 +909,11 @@ function renderDashboardProductDocs(productName) {
           <span class="folder-doc-icon">${icon}</span>
           <div style="flex: 1;">
             <div class="folder-doc-title">${doc.title}</div>
-            <div class="folder-doc-path" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:3px;">
-              ${teamBadge}
-              ${driveBadge}
-              <span style="font-size:11px; color:var(--text-tertiary);">${doc.folderPath || 'Shared Documents'}</span>
+            <div class="folder-doc-path" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px;">
+              ${categoryBadge}
+              ${biomarkerBadge}
+              ${statusBadge}
+              <span style="font-size:11px; color:var(--text-tertiary); margin-left:4px;">${doc.folderPath || 'Shared Documents'}</span>
             </div>
           </div>
         </div>
@@ -1215,29 +1206,33 @@ function renderDashboard() {
   }
 }
 
+// Helper to derive clean content category name for cards
+function getCardCategoryLabel(doc) {
+  let cat = (doc.contentType || '').trim();
+  if (!cat || cat.toLowerCase() === 'others' || cat.toLowerCase() === 'document') {
+    const rawCat = (doc.category || '').toLowerCase();
+    if (rawCat === 'company-assets') cat = 'Company Asset';
+    else if (rawCat === 'product-hub' || rawCat === 'product-collateral') cat = 'Product Collateral';
+    else if (rawCat === 'case-library') cat = 'Case Study';
+    else if (rawCat === 'report-library') cat = 'Sample Report';
+    else if (rawCat === 'publications') cat = 'Publication';
+    else if (rawCat === 'speakers') cat = 'Speaker Profile';
+    else cat = doc.department || 'Product Collateral';
+  }
+  return cat;
+}
+window.getCardCategoryLabel = getCardCategoryLabel;
+
 // Render document card template
 function renderDocumentCard(doc) {
   const isFav = userFavorites.has(doc.id);
-  const biomarkerBadge = doc.biomarker ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
+  const biomarkerBadge = (doc.biomarker && doc.biomarker !== 'None') ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
   const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
   const productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : `<span class="badge badge-prod" style="background:#e8edf5; color:#1a365d; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />Corporate</span>`);
 
-  // Multi-Team scope badge
-  let teamBadge = '';
-  const vis = (doc.visibility || '').toLowerCase();
-  const docTeam = (doc.team_id || '').toLowerCase();
-  if (vis === 'scientific' || docTeam === 'scientific') {
-    teamBadge = `<span class="badge badge-team-scientific">🧬 Scientific Team</span>`;
-  } else if (vis === 'marketing' || docTeam === 'marketing') {
-    teamBadge = `<span class="badge badge-team-marketing">📢 Marketing Team</span>`;
-  } else {
-    teamBadge = `<span class="badge badge-team-crossteam">🌐 Cross-Team</span>`;
-  }
-
-  // OneDrive / SharePoint badge
-  const fileUrl = doc.oneDriveUrl || doc.sharePointUrl || doc.downloadUrl || doc.readMoreUrl || '';
-  const isOneDrive = fileUrl.toLowerCase().includes('onedrive') || fileUrl.toLowerCase().includes('1drv.ms');
-  const driveBadge = `<span class="badge badge-onedrive" title="Direct file link hosted in Microsoft OneDrive / SharePoint">${isOneDrive ? '📁 OneDrive' : '📄 SharePoint'}</span>`;
+  const categoryLabel = getCardCategoryLabel(doc);
+  const categoryBadge = `<span class="badge badge-category">🏷️ ${categoryLabel}</span>`;
+  const statusBadge = `<span class="badge badge-status-approved">${doc.status || 'Approved'}</span>`;
 
   return `
     <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
@@ -1246,18 +1241,20 @@ function renderDocumentCard(doc) {
           ${doc.contentType === 'Video' ? '🎥' : doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation' ? '📊' : doc.contentType === 'Sample Report' ? '📋' : '📄'}
         </div>
         <div class="card-tags">
-          ${teamBadge}
-          ${driveBadge}
-          <span class="badge badge-dept">${doc.department}</span>
           ${productTag}
+          ${categoryBadge}
           ${biomarkerBadge}
-          <span class="badge badge-status-approved">${doc.status}</span>
+          ${statusBadge}
         </div>
       </div>
       <div class="card-body">
         <h3 class="card-title">${doc.title}</h3>
-        <p class="card-description">${doc.description}</p>
+        <p class="card-description">${doc.description || ''}</p>
         <div class="card-metadata">
+          <div class="meta-row">
+            <span>Category:</span>
+            <span class="meta-value" style="font-weight:600; color:var(--text-primary);">${categoryLabel}</span>
+          </div>
           <div class="meta-row">
             <span>Version:</span>
             <span class="meta-value">${doc.version || 'v1.0'}</span>
@@ -1269,10 +1266,6 @@ function renderDocumentCard(doc) {
           <div class="meta-row">
             <span>Added By:</span>
             <span class="meta-value" title="${doc.created_by || doc.owner || '1Cell.Ai'}">${doc.created_by || doc.owner || doc.author || '1Cell.Ai Team'}</span>
-          </div>
-          <div class="meta-row">
-            <span>Scope:</span>
-            <span class="meta-value" style="font-weight:600;">${vis === 'scientific' ? 'Scientific Team' : vis === 'marketing' ? 'Marketing Team' : 'Cross-Team (All)'}</span>
           </div>
         </div>
       </div>
@@ -1810,9 +1803,15 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
       ${db.cases.map(c => `
         <div class="doc-card" onclick="window.openSharePoint('${c.id}')" style="cursor:pointer;" title="Click to view case in SharePoint">
           <div class="case-card-header">
-            <span class="badge badge-biomarker" style="margin-right:6px;">${c.biomarker}</span>
-            <span class="badge badge-prod">${(db.products.find(p => p.id === c.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-            <h3 style="font-size:16px; font-weight:700; margin-top:8px;">${c.title}</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <span class="badge badge-prod">${(db.products.find(p => p.id === c.relatedProduct) || {}).name || '1Cell.Ai'}</span>
+                <span class="badge badge-category">🏷️ Case Study</span>
+                ${c.biomarker ? `<span class="badge badge-biomarker">${c.biomarker}</span>` : ''}
+              </div>
+              <span class="badge badge-status-approved">Approved</span>
+            </div>
+            <h3 style="font-size:16px; font-weight:700; margin-top:4px;">${c.title}</h3>
             <div class="case-hospital">${c.doctor} • ${c.hospital}</div>
           </div>
           <div class="card-body" style="padding-top:16px;">
@@ -1909,9 +1908,10 @@ window.updateReportLibraryCards = function() {
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${prodName}</span>
-                <span class="badge" style="background-color:rgba(14,165,233,0.12); color:#0284c7; font-weight:600;">${r.cancerType}</span>
+                <span class="badge badge-category">🏷️ Sample Report</span>
+                ${r.cancerType ? `<span class="badge" style="background-color:rgba(14,165,233,0.12); color:#0284c7; font-weight:600;">${r.cancerType}</span>` : ''}
               </div>
-              <span class="badge" style="background-color:rgba(16,185,129,0.12); color:#059669; font-weight:600; font-size:10px;">${r.status || 'Approved'}</span>
+              <span class="badge badge-status-approved">${r.status || 'Approved'}</span>
             </div>
             <h3 style="font-size:15.5px; font-weight:700; margin-top:8px; line-height:1.4; color:var(--text-primary); cursor:pointer;" onclick="window.openSharePoint('${r.id}')" title="Click to open report in SharePoint">${r.title}</h3>
           </div>
@@ -2134,9 +2134,12 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
     <div>
       ${db.publications.map(pub => `
         <div class="pub-item" onclick="window.openSharePoint('${pub.id}')" style="cursor:pointer;" title="Click to view publication in SharePoint">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
             <div class="pub-journal">${pub.journal} • Published ${pub.publishedDate}</div>
-            <span class="badge badge-prod">${db.products.find(p => p.id === pub.relatedProduct).name}</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+              <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
+              <span class="badge badge-category">🏷️ Publication</span>
+            </div>
           </div>
           <h3 style="font-size:18px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
           <div class="pub-authors">${pub.authors}</div>
@@ -3258,7 +3261,7 @@ window.previewDocument = function(docId) {
           <span style="font-size:9px; color:#94a3b8;">OFFICIAL APPROVED DOCUMENT</span>
         </div>
         <h2 class="mock-pdf-title">${doc.title}</h2>
-        <div style="font-size:11px; margin-bottom:12px; color:var(--text-secondary);"><strong>Target Department:</strong> ${doc.department} | <strong>Owner / Author:</strong> ${doc.owner || doc.author || '1Cell.Ai Team'} | <strong>Biomarker:</strong> ${doc.biomarker || 'General'}</div>
+        <div style="font-size:11px; margin-bottom:12px; color:var(--text-secondary);"><strong>Category:</strong> ${getCardCategoryLabel(doc)} | <strong>Owner / Author:</strong> ${doc.owner || doc.author || '1Cell.Ai Team'} | <strong>Biomarker:</strong> ${doc.biomarker || 'General'}</div>
         
         <div class="mock-pdf-section-title">Clinical Background</div>
         <p class="mock-pdf-paragraph">1Cell's assays enable clinicians to detect crucial solid tumor variants down to extremely low allele frequencies. By integrating whole transcriptome RNA sequencing, the diagnostic yield expands to target complex fusions, structural variants, and transcriptomic signature patterns.</p>

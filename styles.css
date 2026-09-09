@@ -663,6 +663,16 @@ button, input, select {
   color: var(--accent-color);
 }
 
+.badge-category {
+  background-color: rgba(0, 120, 212, 0.08);
+  color: var(--accent-color);
+  border: 1px solid rgba(0, 120, 212, 0.22);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
 .badge-biomarker {
   background-color: #f5f3ff;
   color: #7c3aed;
