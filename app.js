@@ -759,21 +759,13 @@ function updateSidebarCategories() {
     else if (currentRole === 'leadership') dept = 'Leadership';
   }
 
-  const campaignsItem = document.querySelector('.sidebar .nav-item[data-route="campaigns"]');
-  const brandAssetsItem = document.querySelector('.sidebar .nav-item[data-route="brand-assets"]');
-  const templatesItem = document.querySelector('.sidebar .nav-item[data-route="templates"]');
   const roleSelectorWrapper = document.querySelector('.role-pill-selector');
-
-  if (dept === 'Marketing' || dept === 'Leadership') {
-    if (campaignsItem) campaignsItem.style.display = '';
-    if (brandAssetsItem) brandAssetsItem.style.display = '';
-    if (templatesItem) templatesItem.style.display = '';
-    if (roleSelectorWrapper) roleSelectorWrapper.style.display = '';
-  } else {
-    if (campaignsItem) campaignsItem.style.display = 'none';
-    if (brandAssetsItem) brandAssetsItem.style.display = 'none';
-    if (templatesItem) templatesItem.style.display = 'none';
-    if (roleSelectorWrapper) roleSelectorWrapper.style.display = 'none';
+  if (roleSelectorWrapper) {
+    if (dept === 'Marketing' || dept === 'Leadership') {
+      roleSelectorWrapper.style.display = '';
+    } else {
+      roleSelectorWrapper.style.display = 'none';
+    }
   }
 }
 
@@ -812,19 +804,9 @@ function renderRoute(route) {
   workspaceViewport.innerHTML = '';
   suggestionsDropdown.style.display = 'none';
 
-  // Role/Dept access controls mapping
-  const authDept = sessionStorage.getItem("authDept");
-  let dept = authDept;
-  if (!dept) {
-    if (currentRole === 'marketing_admin') dept = 'Marketing';
-    else if (currentRole === 'sales') dept = 'Sales';
-    else if (currentRole === 'medical') dept = 'Genomic Scientist';
-    else if (currentRole === 'leadership') dept = 'Leadership';
-  }
-
-  if (dept !== 'Marketing' && dept !== 'Leadership' && (route === 'campaigns' || route === 'brand-assets' || route === 'templates')) {
-    showToast("Access restricted: Section available to Marketing & Leadership only.");
-    // Switch active nav item in UI to dashboard
+  // Sections hidden across platform for now
+  const hiddenRoutes = ['campaigns', 'sales-enablement', 'videos', 'brand-assets', 'templates', 'newsletters'];
+  if (hiddenRoutes.includes(route)) {
     sidebarItems.forEach(item => {
       if (item.getAttribute('data-route') === 'dashboard') {
         item.classList.add('active');
@@ -855,29 +837,11 @@ function renderRoute(route) {
     case 'publications':
       renderPublications();
       break;
-    case 'campaigns':
-      renderCampaignHub();
-      break;
-    case 'sales-enablement':
-      renderSalesEnablement();
-      break;
-    case 'quiz':
-      renderQuizPage();
-      break;
-    case 'videos':
-      renderVideoLibrary();
-      break;
-    case 'newsletters':
-      renderNewsletters();
-      break;
     case 'speakers':
       renderSpeakerProfiles();
       break;
-    case 'brand-assets':
-      renderBrandGuidelines();
-      break;
-    case 'templates':
-      renderTemplates();
+    case 'quiz':
+      renderQuizPage();
       break;
     case 'favorites':
       renderFavorites();
@@ -1549,7 +1513,6 @@ window.openProductMicrosite = function(prodId) {
         <button class="product-tab-btn ${currentMicrositeTab === 'cases' ? 'active' : ''}" data-tab="cases" onclick="window.switchProductTab(event, '${prodId}', 'cases')">Case Studies (${totalCasesCount})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'whitepaper' ? 'active' : ''}" data-tab="whitepaper" onclick="window.switchProductTab(event, '${prodId}', 'whitepaper')">WhitePaper (${whitepaperDocs.length})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'sample-report' ? 'active' : ''}" data-tab="sample-report" onclick="window.switchProductTab(event, '${prodId}', 'sample-report')">Sample Report (${totalReportsCount})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'sales' ? 'active' : ''}" data-tab="sales" onclick="window.switchProductTab(event, '${prodId}', 'sales')">Sales Enablement (${salesDocs.length})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'others' ? 'active' : ''}" data-tab="others" onclick="window.switchProductTab(event, '${prodId}', 'others')">Others (${totalOthersCount})</button>
       </div>
     </div>
