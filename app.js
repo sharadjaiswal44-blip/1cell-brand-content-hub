@@ -1581,21 +1581,21 @@ function renderProductTabContent(prodId, tabName) {
         html += relatedCases.map(c => `
           <div class="doc-card" onclick="window.openSharePoint('${c.id}')" style="cursor:pointer;" title="Click to view case in SharePoint">
             <div class="case-card-header">
-              <span class="badge badge-biomarker">${c.biomarker || 'Clinical Case'}</span>
-              <h3 style="font-size:15px; font-weight:700; margin-top:8px;">${c.title}</h3>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                  <span class="badge badge-category">🏷️ Case Study</span>
+                  <span class="badge badge-biomarker">${c.biomarker || 'Clinical Case'}</span>
+                </div>
+                <span class="badge badge-status-approved">Approved</span>
+              </div>
+              <h3 style="font-size:15px; font-weight:700; margin-top:4px;">${c.title}</h3>
               <div class="case-hospital">${c.doctor || '1Cell Clinical Specialist'} • ${c.hospital || 'Genomic Medicine'}</div>
             </div>
             <div class="card-body" style="padding-top:16px;">
               <div class="case-details-summary">${c.summary}</div>
-              <div class="case-field-grid">
-                <div>
-                  <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Cancer Type</span>
-                  <div style="font-size:11.5px; font-weight:550; margin-top:2px;">${c.cancerType || 'Solid Tumor'}</div>
-                </div>
-                <div>
-                  <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Outcome</span>
-                  <div style="font-size:11.5px; font-weight:550; margin-top:2px; color:var(--success);">${c.outcome || 'Guided Therapy'}</div>
-                </div>
+              <div style="margin-bottom:14px;">
+                <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Cancer Type</span>
+                <div style="font-size:11.5px; font-weight:550; margin-top:2px;">${c.cancerType || 'Solid Tumor'}</div>
               </div>
             </div>
             <div class="card-actions-bar">
@@ -1816,15 +1816,9 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
           </div>
           <div class="card-body" style="padding-top:16px;">
             <div class="case-details-summary">${c.summary}</div>
-            <div class="case-field-grid">
-              <div>
-                <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Cancer Type</span>
-                <div style="font-size:12px; font-weight:600; margin-top:2px;">${c.cancerType}</div>
-              </div>
-              <div>
-                <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Outcome</span>
-                <div style="font-size:12px; font-weight:600; margin-top:2px; color:var(--success);">${c.outcome}</div>
-              </div>
+            <div style="margin-bottom:14px;">
+              <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Cancer Type</span>
+              <div style="font-size:12px; font-weight:600; margin-top:2px;">${c.cancerType}</div>
             </div>
           </div>
           <div class="card-actions-bar">
