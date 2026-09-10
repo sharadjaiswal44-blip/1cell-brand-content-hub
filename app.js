@@ -254,15 +254,84 @@ function updateCloudDbUI(status, count = null, err = null) {
   }
 }
 
-// Map document content type to standard product categories: brochure, cases, whitepaper, sample-report, sales, others
+// Map document content type to standard product categories: about-product, evidence, scientific, training-sales, other
 function getProductAssetCategory(doc) {
+  if (!doc) return 'other';
   const ct = (doc.contentType || '').toLowerCase().trim();
-  if (ct === 'brochure') return 'brochure';
-  if (ct === 'case study' || ct === 'case studies' || ct === 'cases') return 'cases';
-  if (ct === 'whitepaper') return 'whitepaper';
-  if (ct === 'sample report' || ct === 'sample reports' || ct === 'report' || ct === 'patient report' || ct.includes('sample report')) return 'sample-report';
-  if (ct === 'sales enablement' || ct === 'battlecard' || ct === 'presentation' || ct === 'sales deck' || ct === 'one pager' || ct === 'two pager' || ct === 'playbook' || doc.isSalesAsset) return 'sales';
-  return 'others';
+  const rawCat = (doc.category || '').toLowerCase().trim();
+  const docId = String(doc.id || '');
+
+  // 1. Evidence: Case studies, sample reports, clinical evidence
+  if (
+    docId.startsWith('case-') ||
+    docId.startsWith('report-') ||
+    rawCat === 'case-library' ||
+    rawCat === 'report-library' ||
+    ct === 'case study' ||
+    ct === 'case studies' ||
+    ct === 'cases' ||
+    ct === 'sample report' ||
+    ct === 'sample reports' ||
+    ct === 'patient report' ||
+    ct === 'clinical evidence' ||
+    ct.includes('sample report') ||
+    ct === 'evidence'
+  ) {
+    return 'evidence';
+  }
+
+  // 2. Scientific: Whitepaper, publication, clinical validity study
+  if (
+    docId.startsWith('pub-') ||
+    rawCat === 'publications' ||
+    ct === 'whitepaper' ||
+    ct === 'white paper' ||
+    ct === 'publication' ||
+    ct === 'publications' ||
+    ct === 'journal' ||
+    ct === 'poster' ||
+    ct === 'scientific'
+  ) {
+    return 'scientific';
+  }
+
+  // 3. About Product: Brochure, product overview, flyer, one pager, FAQ
+  if (
+    ct === 'brochure' ||
+    ct === 'about product' ||
+    ct === 'product overview' ||
+    ct === 'one pager' ||
+    ct === 'two pager' ||
+    ct === 'product flyer' ||
+    ct === 'faq' ||
+    ct.includes('brochure')
+  ) {
+    return 'about-product';
+  }
+
+  // 4. Training & Sales Enablement: Sales deck, presentation, battlecard, playbook, training, video, objection handling
+  if (
+    docId.startsWith('vid-') ||
+    rawCat === 'videos' ||
+    rawCat === 'sales-enablement' ||
+    ct === 'training & sales enablement' ||
+    ct === 'training & sales' ||
+    ct === 'sales enablement' ||
+    ct === 'training' ||
+    ct === 'sales deck' ||
+    ct === 'presentation' ||
+    ct === 'battlecard' ||
+    ct === 'playbook' ||
+    ct === 'sales playbook' ||
+    ct === 'objection handling' ||
+    ct === 'video' ||
+    doc.isSalesAsset
+  ) {
+    return 'training-sales';
+  }
+
+  // 5. Other: Brand assets, templates, infographics, general collateral
+  return 'other';
 }
 
 
@@ -1206,20 +1275,14 @@ function renderDashboard() {
   }
 }
 
-// Helper to derive clean content category name for cards
+// Helper to derive clean standard content category name for cards
 function getCardCategoryLabel(doc) {
-  let cat = (doc.contentType || '').trim();
-  if (!cat || cat.toLowerCase() === 'others' || cat.toLowerCase() === 'document') {
-    const rawCat = (doc.category || '').toLowerCase();
-    if (rawCat === 'company-assets') cat = 'Company Asset';
-    else if (rawCat === 'product-hub' || rawCat === 'product-collateral') cat = 'Product Collateral';
-    else if (rawCat === 'case-library') cat = 'Case Study';
-    else if (rawCat === 'report-library') cat = 'Sample Report';
-    else if (rawCat === 'publications') cat = 'Publication';
-    else if (rawCat === 'speakers') cat = 'Speaker Profile';
-    else cat = doc.department || 'Product Collateral';
-  }
-  return cat;
+  const cat = getProductAssetCategory(doc);
+  if (cat === 'about-product') return 'About Product';
+  if (cat === 'evidence') return 'Evidence';
+  if (cat === 'scientific') return 'Scientific';
+  if (cat === 'training-sales') return 'Training & Sales';
+  return 'Other';
 }
 window.getCardCategoryLabel = getCardCategoryLabel;
 
@@ -1425,8 +1488,8 @@ function renderProductHub() {
   `;
 }
 
-// Product Microsite Workspace Detail view with 6 Category Tabs:
-// All Assets, Brochure, Case Studies, WhitePaper, Sales Enablement, Others
+// Product Microsite Workspace Detail view with 5 Standard Category Tabs:
+// All Assets, About Product, Evidence, Scientific, Training & Sales Enablement, Other
 window.openProductMicrosite = function(prodId) {
   currentMicrositeId = prodId;
   if (!currentMicrositeTab) currentMicrositeTab = 'all';
@@ -1436,21 +1499,22 @@ window.openProductMicrosite = function(prodId) {
 
   const userTeam = getCurrentUserTeam();
   const allDocs = db.documents.filter(d => d.product === prodId && canTeamViewVisibility(userTeam, d.visibility || d.department));
-  const brochureDocs = allDocs.filter(d => getProductAssetCategory(d) === 'brochure');
-  const caseDocs = allDocs.filter(d => getProductAssetCategory(d) === 'cases');
-  const whitepaperDocs = allDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
-  const sampleReportDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sample-report');
-  const salesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sales');
-  const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'others');
+  const aboutProductDocs = allDocs.filter(d => getProductAssetCategory(d) === 'about-product');
+  const evidenceDocs = allDocs.filter(d => getProductAssetCategory(d) === 'evidence');
+  const scientificDocs = allDocs.filter(d => getProductAssetCategory(d) === 'scientific');
+  const trainingSalesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'training-sales');
+  const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'other');
 
   const relatedCases = db.cases.filter(c => c.relatedProduct === prodId);
+  const relatedReports = (db.reports || []).filter(r => r.product === prodId);
   const relatedPubs = db.publications.filter(p => p.relatedProduct === prodId);
   const relatedVideos = db.videos.filter(v => v.product === prodId);
-  const relatedReports = (db.reports || []).filter(r => r.product === prodId);
 
-  const totalCasesCount = caseDocs.length + relatedCases.length;
-  const totalReportsCount = sampleReportDocs.length + relatedReports.length;
-  const totalOthersCount = otherDocs.length + relatedPubs.length + relatedVideos.length;
+  const totalEvidenceCount = evidenceDocs.length + relatedCases.length + relatedReports.length;
+  const totalScientificCount = scientificDocs.length + relatedPubs.length;
+  const totalTrainingSalesCount = trainingSalesDocs.length + relatedVideos.length;
+  const totalOtherCount = otherDocs.length;
+  const totalAllCount = allDocs.length + relatedCases.length + relatedReports.length + relatedPubs.length + relatedVideos.length;
 
   workspaceViewport.innerHTML = `
     <div class="product-workspace-header">
@@ -1478,35 +1542,39 @@ window.openProductMicrosite = function(prodId) {
         <p class="product-description-full" style="margin:0; flex:1;">${product.details || product.description}</p>
         <div class="product-stats" style="margin-left:auto;">
           <div class="product-stat-box">
-            <div class="product-stat-num">${allDocs.length}</div>
-            <div class="product-stat-lbl">Accessible</div>
+            <div class="product-stat-num">${totalAllCount}</div>
+            <div class="product-stat-lbl">Total Assets</div>
           </div>
           <div class="product-stat-box">
-            <div class="product-stat-num">${brochureDocs.length}</div>
-            <div class="product-stat-lbl">Brochures</div>
+            <div class="product-stat-num">${aboutProductDocs.length}</div>
+            <div class="product-stat-lbl">About Product</div>
           </div>
           <div class="product-stat-box">
-            <div class="product-stat-num">${totalCasesCount}</div>
-            <div class="product-stat-lbl">Cases</div>
+            <div class="product-stat-num">${totalEvidenceCount}</div>
+            <div class="product-stat-lbl">Evidence</div>
           </div>
           <div class="product-stat-box">
-            <div class="product-stat-num">${whitepaperDocs.length}</div>
-            <div class="product-stat-lbl">Whitepapers</div>
+            <div class="product-stat-num">${totalScientificCount}</div>
+            <div class="product-stat-lbl">Scientific</div>
           </div>
           <div class="product-stat-box">
-            <div class="product-stat-num">${totalReportsCount}</div>
-            <div class="product-stat-lbl">Sample Reports</div>
+            <div class="product-stat-num">${totalTrainingSalesCount}</div>
+            <div class="product-stat-lbl">Training & Sales</div>
+          </div>
+          <div class="product-stat-box">
+            <div class="product-stat-num">${totalOtherCount}</div>
+            <div class="product-stat-lbl">Other</div>
           </div>
         </div>
       </div>
 
       <div class="product-tabs-row" style="display:flex; flex-wrap:wrap; gap:8px;">
-        <button class="product-tab-btn ${currentMicrositeTab === 'all' ? 'active' : ''}" data-tab="all" onclick="window.switchProductTab(event, '${prodId}', 'all')">All Assets (${allDocs.length})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'brochure' ? 'active' : ''}" data-tab="brochure" onclick="window.switchProductTab(event, '${prodId}', 'brochure')">Brochure (${brochureDocs.length})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'cases' ? 'active' : ''}" data-tab="cases" onclick="window.switchProductTab(event, '${prodId}', 'cases')">Case Studies (${totalCasesCount})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'whitepaper' ? 'active' : ''}" data-tab="whitepaper" onclick="window.switchProductTab(event, '${prodId}', 'whitepaper')">WhitePaper (${whitepaperDocs.length})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'sample-report' ? 'active' : ''}" data-tab="sample-report" onclick="window.switchProductTab(event, '${prodId}', 'sample-report')">Sample Report (${totalReportsCount})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'others' ? 'active' : ''}" data-tab="others" onclick="window.switchProductTab(event, '${prodId}', 'others')">Others (${totalOthersCount})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'all' ? 'active' : ''}" data-tab="all" onclick="window.switchProductTab(event, '${prodId}', 'all')">All Assets (${totalAllCount})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'about-product' ? 'active' : ''}" data-tab="about-product" onclick="window.switchProductTab(event, '${prodId}', 'about-product')">About Product (${aboutProductDocs.length})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'evidence' ? 'active' : ''}" data-tab="evidence" onclick="window.switchProductTab(event, '${prodId}', 'evidence')">Evidence (${totalEvidenceCount})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'scientific' ? 'active' : ''}" data-tab="scientific" onclick="window.switchProductTab(event, '${prodId}', 'scientific')">Scientific (${totalScientificCount})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'training-sales' ? 'active' : ''}" data-tab="training-sales" onclick="window.switchProductTab(event, '${prodId}', 'training-sales')">Training & Sales Enablement (${totalTrainingSalesCount})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'other' ? 'active' : ''}" data-tab="other" onclick="window.switchProductTab(event, '${prodId}', 'other')">Other (${totalOtherCount})</button>
       </div>
     </div>
 
@@ -1525,17 +1593,16 @@ function renderProductTabContent(prodId, tabName) {
   const product = db.products.find(p => p.id === prodId);
   const allDocs = db.documents.filter(d => d.product === prodId && canTeamViewVisibility(userTeam, d.visibility || d.department));
 
-  const brochureDocs = allDocs.filter(d => getProductAssetCategory(d) === 'brochure');
-  const caseDocs = allDocs.filter(d => getProductAssetCategory(d) === 'cases');
-  const whitepaperDocs = allDocs.filter(d => getProductAssetCategory(d) === 'whitepaper');
-  const sampleReportDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sample-report');
-  const salesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'sales');
-  const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'others');
+  const aboutProductDocs = allDocs.filter(d => getProductAssetCategory(d) === 'about-product');
+  const evidenceDocs = allDocs.filter(d => getProductAssetCategory(d) === 'evidence');
+  const scientificDocs = allDocs.filter(d => getProductAssetCategory(d) === 'scientific');
+  const trainingSalesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'training-sales');
+  const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'other');
 
   const relatedCases = db.cases.filter(c => c.relatedProduct === prodId);
+  const relatedReports = (db.reports || []).filter(r => r.product === prodId);
   const relatedPubs = db.publications.filter(p => p.relatedProduct === prodId);
   const relatedVideos = db.videos.filter(v => v.product === prodId);
-  const relatedReports = (db.reports || []).filter(r => r.product === prodId);
 
   const emptyState = (catName) => `
     <div style="text-align:center; padding:48px 24px; background:var(--card-bg); border:1px dashed var(--border-color); border-radius:12px; width:100%;">
@@ -1549,133 +1616,195 @@ function renderProductTabContent(prodId, tabName) {
   `;
 
   if (tabName === 'all') {
-    if (allDocs.length === 0) {
-      container.innerHTML = emptyState('All Assets');
-    } else {
-      container.innerHTML = `
-        <div class="assets-grid">
-          ${allDocs.map(d => renderDocumentCard(d)).join('')}
-        </div>
-      `;
+    let html = '<div class="assets-grid">';
+    let renderedCount = 0;
+    if (allDocs.length > 0) {
+      html += allDocs.map(d => renderDocumentCard(d)).join('');
+      renderedCount += allDocs.length;
     }
-  } else if (tabName === 'brochure') {
-    if (brochureDocs.length === 0) {
-      container.innerHTML = emptyState('Brochure');
-    } else {
-      container.innerHTML = `
-        <div class="assets-grid">
-          ${brochureDocs.map(d => renderDocumentCard(d)).join('')}
-        </div>
-      `;
+    const docIds = new Set(allDocs.map(d => d.id));
+    if (relatedCases.length > 0) {
+      relatedCases.filter(c => !docIds.has(c.id)).forEach(c => {
+        html += renderDocumentCard({
+          id: c.id,
+          title: c.title,
+          description: c.summary,
+          department: 'Medical',
+          product: c.relatedProduct,
+          contentType: 'Case Studies',
+          cancerType: c.cancerType,
+          biomarker: c.biomarker,
+          status: 'Approved',
+          version: 'v1.0',
+          author: c.doctor || '1Cell.Ai',
+          owner: c.doctor || '1Cell.Ai',
+          sharePointUrl: c.readMoreUrl || c.oneDriveUrl
+        });
+        renderedCount++;
+      });
     }
-  } else if (tabName === 'cases') {
-    const totalCount = caseDocs.length + relatedCases.length;
-    if (totalCount === 0) {
-      container.innerHTML = emptyState('Case Studies');
-    } else {
-      let html = '<div class="assets-grid">';
-      if (caseDocs.length > 0) {
-        html += caseDocs.map(d => renderDocumentCard(d)).join('');
-      }
-      if (relatedCases.length > 0) {
-        html += relatedCases.map(c => `
-          <div class="doc-card" onclick="window.openSharePoint('${c.id}')" style="cursor:pointer;" title="Click to view case in SharePoint">
-            <div class="case-card-header">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                  <span class="badge badge-category">🏷️ Case Study</span>
-                  <span class="badge badge-biomarker">${c.biomarker || 'Clinical Case'}</span>
-                </div>
-                <span class="badge badge-status-approved">Approved</span>
+    if (relatedReports.length > 0) {
+      relatedReports.filter(r => !docIds.has(r.id)).forEach(r => {
+        html += renderDocumentCard({
+          id: r.id,
+          title: r.title,
+          description: r.summary,
+          department: 'Medical',
+          product: r.product,
+          contentType: 'Sample Report',
+          cancerType: r.cancerType,
+          biomarker: r.biomarker,
+          status: r.status || 'Approved',
+          version: r.version || 'v1.0',
+          author: r.author || '1Cell.Ai',
+          owner: r.owner || '1Cell.Ai',
+          sharePointUrl: r.sharePointUrl
+        });
+        renderedCount++;
+      });
+    }
+    if (relatedPubs.length > 0) {
+      relatedPubs.filter(p => !docIds.has(p.id)).forEach(pub => {
+        html += `
+          <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+              <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
+                <span class="badge badge-category">🏷️ Scientific</span>
               </div>
-              <h3 style="font-size:15px; font-weight:700; margin-top:4px;">${c.title}</h3>
-              <div class="case-hospital">${c.doctor || '1Cell Clinical Specialist'} • ${c.hospital || 'Genomic Medicine'}</div>
             </div>
-            <div class="card-body" style="padding-top:16px;">
-              <div class="case-details-summary">${c.summary}</div>
-              <div style="margin-bottom:14px;">
-                <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Cancer Type</span>
-                <div style="font-size:11.5px; font-weight:550; margin-top:2px;">${c.cancerType || 'Solid Tumor'}</div>
+            <h3 style="font-size:17px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
+            <div class="pub-authors">${pub.authors}</div>
+            <div class="pub-abstract-box"><strong>Abstract:</strong> ${pub.abstract}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn-outline" style="padding:6px 12px; font-size:12px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
+                <button class="btn-outline" style="padding:6px 12px; font-size:12px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
+                <button class="btn-primary" style="padding:6px 16px; font-size:12px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
               </div>
-            </div>
-            <div class="card-actions-bar">
-              <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${c.id}')">Edit</button>
-              <button class="btn-outline" style="padding:6px 10px; font-size:11px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${c.id}')">Delete</button>
-              <button class="btn-primary" style="padding:6px 14px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${c.id}')">View</button>
             </div>
           </div>
-        `).join('');
-      }
-      html += '</div>';
+        `;
+        renderedCount++;
+      });
+    }
+    if (relatedVideos.length > 0) {
+      relatedVideos.filter(v => !docIds.has(v.id)).forEach(vid => {
+        html += `
+          <div class="doc-card" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
+            <div class="video-card-thumbnail" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;">
+              <div class="video-play-icon">▶</div>
+              <span class="video-duration">${vid.duration}</span>
+            </div>
+            <div class="card-body" style="padding:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span class="badge badge-category">🏷️ Training & Sales</span>
+                <span class="badge badge-status-approved">Approved</span>
+              </div>
+              <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
+                <span>Speaker: ${vid.speaker}</span>
+                <span>Type: ${vid.type}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:8px;">
+                <button class="btn-outline" style="padding:4px 8px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')">Edit</button>
+                <button class="btn-outline" style="padding:4px 8px; font-size:11px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${vid.id}')">Delete</button>
+                <button class="btn-primary" style="padding:4px 12px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
+              </div>
+            </div>
+          </div>
+        `;
+        renderedCount++;
+      });
+    }
+    html += '</div>';
+    if (renderedCount === 0) {
+      container.innerHTML = emptyState('All Assets');
+    } else {
       container.innerHTML = html;
     }
-  } else if (tabName === 'whitepaper') {
-    if (whitepaperDocs.length === 0) {
-      container.innerHTML = emptyState('WhitePaper');
+  } else if (tabName === 'about-product') {
+    if (aboutProductDocs.length === 0) {
+      container.innerHTML = emptyState('About Product');
     } else {
       container.innerHTML = `
         <div class="assets-grid">
-          ${whitepaperDocs.map(d => renderDocumentCard(d)).join('')}
+          ${aboutProductDocs.map(d => renderDocumentCard(d)).join('')}
         </div>
       `;
     }
-  } else if (tabName === 'sample-report') {
-    const totalCount = sampleReportDocs.length + relatedReports.length;
+  } else if (tabName === 'evidence') {
+    const totalCount = evidenceDocs.length + relatedCases.length + relatedReports.length;
     if (totalCount === 0) {
-      container.innerHTML = emptyState('Sample Report');
+      container.innerHTML = emptyState('Evidence');
     } else {
       let html = '<div class="assets-grid">';
-      if (sampleReportDocs.length > 0) {
-        html += sampleReportDocs.map(d => renderDocumentCard(d)).join('');
+      if (evidenceDocs.length > 0) {
+        html += evidenceDocs.map(d => renderDocumentCard(d)).join('');
+      }
+      const docIds = new Set(evidenceDocs.map(d => d.id));
+      if (relatedCases.length > 0) {
+        relatedCases.filter(c => !docIds.has(c.id)).forEach(c => {
+          html += renderDocumentCard({
+            id: c.id,
+            title: c.title,
+            description: c.summary,
+            department: 'Medical',
+            product: c.relatedProduct,
+            contentType: 'Case Studies',
+            cancerType: c.cancerType,
+            biomarker: c.biomarker,
+            status: 'Approved',
+            version: 'v1.0',
+            author: c.doctor || '1Cell.Ai',
+            owner: c.doctor || '1Cell.Ai',
+            sharePointUrl: c.readMoreUrl || c.oneDriveUrl
+          });
+        });
       }
       if (relatedReports.length > 0) {
-        const docIds = new Set(sampleReportDocs.map(d => d.id));
         relatedReports.filter(r => !docIds.has(r.id)).forEach(r => {
           html += renderDocumentCard({
             id: r.id,
             title: r.title,
             description: r.summary,
-            department: r.department || 'Medical',
+            department: 'Medical',
             product: r.product,
             contentType: 'Sample Report',
             cancerType: r.cancerType,
             biomarker: r.biomarker,
             status: r.status || 'Approved',
-            year: '2026',
             version: r.version || 'v1.0',
             author: r.author || '1Cell.Ai',
             owner: r.owner || '1Cell.Ai',
-            sharePointUrl: r.sharePointUrl,
-            size: r.size || '2.5 MB'
+            sharePointUrl: r.sharePointUrl
           });
         });
       }
       html += '</div>';
       container.innerHTML = html;
     }
-  } else if (tabName === 'sales') {
-    if (salesDocs.length === 0) {
-      container.innerHTML = emptyState('Sales Enablement');
-    } else {
-      container.innerHTML = `
-        <div class="assets-grid">
-          ${salesDocs.map(d => renderDocumentCard(d)).join('')}
-        </div>
-      `;
-    }
-  } else if (tabName === 'others') {
-    const totalOthers = otherDocs.length + relatedPubs.length + relatedVideos.length;
-    if (totalOthers === 0) {
-      container.innerHTML = emptyState('Others');
+  } else if (tabName === 'scientific') {
+    const totalCount = scientificDocs.length + relatedPubs.length;
+    if (totalCount === 0) {
+      container.innerHTML = emptyState('Scientific');
     } else {
       let html = '<div class="assets-grid">';
-      if (otherDocs.length > 0) {
-        html += otherDocs.map(d => renderDocumentCard(d)).join('');
+      if (scientificDocs.length > 0) {
+        html += scientificDocs.map(d => renderDocumentCard(d)).join('');
       }
       if (relatedPubs.length > 0) {
         html += relatedPubs.map(pub => `
           <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
-            <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+              <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
+                <span class="badge badge-category">🏷️ Scientific</span>
+              </div>
+            </div>
             <h3 style="font-size:17px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
             <div class="pub-authors">${pub.authors}</div>
             <div class="pub-abstract-box"><strong>Abstract:</strong> ${pub.abstract}</div>
@@ -1690,6 +1819,18 @@ function renderProductTabContent(prodId, tabName) {
           </div>
         `).join('');
       }
+      html += '</div>';
+      container.innerHTML = html;
+    }
+  } else if (tabName === 'training-sales') {
+    const totalCount = trainingSalesDocs.length + relatedVideos.length;
+    if (totalCount === 0) {
+      container.innerHTML = emptyState('Training & Sales Enablement');
+    } else {
+      let html = '<div class="assets-grid">';
+      if (trainingSalesDocs.length > 0) {
+        html += trainingSalesDocs.map(d => renderDocumentCard(d)).join('');
+      }
       if (relatedVideos.length > 0) {
         html += relatedVideos.map(vid => `
           <div class="doc-card" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
@@ -1698,6 +1839,10 @@ function renderProductTabContent(prodId, tabName) {
               <span class="video-duration">${vid.duration}</span>
             </div>
             <div class="card-body" style="padding:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span class="badge badge-category">🏷️ Training & Sales</span>
+                <span class="badge badge-status-approved">Approved</span>
+              </div>
               <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
               <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
                 <span>Speaker: ${vid.speaker}</span>
@@ -1714,6 +1859,16 @@ function renderProductTabContent(prodId, tabName) {
       }
       html += '</div>';
       container.innerHTML = html;
+    }
+  } else if (tabName === 'other') {
+    if (otherDocs.length === 0) {
+      container.innerHTML = emptyState('Other');
+    } else {
+      container.innerHTML = `
+        <div class="assets-grid">
+          ${otherDocs.map(d => renderDocumentCard(d)).join('')}
+        </div>
+      `;
     }
   }
 }
@@ -1754,13 +1909,12 @@ window.triggerRegisterProductAsset = function(prodId, categoryTab) {
   // Set Category / ContentType based on active tab
   const formContentType = document.getElementById('formContentType');
   if (formContentType) {
-    if (currentTab === 'brochure') formContentType.value = 'Brochure';
-    else if (currentTab === 'cases') formContentType.value = 'Case Studies';
-    else if (currentTab === 'whitepaper') formContentType.value = 'WhitePaper';
-    else if (currentTab === 'sample-report') formContentType.value = 'Sample Report';
-    else if (currentTab === 'sales') formContentType.value = 'Sales Enablement';
-    else if (currentTab === 'others') formContentType.value = 'Others';
-    else formContentType.value = 'Brochure';
+    if (currentTab === 'about-product') formContentType.value = 'About Product';
+    else if (currentTab === 'evidence') formContentType.value = 'Evidence';
+    else if (currentTab === 'scientific') formContentType.value = 'Scientific';
+    else if (currentTab === 'training-sales') formContentType.value = 'Training & Sales Enablement';
+    else if (currentTab === 'other') formContentType.value = 'Other';
+    else formContentType.value = 'About Product';
   }
 
   // Set category dropdown
@@ -1806,7 +1960,7 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${(db.products.find(p => p.id === c.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-                <span class="badge badge-category">🏷️ Case Study</span>
+                <span class="badge badge-category">🏷️ Evidence</span>
                 ${c.biomarker ? `<span class="badge badge-biomarker">${c.biomarker}</span>` : ''}
               </div>
               <span class="badge badge-status-approved">Approved</span>
@@ -1902,7 +2056,7 @@ window.updateReportLibraryCards = function() {
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${prodName}</span>
-                <span class="badge badge-category">🏷️ Sample Report</span>
+                <span class="badge badge-category">🏷️ Evidence</span>
                 ${r.cancerType ? `<span class="badge" style="background-color:rgba(14,165,233,0.12); color:#0284c7; font-weight:600;">${r.cancerType}</span>` : ''}
               </div>
               <span class="badge badge-status-approved">${r.status || 'Approved'}</span>
@@ -2132,7 +2286,7 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
             <div class="pub-journal">${pub.journal} • Published ${pub.publishedDate}</div>
             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
               <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-              <span class="badge badge-category">🏷️ Publication</span>
+              <span class="badge badge-category">🏷️ Scientific</span>
             </div>
           </div>
           <h3 style="font-size:18px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
@@ -2618,11 +2772,11 @@ function triggerSearchHub(query = '') {
           </div>
         </div>
 
-        <!-- Filter Content Type -->
+        <!-- Filter Category -->
         <div class="filter-group">
-          <span class="filter-group-label">Content Type</span>
+          <span class="filter-group-label">Category</span>
           <div class="filter-options-list">
-            ${['Brochure', 'Presentation', 'One Pager', 'Sales Deck', 'FAQ', 'Case Study', 'Clinical Evidence', 'Publication', 'Whitepaper', 'Video', 'Brand Asset', 'Sales Playbook', 'Objection Handling'].map(t => `
+            ${['About Product', 'Evidence', 'Scientific', 'Training & Sales Enablement', 'Other'].map(t => `
               <label class="filter-checkbox-label">
                 <input type="checkbox" data-filter="contentType" value="${t}" ${activeFilters.contentType.includes(t) ? 'checked' : ''} onchange="window.updateFilterState()">
                 ${t}
@@ -3001,9 +3155,19 @@ window.updateFilterState = function() {
     if (activeFilters.product.length > 0 && !activeFilters.product.includes(doc.product)) {
       return false;
     }
-    // 4. Content Type filter
-    if (activeFilters.contentType.length > 0 && !activeFilters.contentType.includes(doc.contentType)) {
-      return false;
+    // 4. Content Type / Category filter
+    if (activeFilters.contentType.length > 0) {
+      const docCat = getProductAssetCategory(doc);
+      const cardLabel = getCardCategoryLabel(doc);
+      const match = activeFilters.contentType.some(f => {
+        if (f === 'About Product' && (docCat === 'about-product' || doc.contentType === 'Brochure' || doc.contentType === 'About Product' || doc.contentType === 'One Pager')) return true;
+        if (f === 'Evidence' && (docCat === 'evidence' || doc.contentType === 'Case Studies' || doc.contentType === 'Case Study' || doc.contentType === 'Sample Report' || doc.contentType === 'Clinical Evidence')) return true;
+        if (f === 'Scientific' && (docCat === 'scientific' || doc.contentType === 'WhitePaper' || doc.contentType === 'Whitepaper' || doc.contentType === 'Publication')) return true;
+        if (f === 'Training & Sales Enablement' && (docCat === 'training-sales' || doc.contentType === 'Sales Enablement' || doc.contentType === 'Presentation' || doc.contentType === 'Sales Deck' || doc.contentType === 'Battlecard' || doc.contentType === 'Playbook' || doc.contentType === 'Video')) return true;
+        if (f === 'Other' && docCat === 'other') return true;
+        return doc.contentType === f || cardLabel === f;
+      });
+      if (!match) return false;
     }
     // 5. Cancer Type filter
     if (activeFilters.cancerType.length > 0) {
@@ -4097,11 +4261,20 @@ window.openEditAssetModal = function(id) {
     document.getElementById('editDocProduct').value = doc.product || '';
     
     // Normalize category to standard 5 or specific
-    let cat = doc.contentType || 'Brochure';
-    if (cat.toLowerCase() === 'case study') cat = 'Case Studies';
-    if (cat.toLowerCase() === 'whitepaper') cat = 'WhitePaper';
-    if (cat.toLowerCase() === 'battlecard' || cat.toLowerCase() === 'presentation' || cat.toLowerCase() === 'sales deck') cat = 'Sales Enablement';
-    document.getElementById('editDocContentType').value = cat;
+    let cat = doc.contentType || 'About Product';
+    const sel = document.getElementById('editDocContentType');
+    if (sel) {
+      const exists = Array.from(sel.options).some(o => o.value.toLowerCase() === cat.toLowerCase());
+      if (!exists) {
+        const stdCat = getProductAssetCategory(doc);
+        if (stdCat === 'about-product') cat = 'About Product';
+        else if (stdCat === 'evidence') cat = 'Evidence';
+        else if (stdCat === 'scientific') cat = 'Scientific';
+        else if (stdCat === 'training-sales') cat = 'Training & Sales Enablement';
+        else cat = 'Other';
+      }
+      sel.value = cat;
+    }
 
     document.getElementById('editDocDept').value = doc.department || 'Marketing';
     if (ownerEl) ownerEl.value = doc.owner || doc.author || '1Cell.Ai';
@@ -4122,7 +4295,7 @@ window.openEditAssetModal = function(id) {
       document.getElementById('editDocSpUrl').value = c.readMoreUrl || c.oneDriveUrl || '';
       document.getElementById('editDocFolderPath').value = `Clinical Cases/${c.cancerType || 'Solid Tumor'}`;
       document.getElementById('editDocProduct').value = c.relatedProduct || '';
-      document.getElementById('editDocContentType').value = 'Case Studies';
+      document.getElementById('editDocContentType').value = 'Evidence';
       document.getElementById('editDocDept').value = 'Medical';
       if (ownerEl) ownerEl.value = c.doctor || c.owner || '1Cell.Ai';
       document.getElementById('editDocVersion').value = 'v1.0';
@@ -4142,7 +4315,7 @@ window.openEditAssetModal = function(id) {
         document.getElementById('editDocSpUrl').value = pub.link || pub.oneDriveUrl || '';
         document.getElementById('editDocFolderPath').value = `Publications/${pub.journal || 'Peer-Reviewed'}`;
         document.getElementById('editDocProduct').value = pub.relatedProduct || '';
-        document.getElementById('editDocContentType').value = 'Others';
+        document.getElementById('editDocContentType').value = 'Scientific';
         document.getElementById('editDocDept').value = 'Scientific';
         if (ownerEl) ownerEl.value = pub.authors || pub.owner || '1Cell.Ai';
         document.getElementById('editDocVersion').value = 'v1.0';
@@ -4162,7 +4335,7 @@ window.openEditAssetModal = function(id) {
           document.getElementById('editDocSpUrl').value = vid.videoUrl || vid.oneDriveUrl || '';
           document.getElementById('editDocFolderPath').value = 'Digital Videos';
           document.getElementById('editDocProduct').value = vid.product || '';
-          document.getElementById('editDocContentType').value = 'Others';
+          document.getElementById('editDocContentType').value = 'Training & Sales Enablement';
           document.getElementById('editDocDept').value = 'Marketing';
           if (ownerEl) ownerEl.value = vid.speaker || vid.owner || '1Cell.Ai';
           document.getElementById('editDocVersion').value = 'v1.0';
@@ -4182,7 +4355,7 @@ window.openEditAssetModal = function(id) {
             document.getElementById('editDocSpUrl').value = rep.sharePointUrl || rep.oneDriveUrl || '';
             document.getElementById('editDocFolderPath').value = rep.folderPath || `Shared Documents/Report Library/${rep.cancerType || 'Clinical'}`;
             document.getElementById('editDocProduct').value = rep.product || '';
-            document.getElementById('editDocContentType').value = 'Others';
+            document.getElementById('editDocContentType').value = 'Evidence';
             const cancerEl = document.getElementById('editDocCancer');
             if (cancerEl) cancerEl.value = rep.cancerType || 'None';
             const biomarkerEl = document.getElementById('editDocBiomarker');
@@ -4202,7 +4375,7 @@ window.openEditAssetModal = function(id) {
               document.getElementById('editDocSpUrl').value = brand.sharePointUrl || brand.downloadUrl || brand.oneDriveUrl || '';
               document.getElementById('editDocFolderPath').value = brand.folderPath || 'Brand Guidelines & Assets';
               document.getElementById('editDocProduct').value = '';
-              document.getElementById('editDocContentType').value = 'Brand Asset';
+              document.getElementById('editDocContentType').value = 'Other';
               document.getElementById('editDocDept').value = 'Corporate';
               if (ownerEl) ownerEl.value = brand.owner || brand.author || 'Brand Team';
               document.getElementById('editDocVersion').value = brand.version || 'v1.0';
@@ -4218,9 +4391,9 @@ window.openEditAssetModal = function(id) {
                 document.getElementById('editDocSpUrl').value = temp.sharePointUrl || temp.downloadUrl || temp.oneDriveUrl || '';
                 document.getElementById('editDocFolderPath').value = temp.folderPath || 'Templates';
                 document.getElementById('editDocProduct').value = '';
-                document.getElementById('editDocContentType').value = 'Others';
-                document.getElementById('editDocDept').value = temp.department || 'Corporate';
-                if (ownerEl) ownerEl.value = temp.owner || temp.author || 'Corporate Team';
+                document.getElementById('editDocContentType').value = 'Other';
+                document.getElementById('editDocDept').value = 'Corporate';
+                if (ownerEl) ownerEl.value = temp.owner || temp.author || '1Cell.Ai';
                 document.getElementById('editDocVersion').value = temp.version || 'v1.0';
                 document.getElementById('editDocStatus').value = temp.status || 'Approved';
                 document.getElementById('editDocDesc').value = temp.description || '';
@@ -4248,7 +4421,7 @@ window.saveAssetEdit = async function() {
   let spUrl = (document.getElementById('editDocSpUrl') ? document.getElementById('editDocSpUrl').value.trim() : '');
   const folderPath = (document.getElementById('editDocFolderPath') ? document.getElementById('editDocFolderPath').value.trim() : '');
   const product = (document.getElementById('editDocProduct') ? document.getElementById('editDocProduct').value : null) || null;
-  const contentType = (document.getElementById('editDocContentType') ? document.getElementById('editDocContentType').value : 'Brochure');
+  const contentType = (document.getElementById('editDocContentType') ? document.getElementById('editDocContentType').value : 'About Product');
   const department = (document.getElementById('editDocDept') ? document.getElementById('editDocDept').value : 'Marketing');
   const ownerEl = document.getElementById('editDocOwner');
   const owner = ownerEl ? ownerEl.value.trim() : '';
