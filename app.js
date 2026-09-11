@@ -2375,47 +2375,89 @@ ${window.renderCategoryHeader('1Cell.Ai Digital Video Library', 'Browse doctor i
 // 8. Speaker Profiles Route
 function renderSpeakerProfiles() {
   workspaceViewport.innerHTML = `
-${window.renderCategoryHeader('Speaker Profiles & Medical Experts', 'Academic profiles and content assets linked to clinical key opinion leaders.', 'speakers')}
+${window.renderCategoryHeader('Speaker Profiles & Key Opinion Leaders', 'Academic profiles and peer-reviewed scientific publications linked to 1Cell.Ai research leaders and clinical key opinion leaders.', 'speakers')}
     
     <div class="speakers-grid">
       ${db.speakers.map(spk => `
         <div class="speaker-card">
-          <img src="${spk.photo}" alt="${spk.name}" class="speaker-photo">
-          <div class="speaker-info">
-            <h3 class="speaker-name">${spk.name}</h3>
-            <div class="speaker-details">
-              <div style="font-weight:600; color:var(--text-primary);">${spk.specialization}</div>
-              <div style="color:var(--text-tertiary); font-size:11.5px; margin-top:2px;">${spk.hospital}</div>
-              <div style="font-size:11px; margin-top:6px; color:var(--accent-color);">${spk.contact}</div>
-            </div>
-            
-            <div class="speaker-relations">
-              <span style="font-size:10px; font-weight:700; color:var(--text-tertiary); text-transform:uppercase;">Linked Resources:</span>
-              <div style="margin-top:6px;">
-                ${spk.publications ? spk.publications.map(p => {
-                  const title = typeof p === 'object' ? p.title : p;
-                  const doc = db.documents.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15)));
-                  const docId = doc ? doc.id : (db.documents[0] ? db.documents[0].id : 'doc-041');
-                  const link = typeof p === 'object' ? (p.link || p.sharePointUrl) : '';
-                  if (link) {
-                    return `<div class="relation-item"><span>📄</span> <span style="cursor:pointer;" onclick="window.open('${link}', '_blank')">${title}</span></div>`;
-                  } else {
-                    return `<div class="relation-item"><span>📄</span> <span style="cursor:pointer;" onclick="window.previewDocument('${docId}')">${title}</span></div>`;
-                  }
-                }).join('') : ''}
-                ${spk.presentations ? spk.presentations.map(p => {
-                  const title = typeof p === 'object' ? p.title : p;
-                  const doc = db.documents.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15))) || db.publications.find(d => d.title.toLowerCase().includes(title.toLowerCase().substring(0, 15)));
-                  const docId = doc ? doc.id : (db.documents[0] ? db.documents[0].id : 'doc-041');
-                  const link = typeof p === 'object' ? (p.link || p.sharePointUrl) : '';
-                  if (link) {
-                    return `<div class="relation-item"><span>📊</span> <span style="cursor:pointer;" onclick="window.open('${link}', '_blank')">${title}</span></div>`;
-                  } else {
-                    return `<div class="relation-item"><span>📊</span> <span style="cursor:pointer;" onclick="window.previewDocument('${docId}')">${title}</span></div>`;
-                  }
-                }).join('') : ''}
+          <div class="speaker-header">
+            <img src="${spk.photo}" alt="${spk.name}" class="speaker-photo" onerror="this.onerror=null;this.src='assets/logos/1cell_icon.png';">
+            <div class="speaker-info">
+              <div class="speaker-name-row">
+                <a href="${spk.author_url || '#'}" target="_blank" rel="noopener noreferrer" class="speaker-name" title="View Full Author Profile on 1Cell.Ai">
+                  ${spk.name} ↗
+                </a>
+              </div>
+              <div style="font-weight:600; color:var(--accent-color); font-size:12px; margin-top:2px;">
+                ${spk.designation || spk.specialization || ''}
+              </div>
+              <div class="speaker-details">
+                <div style="color:var(--text-secondary); font-size:11.5px;">${spk.hospital || ''}</div>
+                ${spk.contact ? `<div style="font-size:11px; margin-top:4px; color:var(--text-tertiary);"><a href="mailto:${spk.contact}" style="color:inherit; text-decoration:none;">✉ ${spk.contact}</a></div>` : ''}
               </div>
             </div>
+          </div>
+
+          ${spk.quote ? `
+            <div class="speaker-bio-quote">
+              "${spk.quote}"
+            </div>
+          ` : ''}
+
+          ${spk.bio ? `
+            <p style="font-size:12px; line-height:1.45; color:var(--text-secondary); margin:0;">
+              ${spk.bio}
+            </p>
+          ` : ''}
+
+          ${spk.expertise_tags && spk.expertise_tags.length > 0 ? `
+            <div class="speaker-tags">
+              ${spk.expertise_tags.map(t => `<span class="speaker-tag">${t}</span>`).join('')}
+            </div>
+          ` : ''}
+          
+          <div class="speaker-relations">
+            <span style="font-size:10.5px; font-weight:700; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">
+              Authored Publications & Research Assets:
+            </span>
+            <div>
+              ${spk.publications && spk.publications.length > 0 ? spk.publications.map(p => {
+                const title = typeof p === 'object' ? p.title : p;
+                const link = typeof p === 'object' ? p.link : '';
+                return `
+                  <div class="relation-item">
+                    <span style="font-size:12px;">📄</span>
+                    <a href="${link || '#'}" target="_blank" rel="noopener noreferrer" class="relation-link" title="Read Article on 1Cell.Ai">
+                      ${title} ↗
+                    </a>
+                  </div>
+                `;
+              }).join('') : `<div style="font-size:11px; color:var(--text-tertiary); font-style:italic;">Peer-reviewed publications and clinical abstracts being indexed.</div>`}
+              
+              ${spk.presentations && spk.presentations.length > 0 ? spk.presentations.map(p => {
+                const title = typeof p === 'object' ? p.title : p;
+                const link = typeof p === 'object' ? p.link : '';
+                return `
+                  <div class="relation-item" style="margin-top:6px;">
+                    <span style="font-size:12px;">📊</span>
+                    <a href="${link || '#'}" target="_blank" rel="noopener noreferrer" class="relation-link" style="color:var(--accent-color);" title="View Clinical Resource">
+                      ${title} ↗
+                    </a>
+                  </div>
+                `;
+              }).join('') : ''}
+            </div>
+          </div>
+
+          <div class="speaker-footer-action">
+            <a href="${spk.author_url || '#'}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="padding:6px 14px; font-size:11.5px; text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:600;">
+              View 1Cell.Ai Author Profile ↗
+            </a>
+            ${spk.contact ? `
+              <a href="mailto:${spk.contact}" class="btn-outline" style="padding:6px 12px; font-size:11.5px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                Contact Author
+              </a>
+            ` : ''}
           </div>
         </div>
       `).join('')}
