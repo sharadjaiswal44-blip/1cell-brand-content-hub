@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260908-v25';
+import db from './db.js?v=20260911-v30';
 import { 
   normalizeTeam,
   canTeamViewVisibility,
@@ -68,9 +68,15 @@ function mapSupabaseRowToCard(row) {
   };
 }
 
+const DUMMY_COMPANY_DOC_IDS = new Set(['doc-101', 'doc-102', 'doc-103', 'doc-104', 'doc-105', 'doc-106', 'doc-107']);
+
+if (db && Array.isArray(db.documents)) {
+  db.documents = db.documents.filter(d => !DUMMY_COMPANY_DOC_IDS.has(d.id));
+}
+
 // Injects or updates an asset card inside the in-memory collections
 function applyAssetToLocalDb(card) {
-  if (!card || card.is_deleted) return;
+  if (!card || !card.id || DUMMY_COMPANY_DOC_IDS.has(card.id) || card.is_deleted) return;
   const cat = (card.category || '').toLowerCase();
   
   if (cat === 'case-library' || card.contentType === 'Case Study') {
