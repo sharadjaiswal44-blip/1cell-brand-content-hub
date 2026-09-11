@@ -973,10 +973,7 @@ function renderDashboardProductDocs(productName) {
     else if (doc.contentType === 'Presentation' || doc.contentType === 'Sales Deck') icon = '📊';
     else if (doc.contentType === 'Sample Report') icon = '📋';
 
-    const categoryLabel = getCardCategoryLabel(doc);
-    const categoryBadge = `<span class="badge badge-category">🏷️ ${categoryLabel}</span>`;
     const biomarkerBadge = (doc.biomarker && doc.biomarker !== 'None') ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
-    const statusBadge = `<span class="badge badge-status-approved">${doc.status || 'Approved'}</span>`;
 
     html += `
       <div class="folder-doc-card" id="folder-card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
@@ -985,10 +982,8 @@ function renderDashboardProductDocs(productName) {
           <div style="flex: 1;">
             <div class="folder-doc-title">${doc.title}</div>
             <div class="folder-doc-path" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px;">
-              ${categoryBadge}
               ${biomarkerBadge}
-              ${statusBadge}
-              <span style="font-size:11px; color:var(--text-tertiary); margin-left:4px;">${doc.folderPath || 'Shared Documents'}</span>
+              <span style="font-size:11px; color:var(--text-tertiary); margin-left:2px;">${doc.folderPath || 'Shared Documents'}</span>
             </div>
           </div>
         </div>
@@ -1299,10 +1294,6 @@ function renderDocumentCard(doc) {
   const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
   const productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : `<span class="badge badge-prod" style="background:#e8edf5; color:#1a365d; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />Corporate</span>`);
 
-  const categoryLabel = getCardCategoryLabel(doc);
-  const categoryBadge = `<span class="badge badge-category">🏷️ ${categoryLabel}</span>`;
-  const statusBadge = `<span class="badge badge-status-approved">${doc.status || 'Approved'}</span>`;
-
   return `
     <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
       <div class="card-header-bar">
@@ -1311,9 +1302,7 @@ function renderDocumentCard(doc) {
         </div>
         <div class="card-tags">
           ${productTag}
-          ${categoryBadge}
           ${biomarkerBadge}
-          ${statusBadge}
         </div>
       </div>
       <div class="card-body">
@@ -1321,20 +1310,8 @@ function renderDocumentCard(doc) {
         <p class="card-description">${doc.description || ''}</p>
         <div class="card-metadata">
           <div class="meta-row">
-            <span>Category:</span>
-            <span class="meta-value" style="font-weight:600; color:var(--text-primary);">${categoryLabel}</span>
-          </div>
-          <div class="meta-row">
-            <span>Version:</span>
-            <span class="meta-value">${doc.version || 'v1.0'}</span>
-          </div>
-          <div class="meta-row">
             <span>Updated:</span>
             <span class="meta-value">${doc.updatedDate || doc.createdDate || 'Recent'}</span>
-          </div>
-          <div class="meta-row">
-            <span>Added By:</span>
-            <span class="meta-value" title="${doc.created_by || doc.owner || '1Cell.Ai'}">${doc.created_by || doc.owner || doc.author || '1Cell.Ai Team'}</span>
           </div>
         </div>
       </div>
@@ -1677,7 +1654,6 @@ function renderProductTabContent(prodId, tabName) {
               <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-                <span class="badge badge-category">🏷️ Scientific</span>
               </div>
             </div>
             <h3 style="font-size:17px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
@@ -1705,10 +1681,6 @@ function renderProductTabContent(prodId, tabName) {
               <span class="video-duration">${vid.duration}</span>
             </div>
             <div class="card-body" style="padding:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <span class="badge badge-category">🏷️ Training & Sales</span>
-                <span class="badge badge-status-approved">Approved</span>
-              </div>
               <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
               <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
                 <span>Speaker: ${vid.speaker}</span>
@@ -1808,7 +1780,6 @@ function renderProductTabContent(prodId, tabName) {
               <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-                <span class="badge badge-category">🏷️ Scientific</span>
               </div>
             </div>
             <h3 style="font-size:17px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
@@ -1845,10 +1816,6 @@ function renderProductTabContent(prodId, tabName) {
               <span class="video-duration">${vid.duration}</span>
             </div>
             <div class="card-body" style="padding:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <span class="badge badge-category">🏷️ Training & Sales</span>
-                <span class="badge badge-status-approved">Approved</span>
-              </div>
               <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
               <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
                 <span>Speaker: ${vid.speaker}</span>
@@ -1966,10 +1933,8 @@ ${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medica
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${(db.products.find(p => p.id === c.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-                <span class="badge badge-category">🏷️ Evidence</span>
                 ${c.biomarker ? `<span class="badge badge-biomarker">${c.biomarker}</span>` : ''}
               </div>
-              <span class="badge badge-status-approved">Approved</span>
             </div>
             <h3 style="font-size:16px; font-weight:700; margin-top:4px;">${c.title}</h3>
             <div class="case-hospital">${c.doctor} • ${c.hospital}</div>
@@ -2062,10 +2027,8 @@ window.updateReportLibraryCards = function() {
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${prodName}</span>
-                <span class="badge badge-category">🏷️ Evidence</span>
                 ${r.cancerType ? `<span class="badge" style="background-color:rgba(14,165,233,0.12); color:#0284c7; font-weight:600;">${r.cancerType}</span>` : ''}
               </div>
-              <span class="badge badge-status-approved">${r.status || 'Approved'}</span>
             </div>
             <h3 style="font-size:15.5px; font-weight:700; margin-top:8px; line-height:1.4; color:var(--text-primary); cursor:pointer;" onclick="window.openSharePoint('${r.id}')" title="Click to open report in SharePoint">${r.title}</h3>
           </div>
@@ -2081,8 +2044,7 @@ window.updateReportLibraryCards = function() {
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-tertiary); padding-top:8px; border-top:1px solid var(--border-color); flex-wrap:wrap; gap:4px;">
-              <span>Author: <strong style="color:var(--text-primary);">${r.author || r.owner || 'Clinical Genomics Laboratory'}</strong></span>
-              <span>v<strong>${r.version || '1.0'}</strong> • ${r.updatedDate || '2026'}</span>
+              <span>Updated: <strong style="color:var(--text-secondary);">${r.updatedDate || r.createdDate || '2026'}</strong></span>
             </div>
           </div>
         </div>
@@ -2292,7 +2254,6 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
             <div class="pub-journal">${pub.journal} • Published ${pub.publishedDate}</div>
             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
               <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-              <span class="badge badge-category">🏷️ Scientific</span>
             </div>
           </div>
           <h3 style="font-size:18px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
