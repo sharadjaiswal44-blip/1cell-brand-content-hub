@@ -4368,63 +4368,217 @@ window.openEditAssetModal = function(id) {
 
 // Save edited asset and SharePoint URL
 window.saveAssetEdit = async function() {
-  const idEl = document.getElementById('editDocId');
-  if (!idEl || !idEl.value) {
-    showToast("Error: No card ID found to edit.");
-    return;
-  }
-  const id = idEl.value;
-  const itemType = (document.getElementById('editItemType') ? document.getElementById('editItemType').value : 'document');
-  const title = (document.getElementById('editDocTitle') ? document.getElementById('editDocTitle').value.trim() : '');
-  let spUrl = (document.getElementById('editDocSpUrl') ? document.getElementById('editDocSpUrl').value.trim() : '');
-  const folderPath = (document.getElementById('editDocFolderPath') ? document.getElementById('editDocFolderPath').value.trim() : '');
-  const product = (document.getElementById('editDocProduct') ? document.getElementById('editDocProduct').value : null) || null;
-  const contentType = (document.getElementById('editDocContentType') ? document.getElementById('editDocContentType').value : 'About Product');
-  const department = (document.getElementById('editDocDept') ? document.getElementById('editDocDept').value : 'Marketing');
-  const ownerEl = document.getElementById('editDocOwner');
-  const owner = ownerEl ? ownerEl.value.trim() : '';
-  const version = (document.getElementById('editDocVersion') ? document.getElementById('editDocVersion').value.trim() : '') || 'v1.0';
-  const status = (document.getElementById('editDocStatus') ? document.getElementById('editDocStatus').value : 'Approved');
-  const desc = (document.getElementById('editDocDesc') ? document.getElementById('editDocDesc').value.trim() : '');
-  const cancerEl = document.getElementById('editDocCancer');
-  const biomarkerEl = document.getElementById('editDocBiomarker');
-  const cancerVal = (cancerEl && cancerEl.value && cancerEl.value !== 'None') ? cancerEl.value : 'None';
-  const biomarkerVal = (biomarkerEl && biomarkerEl.value && biomarkerEl.value !== 'None') ? biomarkerEl.value : 'None';
+  try {
+    const idEl = document.getElementById('editDocId');
+    if (!idEl || !idEl.value) {
+      showToast("Error: No card ID found to edit.");
+      return;
+    }
+    const id = idEl.value;
+    const itemType = (document.getElementById('editItemType') ? document.getElementById('editItemType').value : 'document');
+    const title = (document.getElementById('editDocTitle') ? document.getElementById('editDocTitle').value.trim() : '');
+    let spUrl = (document.getElementById('editDocSpUrl') ? document.getElementById('editDocSpUrl').value.trim() : '');
+    const folderPath = (document.getElementById('editDocFolderPath') ? document.getElementById('editDocFolderPath').value.trim() : '');
+    const product = (document.getElementById('editDocProduct') ? document.getElementById('editDocProduct').value : null) || null;
+    const contentType = (document.getElementById('editDocContentType') ? document.getElementById('editDocContentType').value : 'About Product');
+    const department = (document.getElementById('editDocDept') ? document.getElementById('editDocDept').value : 'Marketing');
+    const ownerEl = document.getElementById('editDocOwner');
+    const owner = ownerEl ? ownerEl.value.trim() : '';
+    const version = (document.getElementById('editDocVersion') ? document.getElementById('editDocVersion').value.trim() : '') || 'v1.0';
+    const status = (document.getElementById('editDocStatus') ? document.getElementById('editDocStatus').value : 'Approved');
+    const desc = (document.getElementById('editDocDesc') ? document.getElementById('editDocDesc').value.trim() : '');
+    const cancerEl = document.getElementById('editDocCancer');
+    const biomarkerEl = document.getElementById('editDocBiomarker');
+    const cancerVal = (cancerEl && cancerEl.value && cancerEl.value !== 'None') ? cancerEl.value : 'None';
+    const biomarkerVal = (biomarkerEl && biomarkerEl.value && biomarkerEl.value !== 'None') ? biomarkerEl.value : 'None';
 
-  // Target Team & Collaboration Scope defaults to 'all'
-  const visibility = 'all';
+    const userTeam = getCurrentUserTeam();
+    const authName = sessionStorage.getItem("authName") || owner || '1Cell.Ai';
 
-  const userTeam = getCurrentUserTeam();
-  const authName = sessionStorage.getItem("authName") || owner || '1Cell.Ai';
-
-  if (!title || !spUrl) {
-    showToast("Document Title and SharePoint / OneDrive URL are required!");
-    return;
-  }
-
-  if (!/^https?:\/\//i.test(spUrl)) {
-    spUrl = 'https://' + spUrl;
-  }
-
-  // Validate Document URL format
-  const urlCheck = supabaseService.validateDocumentUrl(spUrl);
-  if (!urlCheck.valid) {
-    showToast(urlCheck.message || "Please provide a valid document URL.");
-    return;
-  }
-
-  const saveBtn = document.getElementById('editAssetModalSave') || document.getElementById('editModalSave');
-  const originalBtnText = saveBtn ? saveBtn.innerHTML : 'Save Changes';
-
-  // Central Database update via Supabase Free Tier
-  if (supabaseService.isConfigured()) {
-    if (saveBtn) {
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Central Hub...';
+    if (!title) {
+      showToast("Please provide a Document / Asset Title.");
+      const titleEl = document.getElementById('editDocTitle');
+      if (titleEl) titleEl.focus();
+      return;
     }
 
+    if (!spUrl) {
+      // Fallback to existing asset URL or placeholder
+      const existingDoc = (db.documents || []).find(d => String(d.id) === String(id));
+      spUrl = existingDoc ? (existingDoc.sharePointUrl || existingDoc.oneDriveUrl || '#') : '#';
+    } else if (!/^https?:\/\//i.test(spUrl) && spUrl !== '#') {
+      spUrl = 'https://' + spUrl;
+    }
+
+    // 1. Update in canonical db.documents
+    if (!db.documents) db.documents = [];
+    const docIdx = db.documents.findIndex(d => String(d.id) === String(id));
+    const updatedDocData = {
+      title: title,
+      sharePointUrl: spUrl,
+      oneDriveUrl: spUrl,
+      visibility: 'all',
+      folderPath: folderPath || 'Shared Documents',
+      product: product,
+      contentType: contentType,
+      department: department,
+      owner: owner || authName,
+      author: owner || authName,
+      version: version,
+      status: status,
+      description: desc,
+      cancerType: cancerVal,
+      biomarker: biomarkerVal,
+      updatedDate: new Date().toISOString().split('T')[0],
+      updated_at: new Date().toISOString()
+    };
+
+    if (docIdx >= 0) {
+      db.documents[docIdx] = { ...db.documents[docIdx], ...updatedDocData };
+    } else {
+      db.documents.unshift({ id: id, ...updatedDocData });
+    }
     try {
-      await supabaseService.updateAsset(id, {
+      localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
+    } catch (e) {}
+
+    // 2. Update in specialized collections if applicable
+    if (db.cases) {
+      const cIdx = db.cases.findIndex(item => String(item.id) === String(id));
+      if (cIdx >= 0) {
+        db.cases[cIdx] = {
+          ...db.cases[cIdx],
+          title: title,
+          readMoreUrl: spUrl,
+          oneDriveUrl: spUrl,
+          visibility: 'all',
+          relatedProduct: product || db.cases[cIdx].relatedProduct,
+          doctor: owner || authName,
+          owner: owner || authName,
+          summary: desc,
+          description: desc,
+          cancerType: cancerVal,
+          biomarker: biomarkerVal,
+          updated_at: new Date().toISOString()
+        };
+        try { localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases)); } catch (e) {}
+      }
+    }
+
+    if (db.publications) {
+      const pIdx = db.publications.findIndex(item => String(item.id) === String(id));
+      if (pIdx >= 0) {
+        db.publications[pIdx] = {
+          ...db.publications[pIdx],
+          title: title,
+          link: spUrl,
+          oneDriveUrl: spUrl,
+          visibility: 'all',
+          relatedProduct: product || db.publications[pIdx].relatedProduct,
+          authors: owner || authName,
+          owner: owner || authName,
+          abstract: desc,
+          description: desc,
+          updated_at: new Date().toISOString()
+        };
+        try { localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications)); } catch (e) {}
+      }
+    }
+
+    if (db.videos) {
+      const vIdx = db.videos.findIndex(item => String(item.id) === String(id));
+      if (vIdx >= 0) {
+        db.videos[vIdx] = {
+          ...db.videos[vIdx],
+          title: title,
+          videoUrl: spUrl,
+          oneDriveUrl: spUrl,
+          visibility: 'all',
+          product: product || db.videos[vIdx].product,
+          speaker: owner || authName,
+          owner: owner || authName,
+          description: desc,
+          summary: desc,
+          updated_at: new Date().toISOString()
+        };
+        try { localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos)); } catch (e) {}
+      }
+    }
+
+    if (db.reports) {
+      const rIdx = db.reports.findIndex(r => String(r.id) === String(id));
+      if (rIdx >= 0) {
+        db.reports[rIdx] = {
+          ...db.reports[rIdx],
+          title: title,
+          sharePointUrl: spUrl,
+          oneDriveUrl: spUrl,
+          visibility: 'all',
+          folderPath: folderPath || db.reports[rIdx].folderPath,
+          product: product || db.reports[rIdx].product,
+          cancerType: cancerVal,
+          biomarker: biomarkerVal,
+          author: owner || authName,
+          owner: owner || authName,
+          summary: desc,
+          description: desc,
+          version: version || db.reports[rIdx].version,
+          status: status || db.reports[rIdx].status,
+          updatedDate: new Date().toISOString().split('T')[0],
+          updated_at: new Date().toISOString()
+        };
+        try { localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports)); } catch (e) {}
+      }
+    }
+
+    if (db.brandAssets) {
+      const bIdx = db.brandAssets.findIndex(b => String(b.id) === String(id));
+      if (bIdx >= 0) {
+        db.brandAssets[bIdx] = {
+          ...db.brandAssets[bIdx],
+          title: title,
+          sharePointUrl: spUrl,
+          downloadUrl: spUrl,
+          oneDriveUrl: spUrl,
+          visibility: 'all',
+          owner: owner || authName,
+          author: owner || authName,
+          description: desc,
+          updated_at: new Date().toISOString()
+        };
+        try { localStorage.setItem('1cell_custom_brandAssets', JSON.stringify(db.brandAssets)); } catch (e) {}
+      }
+    }
+
+    if (db.templates) {
+      const tIdx = db.templates.findIndex(t => String(t.id) === String(id));
+      if (tIdx >= 0) {
+        db.templates[tIdx] = {
+          ...db.templates[tIdx],
+          title: title,
+          sharePointUrl: spUrl,
+          downloadUrl: spUrl,
+          oneDriveUrl: spUrl,
+          visibility: 'all',
+          owner: owner || authName,
+          author: owner || authName,
+          description: desc,
+          updated_at: new Date().toISOString()
+        };
+        try { localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates)); } catch (e) {}
+      }
+    }
+
+    // 3. Immediately close modal, display toast, and refresh view
+    const editModal = document.getElementById('editAssetModal');
+    if (editModal) closeModal(editModal);
+
+    showToast(`Updated "${title}"! Changes saved.`);
+    window.refreshCurrentView();
+
+    // 4. Asynchronously background-sync to Supabase
+    if (supabaseService && typeof supabaseService.isConfigured === 'function' && supabaseService.isConfigured()) {
+      supabaseService.updateAsset(id, {
         title: title,
         description: desc,
         department: department,
@@ -4439,182 +4593,14 @@ window.saveAssetEdit = async function() {
         collaboration_scope: 'all',
         sharepoint_url: spUrl,
         sharepoint_folder_path: folderPath || 'Shared Documents'
+      }).catch(dbErr => {
+        console.warn('Background Supabase update notice:', dbErr);
       });
-    } catch (dbErr) {
-      console.warn('Central Supabase update warning:', dbErr);
-    } finally {
-      if (saveBtn) {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = originalBtnText;
-      }
     }
+  } catch (err) {
+    console.error('Error saving asset edit:', err);
+    showToast('Failed to save changes. Please check fields.');
   }
-
-  // Update in canonical db.documents
-  if (!db.documents) db.documents = [];
-  const docIdx = db.documents.findIndex(d => String(d.id) === String(id));
-  const updatedDocData = {
-    title: title,
-    sharePointUrl: spUrl,
-    oneDriveUrl: spUrl,
-    visibility: 'all',
-    folderPath: folderPath || 'Shared Documents',
-    product: product,
-    contentType: contentType,
-    department: department,
-    owner: owner || authName,
-    author: owner || authName,
-    version: version,
-    status: status,
-    description: desc,
-    cancerType: cancerVal,
-    biomarker: biomarkerVal,
-    updatedDate: new Date().toISOString().split('T')[0],
-    updated_at: new Date().toISOString()
-  };
-
-  if (docIdx >= 0) {
-    db.documents[docIdx] = { ...db.documents[docIdx], ...updatedDocData };
-  } else {
-    db.documents.unshift({ id: id, ...updatedDocData });
-  }
-  try {
-    localStorage.setItem('1cell_custom_documents', JSON.stringify(db.documents));
-  } catch (e) {}
-
-  // Update in specialized collections if applicable
-  if (db.cases) {
-    const cIdx = db.cases.findIndex(item => String(item.id) === String(id));
-    if (cIdx >= 0) {
-      db.cases[cIdx] = {
-        ...db.cases[cIdx],
-        title: title,
-        readMoreUrl: spUrl,
-        oneDriveUrl: spUrl,
-        visibility: 'all',
-        relatedProduct: product || db.cases[cIdx].relatedProduct,
-        doctor: owner || authName,
-        owner: owner || authName,
-        summary: desc,
-        description: desc,
-        cancerType: cancerVal,
-        biomarker: biomarkerVal,
-        updated_at: new Date().toISOString()
-      };
-      try { localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases)); } catch (e) {}
-    }
-  }
-
-  if (db.publications) {
-    const pIdx = db.publications.findIndex(item => String(item.id) === String(id));
-    if (pIdx >= 0) {
-      db.publications[pIdx] = {
-        ...db.publications[pIdx],
-        title: title,
-        link: spUrl,
-        oneDriveUrl: spUrl,
-        visibility: 'all',
-        relatedProduct: product || db.publications[pIdx].relatedProduct,
-        authors: owner || authName,
-        owner: owner || authName,
-        abstract: desc,
-        description: desc,
-        updated_at: new Date().toISOString()
-      };
-      try { localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications)); } catch (e) {}
-    }
-  }
-
-  if (db.videos) {
-    const vIdx = db.videos.findIndex(item => String(item.id) === String(id));
-    if (vIdx >= 0) {
-      db.videos[vIdx] = {
-        ...db.videos[vIdx],
-        title: title,
-        videoUrl: spUrl,
-        oneDriveUrl: spUrl,
-        visibility: 'all',
-        product: product || db.videos[vIdx].product,
-        speaker: owner || authName,
-        owner: owner || authName,
-        description: desc,
-        summary: desc,
-        updated_at: new Date().toISOString()
-      };
-      try { localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos)); } catch (e) {}
-    }
-  }
-
-  if (db.reports) {
-    const rIdx = db.reports.findIndex(r => String(r.id) === String(id));
-    if (rIdx >= 0) {
-      db.reports[rIdx] = {
-        ...db.reports[rIdx],
-        title: title,
-        sharePointUrl: spUrl,
-        oneDriveUrl: spUrl,
-        visibility: 'all',
-        folderPath: folderPath || db.reports[rIdx].folderPath,
-        product: product || db.reports[rIdx].product,
-        cancerType: cancerVal,
-        biomarker: biomarkerVal,
-        author: owner || authName,
-        owner: owner || authName,
-        summary: desc,
-        description: desc,
-        version: version || db.reports[rIdx].version,
-        status: status || db.reports[rIdx].status,
-        updatedDate: new Date().toISOString().split('T')[0],
-        updated_at: new Date().toISOString()
-      };
-      try { localStorage.setItem('1cell_custom_reports', JSON.stringify(db.reports)); } catch (e) {}
-    }
-  }
-
-  if (db.brandAssets) {
-    const bIdx = db.brandAssets.findIndex(b => String(b.id) === String(id));
-    if (bIdx >= 0) {
-      db.brandAssets[bIdx] = {
-        ...db.brandAssets[bIdx],
-        title: title,
-        sharePointUrl: spUrl,
-        downloadUrl: spUrl,
-        oneDriveUrl: spUrl,
-        visibility: 'all',
-        owner: owner || authName,
-        author: owner || authName,
-        description: desc,
-        updated_at: new Date().toISOString()
-      };
-      try { localStorage.setItem('1cell_custom_brandAssets', JSON.stringify(db.brandAssets)); } catch (e) {}
-    }
-  }
-
-  if (db.templates) {
-    const tIdx = db.templates.findIndex(t => String(t.id) === String(id));
-    if (tIdx >= 0) {
-      db.templates[tIdx] = {
-        ...db.templates[tIdx],
-        title: title,
-        sharePointUrl: spUrl,
-        downloadUrl: spUrl,
-        oneDriveUrl: spUrl,
-        visibility: 'all',
-        owner: owner || authName,
-        author: owner || authName,
-        description: desc,
-        updated_at: new Date().toISOString()
-      };
-      try { localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates)); } catch (e) {}
-    }
-  }
-
-  showToast(`Updated "${title}"! Direct link & metadata saved.`);
-  const editModal = document.getElementById('editAssetModal');
-  if (editModal) closeModal(editModal);
-
-  // Refresh current view to instantly display updated cards
-  window.refreshCurrentView();
 };
 
 // Re-render current active screen
