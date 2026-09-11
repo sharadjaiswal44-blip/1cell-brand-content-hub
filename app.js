@@ -1324,10 +1324,26 @@ function renderDocumentCard(doc) {
   `;
 }
 
+// Helper to determine if a document is purely a Company/Corporate asset (not a Product workspace asset)
+function isCompanyAsset(d) {
+  if (!d) return false;
+  const prod = (d.product || '').toLowerCase().trim();
+  // If document belongs to a specific product model, it is NEVER a company asset
+  if (prod && prod !== 'company' && prod !== 'corporate' && prod !== 'none' && prod !== 'null') {
+    return false;
+  }
+  // Exclude case studies, sample reports, and publications
+  if (d.contentType === 'Case Study' || d.contentType === 'Sample Report' || d.contentType === 'Publication') {
+    return false;
+  }
+  return prod === 'company' || prod === 'corporate' || (!prod && (d.category === 'company-assets' || d.department === 'Corporate'));
+}
+window.isCompanyAsset = isCompanyAsset;
+
 // 2. Company Assets View
 function renderCompanyAssets() {
   const userTeam = getCurrentUserTeam();
-  const assets = db.documents.filter(d => (!d.product || d.product === 'company' || d.category === 'company-assets') && canTeamViewVisibility(userTeam, d.visibility || d.department));
+  const assets = db.documents.filter(d => isCompanyAsset(d) && canTeamViewVisibility(userTeam, d.visibility || d.department));
 
   workspaceViewport.innerHTML = `
     <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
