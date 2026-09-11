@@ -4495,7 +4495,8 @@ window.saveAssetEdit = async function() {
         relatedProduct: product || db.cases[cIdx].relatedProduct,
         doctor: owner || authName,
         owner: owner || authName,
-        summary: desc || db.cases[cIdx].summary,
+        summary: desc,
+        description: desc,
         cancerType: cancerVal,
         biomarker: biomarkerVal,
         updated_at: new Date().toISOString()
@@ -4516,7 +4517,8 @@ window.saveAssetEdit = async function() {
         relatedProduct: product || db.publications[pIdx].relatedProduct,
         authors: owner || authName,
         owner: owner || authName,
-        abstract: desc || db.publications[pIdx].abstract,
+        abstract: desc,
+        description: desc,
         updated_at: new Date().toISOString()
       };
       try { localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications)); } catch (e) {}
@@ -4535,7 +4537,8 @@ window.saveAssetEdit = async function() {
         product: product || db.videos[vIdx].product,
         speaker: owner || authName,
         owner: owner || authName,
-        description: desc || db.videos[vIdx].description,
+        description: desc,
+        summary: desc,
         updated_at: new Date().toISOString()
       };
       try { localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos)); } catch (e) {}
@@ -4557,7 +4560,8 @@ window.saveAssetEdit = async function() {
         biomarker: biomarkerVal,
         author: owner || authName,
         owner: owner || authName,
-        summary: desc || db.reports[rIdx].summary,
+        summary: desc,
+        description: desc,
         version: version || db.reports[rIdx].version,
         status: status || db.reports[rIdx].status,
         updatedDate: new Date().toISOString().split('T')[0],
@@ -4579,7 +4583,7 @@ window.saveAssetEdit = async function() {
         visibility: 'all',
         owner: owner || authName,
         author: owner || authName,
-        description: desc || db.brandAssets[bIdx].description,
+        description: desc,
         updated_at: new Date().toISOString()
       };
       try { localStorage.setItem('1cell_custom_brandAssets', JSON.stringify(db.brandAssets)); } catch (e) {}
@@ -4598,7 +4602,7 @@ window.saveAssetEdit = async function() {
         visibility: 'all',
         owner: owner || authName,
         author: owner || authName,
-        description: desc || db.templates[tIdx].description,
+        description: desc,
         updated_at: new Date().toISOString()
       };
       try { localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates)); } catch (e) {}
