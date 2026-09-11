@@ -1215,31 +1215,6 @@ function renderDashboard() {
                 </div>
               </div>
             `).join('')}
-          </div>
-        </div>
-
-        <!-- Activity Feed -->
-        <div class="dashboard-section">
-          <div class="section-title-row">
-            <h2 class="section-headline">Audit & Compliance Log</h2>
-          </div>
-          <div class="activity-feed">
-            <div class="feed-item">
-              <div class="feed-time">10 mins ago</div>
-              <div class="feed-title">New version uploaded</div>
-              <div class="feed-desc">OncoIndx® Clinical Case Study updated to v2.1 by Medical Affairs.</div>
-            </div>
-            <div class="feed-item">
-              <div class="feed-time">2 hours ago</div>
-              <div class="feed-title">Regulatory approval tag added</div>
-              <div class="feed-desc">OncoHRD® Testing Guidelines verified by Diagnostic Compliance Lead.</div>
-            </div>
-            <div class="feed-item">
-              <div class="feed-time">Yesterday</div>
-              <div class="feed-title">New document registered</div>
-              <div class="feed-desc">OncoPredikt Technical Whitepaper added to Scientific directory.</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
