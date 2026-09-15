@@ -1819,9 +1819,9 @@ const db = {
     },
     {
         "id": "report-005",
-        "title": "OncoHRD\u00ae Genomic Scarring & LOH Analysis - High-Grade Serous Ovarian Carcinoma",
+        "title": "OncoHRD® Genomic Scarring & LOH Analysis - High-Grade Serous Ovarian Carcinoma",
         "product": "oncohrd",
-        "cancerType": "Ovarian Cancer",
+        "cancerType": "Ovary Cancer",
         "biomarker": "HRD Score: 62 (HRD Positive) | BRCA2 Somatic Inactivating Variant",
         "specimen": "Ovarian Tumor FFPE Tissue",
         "status": "Approved",
@@ -1832,7 +1832,7 @@ const db = {
         "department": "Medical",
         "summary": "Genome-wide LOH, TAI, and LST scarring computation demonstrating high genomic instability. Predicts marked progression-free survival benefit from maintenance PARP inhibitor therapy.",
         "sharePointUrl": "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/SampleReports/OncoHRD_Ovarian_Sample_Report.pdf",
-        "folderPath": "Shared Documents/Sample Reports/Ovarian Cancer",
+        "folderPath": "Shared Documents/Sample Reports/Ovary Cancer",
         "size": "3.5 MB",
         "viewCount": 164
     },
@@ -1914,9 +1914,9 @@ const db = {
     },
     {
         "id": "report-010",
-        "title": "iCore\u00ae AI Genomic Intelligence & Variant Interpretation - Solid Tumor Pan-Cancer",
+        "title": "iCore® AI Genomic Intelligence & Variant Interpretation - Solid Tumor Pan-Cancer",
         "product": "icore",
-        "cancerType": "Pan Cancer",
+        "cancerType": "Non specific Cancer",
         "biomarker": "MSI-High | POLE Mutation | TMB: 28.6 mut/Mb",
         "specimen": "Multi-Omics Assay Fusion (tDNA, cfDNA, RNA)",
         "status": "Approved",

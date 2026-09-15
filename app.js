@@ -2253,7 +2253,19 @@ window.updateScientificResourcesCards = function() {
     if (scientificCancerFilter !== 'all') {
       const cCancer = (c.cancerType || '').toLowerCase();
       const targetCancer = scientificCancerFilter.toLowerCase();
-      if (!cCancer.includes(targetCancer.replace(' cancer', '')) && !targetCancer.includes(cCancer.replace(' cancer', ''))) {
+      const targetCore = targetCancer.replace(' cancer', '').trim();
+      const cCore = cCancer.replace(' cancer', '').trim();
+      
+      const isMatch = cCancer === targetCancer ||
+                      cCancer.includes(targetCore) || 
+                      targetCancer.includes(cCore) ||
+                      (targetCore === 'pancreas' && cCancer.includes('pancreat')) ||
+                      (targetCore === 'ovary' && cCancer.includes('ovari')) ||
+                      (targetCore === 'head & neck' && (cCancer.includes('head') || cCancer.includes('neck') || cCancer.includes('oral'))) ||
+                      (targetCore === 'liver' && (cCancer.includes('liver') || cCancer.includes('hepat'))) ||
+                      (targetCore === 'hepatobiliary' && (cCancer.includes('hepat') || cCancer.includes('biliary') || cCancer.includes('liver'))) ||
+                      (targetCore === 'non specific' && (cCancer.includes('non specific') || cCancer.includes('solid tumor') || cCancer.includes('dual')));
+      if (!isMatch) {
         return false;
       }
     }
@@ -2445,15 +2457,24 @@ function renderCaseLibrary() {
           <label for="scientificCancerSelect">Cancer Type</label>
           <select id="scientificCancerSelect" onchange="window.setScientificFilter('cancer', this.value)">
             <option value="all" ${scientificCancerFilter === 'all' ? 'selected' : ''}>All Cancer Types</option>
-            <option value="Breast" ${scientificCancerFilter === 'Breast' ? 'selected' : ''}>Breast Cancer</option>
-            <option value="Lung" ${scientificCancerFilter === 'Lung' ? 'selected' : ''}>Lung Cancer / NSCLC</option>
-            <option value="Endometrial" ${scientificCancerFilter === 'Endometrial' ? 'selected' : ''}>Endometrial / Uterine</option>
-            <option value="Colorectal" ${scientificCancerFilter === 'Colorectal' ? 'selected' : ''}>Colorectal Cancer</option>
-            <option value="Pancreatic" ${scientificCancerFilter === 'Pancreatic' ? 'selected' : ''}>Pancreatic Cancer</option>
-            <option value="Prostate" ${scientificCancerFilter === 'Prostate' ? 'selected' : ''}>Prostate Cancer</option>
-            <option value="Cervical" ${scientificCancerFilter === 'Cervical' ? 'selected' : ''}>Cervical Cancer</option>
-            <option value="Hepatocellular" ${scientificCancerFilter === 'Hepatocellular' ? 'selected' : ''}>Liver / Hepatobiliary</option>
-            <option value="Rare" ${scientificCancerFilter === 'Rare' ? 'selected' : ''}>Rare & Dual Primaries</option>
+            <option value="Colorectal Cancer" ${scientificCancerFilter === 'Colorectal Cancer' ? 'selected' : ''}>Colorectal Cancer</option>
+            <option value="Lung Cancer" ${scientificCancerFilter === 'Lung Cancer' ? 'selected' : ''}>Lung Cancer</option>
+            <option value="Non specific Cancer" ${scientificCancerFilter === 'Non specific Cancer' ? 'selected' : ''}>Non specific Cancer</option>
+            <option value="Breast Cancer" ${scientificCancerFilter === 'Breast Cancer' ? 'selected' : ''}>Breast Cancer</option>
+            <option value="Pancreas Cancer" ${scientificCancerFilter === 'Pancreas Cancer' ? 'selected' : ''}>Pancreas Cancer</option>
+            <option value="Head & Neck Cancer" ${scientificCancerFilter === 'Head & Neck Cancer' ? 'selected' : ''}>Head & Neck Cancer</option>
+            <option value="Liver Cancer" ${scientificCancerFilter === 'Liver Cancer' ? 'selected' : ''}>Liver Cancer</option>
+            <option value="Ovary Cancer" ${scientificCancerFilter === 'Ovary Cancer' ? 'selected' : ''}>Ovary Cancer</option>
+            <option value="Stomach Cancer" ${scientificCancerFilter === 'Stomach Cancer' ? 'selected' : ''}>Stomach Cancer</option>
+            <option value="Hepatobiliary Cancer" ${scientificCancerFilter === 'Hepatobiliary Cancer' ? 'selected' : ''}>Hepatobiliary Cancer</option>
+            <option value="Endometrial Cancer" ${scientificCancerFilter === 'Endometrial Cancer' ? 'selected' : ''}>Endometrial Cancer</option>
+            <option value="Gall Bladder Cancer" ${scientificCancerFilter === 'Gall Bladder Cancer' ? 'selected' : ''}>Gall Bladder Cancer</option>
+            <option value="Prostate Cancer" ${scientificCancerFilter === 'Prostate Cancer' ? 'selected' : ''}>Prostate Cancer</option>
+            <option value="Urothelial Cancer" ${scientificCancerFilter === 'Urothelial Cancer' ? 'selected' : ''}>Urothelial Cancer</option>
+            <option value="Melanoma Cancer" ${scientificCancerFilter === 'Melanoma Cancer' ? 'selected' : ''}>Melanoma Cancer</option>
+            <option value="Gastrointestinal Cancer" ${scientificCancerFilter === 'Gastrointestinal Cancer' ? 'selected' : ''}>Gastrointestinal Cancer</option>
+            <option value="Oral Cancer" ${scientificCancerFilter === 'Oral Cancer' ? 'selected' : ''}>Oral Cancer</option>
+            <option value="Renal Cancer" ${scientificCancerFilter === 'Renal Cancer' ? 'selected' : ''}>Renal Cancer</option>
           </select>
         </div>
 
@@ -3443,21 +3464,77 @@ window.parseAiNlpSearch = function() {
   }
 
   // 2. Detect Cancer Type
+  if (nlpText.includes('colorectal') || nlpText.includes('crc') || nlpText.includes('colon') || nlpText.includes('rectal')) {
+    activeFilters.cancerType.push('Colorectal Cancer');
+    feedback.push('Cancer Type = Colorectal Cancer');
+  }
+  if (nlpText.includes('lung') || nlpText.includes('nsclc')) {
+    activeFilters.cancerType.push('Lung Cancer');
+    feedback.push('Cancer Type = Lung Cancer');
+  }
+  if (nlpText.includes('non specific') || nlpText.includes('solid tumor') || nlpText.includes('pan cancer')) {
+    activeFilters.cancerType.push('Non specific Cancer');
+    feedback.push('Cancer Type = Non specific Cancer');
+  }
   if (nlpText.includes('breast')) {
-    activeFilters.cancerType.push('Breast');
-    feedback.push('Cancer Type = Breast');
+    activeFilters.cancerType.push('Breast Cancer');
+    feedback.push('Cancer Type = Breast Cancer');
   }
-  if (nlpText.includes('lung')) {
-    activeFilters.cancerType.push('Lung');
-    feedback.push('Cancer Type = Lung');
+  if (nlpText.includes('pancreas') || nlpText.includes('pancreatic')) {
+    activeFilters.cancerType.push('Pancreas Cancer');
+    feedback.push('Cancer Type = Pancreas Cancer');
   }
-  if (nlpText.includes('ovarian')) {
-    activeFilters.cancerType.push('Ovarian');
-    feedback.push('Cancer Type = Ovarian');
+  if (nlpText.includes('head') || nlpText.includes('neck') || nlpText.includes('h&n')) {
+    activeFilters.cancerType.push('Head & Neck Cancer');
+    feedback.push('Cancer Type = Head & Neck Cancer');
   }
-  if (nlpText.includes('colorectal')) {
-    activeFilters.cancerType.push('Colorectal');
-    feedback.push('Cancer Type = Colorectal');
+  if (nlpText.includes('liver') || nlpText.includes('hcc') || nlpText.includes('hepatocellular')) {
+    activeFilters.cancerType.push('Liver Cancer');
+    feedback.push('Cancer Type = Liver Cancer');
+  }
+  if (nlpText.includes('ovary') || nlpText.includes('ovarian')) {
+    activeFilters.cancerType.push('Ovary Cancer');
+    feedback.push('Cancer Type = Ovary Cancer');
+  }
+  if (nlpText.includes('stomach') || nlpText.includes('gastric')) {
+    activeFilters.cancerType.push('Stomach Cancer');
+    feedback.push('Cancer Type = Stomach Cancer');
+  }
+  if (nlpText.includes('hepatobiliary')) {
+    activeFilters.cancerType.push('Hepatobiliary Cancer');
+    feedback.push('Cancer Type = Hepatobiliary Cancer');
+  }
+  if (nlpText.includes('endometrial') || nlpText.includes('uterine')) {
+    activeFilters.cancerType.push('Endometrial Cancer');
+    feedback.push('Cancer Type = Endometrial Cancer');
+  }
+  if (nlpText.includes('gall bladder') || nlpText.includes('gallbladder')) {
+    activeFilters.cancerType.push('Gall Bladder Cancer');
+    feedback.push('Cancer Type = Gall Bladder Cancer');
+  }
+  if (nlpText.includes('prostate')) {
+    activeFilters.cancerType.push('Prostate Cancer');
+    feedback.push('Cancer Type = Prostate Cancer');
+  }
+  if (nlpText.includes('urothelial') || nlpText.includes('bladder')) {
+    activeFilters.cancerType.push('Urothelial Cancer');
+    feedback.push('Cancer Type = Urothelial Cancer');
+  }
+  if (nlpText.includes('melanoma') || nlpText.includes('skin')) {
+    activeFilters.cancerType.push('Melanoma Cancer');
+    feedback.push('Cancer Type = Melanoma Cancer');
+  }
+  if (nlpText.includes('gastrointestinal') || nlpText.includes('gi tract') || nlpText.includes('gi cancer')) {
+    activeFilters.cancerType.push('Gastrointestinal Cancer');
+    feedback.push('Cancer Type = Gastrointestinal Cancer');
+  }
+  if (nlpText.includes('oral')) {
+    activeFilters.cancerType.push('Oral Cancer');
+    feedback.push('Cancer Type = Oral Cancer');
+  }
+  if (nlpText.includes('renal') || nlpText.includes('kidney') || nlpText.includes('rcc')) {
+    activeFilters.cancerType.push('Renal Cancer');
+    feedback.push('Cancer Type = Renal Cancer');
   }
 
   // 3. Detect Content Type
@@ -3746,9 +3823,17 @@ window.updateFilterState = function() {
       const docC = doc.cancerType.toLowerCase();
       const match = activeFilters.cancerType.some(c => {
         const cLower = c.toLowerCase();
+        const cCore = cLower.replace(' cancer', '').trim();
+        const docCore = docC.replace(' cancer', '').trim();
         return docC === cLower || 
-               docC.includes(cLower.replace(' cancer', '')) || 
-               cLower.includes(docC.replace(' cancer', ''));
+               docC.includes(cCore) || 
+               cLower.includes(docCore) ||
+               (cCore === 'pancreas' && docC.includes('pancreat')) ||
+               (cCore === 'ovary' && docC.includes('ovari')) ||
+               (cCore === 'head & neck' && (docC.includes('head') || docC.includes('neck') || docC.includes('oral'))) ||
+               (cCore === 'liver' && (docC.includes('liver') || docC.includes('hepat'))) ||
+               (cCore === 'hepatobiliary' && (docC.includes('hepat') || docC.includes('biliary') || docC.includes('liver'))) ||
+               (cCore === 'non specific' && (docC.includes('non specific') || docC.includes('solid tumor') || docC.includes('dual')));
       });
       if (!match) return false;
     }
