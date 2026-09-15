@@ -2051,11 +2051,14 @@ function renderProductTabContent(prodId, tabName) {
       container.innerHTML = emptyState('Training & Sales Enablement');
     } else {
       let html = '<div class="assets-grid">';
+      let renderedCount = 0;
       if (trainingSalesDocs.length > 0) {
         html += trainingSalesDocs.map(d => renderDocumentCard(d)).join('');
+        renderedCount += trainingSalesDocs.length;
       }
       if (relatedVideos.length > 0) {
-        html += relatedVideos.map(vid => `
+        relatedVideos.forEach(vid => {
+          html += `
           <div class="doc-card" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
             <div class="video-card-thumbnail" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;">
               <div class="video-play-icon">▶</div>
@@ -2088,14 +2091,15 @@ function renderProductTabContent(prodId, tabName) {
             </div>
           </div>
         `;
-        renderedCount++;
-      });
-    }
-    html += '</div>';
-    if (renderedCount === 0) {
-      container.innerHTML = emptyState('All Assets');
-    } else {
-      container.innerHTML = html;
+          renderedCount++;
+        });
+      }
+      html += '</div>';
+      if (renderedCount === 0) {
+        container.innerHTML = emptyState('Training & Sales Enablement');
+      } else {
+        container.innerHTML = html;
+      }
     }
   } else if (tabName === 'other') {
     if (otherDocs.length === 0) {
