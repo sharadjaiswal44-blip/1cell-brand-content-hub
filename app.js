@@ -1362,35 +1362,35 @@ function renderCompanyAssets() {
     </div>
 
     <!-- Brand Story & Mission/Vision Section from Guidelines v3.0 -->
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 24px; margin-bottom: 30px; align-items: stretch;">
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 18px; margin-bottom: 24px; align-items: stretch;">
       <!-- About Us -->
-      <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: flex; flex-direction: column; justify-content: center;">
-        <h3 style="font-size: 18px; color: var(--accent-color); margin-bottom: 12px; font-weight: 700;">About 1Cell.Ai</h3>
-        <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-secondary); font-family: 'Source Serif 4', serif;">
-          1Cell.Ai is a Cupertino, USA-based precision oncology company specializing in developing innovations in liquid biopsy, single-cell multiomics and digital pathology. We bring the power of Genomics data and Artificial Intelligence (AI) to healthcare.
+      <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; justify-content: center; box-shadow: var(--shadow-xs);">
+        <h3 style="font-size: 15px; color: var(--accent-color); margin-bottom: 8px; font-weight: 700;">About 1Cell.Ai</h3>
+        <p style="font-size: 13px; line-height: 1.5; color: var(--text-secondary);">
+          1Cell.Ai is a Cupertino, USA-based precision oncology company specializing in innovations in liquid biopsy, single-cell multiomics and digital pathology, bringing Genomics data and AI to healthcare.
         </p>
       </div>
       
       <!-- Mission Card (Dark Pioneer Blue Theme) -->
-      <div style="background-color: #1A365D; border-radius: var(--radius-md); padding: 24px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #1A365D;">
+      <div style="background-color: #1A365D; border-radius: var(--radius-lg); padding: 20px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #1A365D; box-shadow: var(--shadow-xs);">
         <div>
-          <h3 style="font-size: 18px; color: #DAA520; margin-bottom: 16px; font-weight: 700; border-bottom: 2px solid #DAA520; padding-bottom: 6px; display: inline-block;">Mission</h3>
-          <p style="font-size: 15px; line-height: 1.6; font-family: 'Source Serif 4', serif;">
+          <h3 style="font-size: 15px; color: #DAA520; margin-bottom: 8px; font-weight: 700;">Mission</h3>
+          <p style="font-size: 13.5px; line-height: 1.45;">
             Impacting lives of <span class="brand-highlight-2">one million cancer patients</span> by breakthrough innovations in science and AI technology.
           </p>
         </div>
-        <div style="font-size: 11px; opacity: 0.6; font-family: 'Outfit', sans-serif; margin-top: 12px;">Guidelines v3.0 Core Value</div>
+        <div style="font-size: 10.5px; opacity: 0.65; margin-top: 10px;">Guidelines v3.0 Core Value</div>
       </div>
 
       <!-- Vision Card (Light Theme) -->
-      <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+      <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-xs);">
         <div>
-          <h3 style="font-size: 18px; color: #1A365D; margin-bottom: 16px; font-weight: 700; border-bottom: 2px solid #DAA520; padding-bottom: 6px; display: inline-block;">Vision</h3>
-          <p style="font-size: 15px; line-height: 1.6; color: var(--text-secondary); font-family: 'Source Serif 4', serif;">
+          <h3 style="font-size: 15px; color: #1A365D; margin-bottom: 8px; font-weight: 700;">Vision</h3>
+          <p style="font-size: 13.5px; line-height: 1.45; color: var(--text-secondary);">
             Democratizing precision oncology, by making it <span class="brand-link" onclick="window.triggerSearchHub('')">actionable, accessible and affordable</span>.
           </p>
         </div>
-        <div style="font-size: 11px; color: var(--text-tertiary); font-family: 'Outfit', sans-serif; margin-top: 12px;">Guidelines v3.0 Core Value</div>
+        <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 10px;">Guidelines v3.0 Core Value</div>
       </div>
     </div>
 
