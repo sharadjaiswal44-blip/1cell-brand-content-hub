@@ -974,7 +974,146 @@
   <!-- Toast Notification Overlay -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Scripts -->
-  <script type="module" src="app.js?v=20260915-v41"></script>
+  <!-- Synchronous Core Authentication Engine -->
+  <script>
+    (function() {
+      const authorizedMarketingEmails = [
+        "sharad.jaiswal@1cell.ai",
+        "vikas.naguru@1cell.ai",
+        "parita.razdan@1cell.ai",
+        "arjvee.vaidya@1cell.ai",
+        "tanisha.tolani@1cell.ai",
+        "pranad.kshirsagar@1cell.ai",
+        "richa@1cell.ai",
+        "richa.jhaveri@1cell.ai",
+        "ishita.dhaddha@1cell.ai",
+        "sanskar.haldankar@1cell.ai",
+        "rohan.arora@1cell.ai"
+      ];
+      window.authorizedMarketingEmails = authorizedMarketingEmails;
+
+      function checkSession() {
+        let authName = null, authEmail = null;
+        try {
+          authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+          authEmail = sessionStorage.getItem("authEmail") || localStorage.getItem("1cell_auth_email");
+        } catch (e) {}
+
+        const overlay = document.getElementById('loginOverlay');
+        if (authName && authEmail) {
+          document.documentElement.classList.add("authenticated");
+          if (document.body) document.body.classList.add("authenticated");
+          if (overlay) {
+            overlay.classList.add('authenticated');
+            overlay.style.cssText = "display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;";
+          }
+          return true;
+        } else {
+          document.documentElement.classList.remove("authenticated");
+          if (document.body) document.body.classList.remove("authenticated");
+          if (overlay) {
+            overlay.classList.remove('authenticated');
+            overlay.style.cssText = "display: flex !important; opacity: 1 !important; visibility: visible !important; pointer-events: all !important;";
+          }
+          return false;
+        }
+      }
+
+      window.handleLoginPortalSubmit = function(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const nameEl = document.getElementById('loginName');
+        const emailEl = document.getElementById('loginEmail');
+        const deptEl = document.getElementById('loginDept');
+        const errorMsg = document.getElementById('loginErrorMessage');
+
+        const name = nameEl ? nameEl.value.trim() : '';
+        const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
+        const dept = deptEl ? deptEl.value : 'Marketing';
+
+        if (!name) {
+          alert("Please enter your full name.");
+          if (nameEl) nameEl.focus();
+          return false;
+        }
+
+        if (!email || !email.endsWith('@1cell.ai')) {
+          if (emailEl) emailEl.classList.add('input-error');
+          if (errorMsg) {
+            const span = errorMsg.querySelector('span');
+            if (span) span.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
+            errorMsg.style.display = 'flex';
+          }
+          return false;
+        }
+
+        const deptLower = (dept || '').toLowerCase();
+        const isMarketing = deptLower.includes('market') || deptLower.includes('brand');
+
+        if (isMarketing) {
+          const isAuth = authorizedMarketingEmails.map(m => m.toLowerCase().trim()).includes(email);
+          if (!isAuth) {
+            if (emailEl) emailEl.classList.add('input-error');
+            if (errorMsg) {
+              const span = errorMsg.querySelector('span');
+              if (span) span.innerText = "Access denied: Your email is not registered in the Marketing team. Choose another department.";
+              errorMsg.style.display = 'flex';
+            }
+            return false;
+          }
+        }
+
+        const normTeam = isMarketing ? 'marketing' : (deptLower.includes('scien') || deptLower.includes('genomic') || deptLower.includes('medical')) ? 'scientific' : (deptLower.includes('sale')) ? 'sales' : 'leadership';
+
+        try {
+          sessionStorage.setItem("authName", name);
+          sessionStorage.setItem("authEmail", email);
+          sessionStorage.setItem("authDept", dept);
+          sessionStorage.setItem("authTeam", normTeam);
+          localStorage.setItem("1cell_auth_name", name);
+          localStorage.setItem("1cell_auth_email", email);
+          localStorage.setItem("1cell_auth_dept", dept);
+          localStorage.setItem("1cell_auth_team", normTeam);
+        } catch (err) {}
+
+        // Hide overlay instantly
+        document.documentElement.classList.add("authenticated");
+        if (document.body) document.body.classList.add("authenticated");
+        const overlay = document.getElementById('loginOverlay');
+        if (overlay) {
+          overlay.classList.add('authenticated');
+          overlay.style.cssText = "display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;";
+        }
+
+        if (typeof window.checkAuth === 'function') window.checkAuth();
+        if (typeof window.updateUserBadge === 'function') window.updateUserBadge();
+        if (typeof window.updateSidebarCategories === 'function') window.updateSidebarCategories();
+        if (typeof window.renderRoute === 'function') window.renderRoute('dashboard');
+        return false;
+      };
+
+      window.handleSignOut = function(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        try {
+          sessionStorage.removeItem("authName");
+          sessionStorage.removeItem("authEmail");
+          sessionStorage.removeItem("authDept");
+          sessionStorage.removeItem("authTeam");
+          localStorage.removeItem("1cell_auth_name");
+          localStorage.removeItem("1cell_auth_email");
+          localStorage.removeItem("1cell_auth_dept");
+          localStorage.removeItem("1cell_auth_team");
+        } catch (err) {}
+        checkSession();
+        if (typeof window.updateUserBadge === 'function') window.updateUserBadge();
+        if (typeof window.updateSidebarCategories === 'function') window.updateSidebarCategories();
+      };
+
+      // Run session check immediately
+      checkSession();
+    })();
+  </script>
+
+  <!-- Main Application Script -->
+  <script type="module" src="app.js?v=20260915-v42"></script>
 </body>
 </html>

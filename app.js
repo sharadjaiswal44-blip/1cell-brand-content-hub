@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260915-v41';
+import db from './db.js?v=20260915-v42';
 import { 
   normalizeTeam,
   canTeamViewVisibility,
@@ -609,11 +609,21 @@ function bindCloudDbModalEvents() {
 
 // Initialize Application
 function init() {
-  // Sync cards from central Supabase database
-  syncFromCentralDatabase(true);
-  bindCloudDbModalEvents();
-  // Check session authentication status on start
-  checkAuth();
+  // Check session authentication status on start immediately
+  try {
+    checkAuth();
+  } catch (e) {}
+
+  // Sync cards from central Supabase database in background
+  try {
+    setTimeout(() => {
+      syncFromCentralDatabase(true).catch(() => {});
+    }, 100);
+  } catch (e) {}
+
+  try {
+    bindCloudDbModalEvents();
+  } catch (e) {}
 
   // Navigation Routing
   sidebarItems.forEach(item => {

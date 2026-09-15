@@ -2300,10 +2300,14 @@ button, input, select, textarea {
   transition: opacity var(--transition-normal) ease, visibility var(--transition-normal) ease;
 }
 
-body.authenticated .login-overlay {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+html.authenticated .login-overlay,
+body.authenticated .login-overlay,
+.login-overlay.authenticated,
+.login-overlay.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .login-card {
