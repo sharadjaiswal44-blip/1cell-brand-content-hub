@@ -60,6 +60,7 @@ function mapSupabaseRowToCard(row) {
     region: row.region || 'Global',
     cancerType: row.cancer_type || 'None',
     biomarker: row.biomarkers || 'None',
+    eventType: row.event_type || row.eventType || (row.extra_metadata ? row.extra_metadata.eventType : null) || 'Case Review',
     owner: row.owner_author || '1Cell.Ai',
     author: row.owner_author || '1Cell.Ai',
     version: row.version || 'v1.0',
@@ -101,7 +102,8 @@ function applyAssetToLocalDb(card) {
       hospital: card.department || '1Cell Clinical Specialist',
       relatedProduct: card.product || 'oncoindx',
       readMoreUrl: card.sharePointUrl,
-      summary: card.description
+      summary: card.description,
+      eventType: card.eventType || (card.extra_metadata ? card.extra_metadata.eventType : null) || 'Case Review'
     };
     if (idx >= 0) db.cases[idx] = { ...db.cases[idx], ...caseObj };
     else db.cases.unshift(caseObj);
@@ -2111,43 +2113,330 @@ window.triggerRegisterProductAsset = function(prodId, categoryTab) {
   if (uploadModal) openModal(uploadModal);
 };
 
-// 4. Scientific Resources Route
-function renderCaseLibrary() {
-  workspaceViewport.innerHTML = `
-${window.renderCategoryHeader('Scientific Resources', 'Search real-world medical responses, case summaries, and clinical validation evidence.', 'case-library')}
-    
-    <div class="assets-grid">
-      ${db.cases.map(c => `
-        <div class="doc-card" onclick="window.openSharePoint('${c.id}')" style="cursor:pointer;" title="Click to view case in SharePoint">
-          <div class="case-card-header">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <span class="badge badge-prod">${(db.products.find(p => p.id === c.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-                ${c.biomarker ? `<span class="badge badge-biomarker">${c.biomarker}</span>` : ''}
+// 4. Scientific Resources Route & Interactive Filtering Engine
+let scientificCancerFilter = 'all';
+let scientificBiomarkerFilter = 'all';
+let scientificEventTypeFilter = 'all';
+let scientificProductFilter = 'all';
+let scientificSearchQuery = '';
+
+window.setScientificFilter = function(filterType, value) {
+  if (filterType === 'cancer') scientificCancerFilter = value;
+  if (filterType === 'biomarker') scientificBiomarkerFilter = value;
+  if (filterType === 'eventType') scientificEventTypeFilter = value;
+  if (filterType === 'product') scientificProductFilter = value;
+  window.updateScientificResourcesCards();
+};
+
+window.searchScientificResources = function(query) {
+  scientificSearchQuery = (query || '').toLowerCase().trim();
+  const clearBtn = document.getElementById('scientificSearchClearBtn');
+  if (clearBtn) clearBtn.style.display = scientificSearchQuery ? 'inline-flex' : 'none';
+  window.updateScientificResourcesCards();
+};
+
+window.clearScientificFilters = function() {
+  scientificCancerFilter = 'all';
+  scientificBiomarkerFilter = 'all';
+  scientificEventTypeFilter = 'all';
+  scientificProductFilter = 'all';
+  scientificSearchQuery = '';
+  
+  const searchInput = document.getElementById('scientificSearchInput');
+  if (searchInput) searchInput.value = '';
+  const clearBtn = document.getElementById('scientificSearchClearBtn');
+  if (clearBtn) clearBtn.style.display = 'none';
+
+  const cancerSel = document.getElementById('scientificCancerSelect');
+  if (cancerSel) cancerSel.value = 'all';
+  const bioSel = document.getElementById('scientificBiomarkerSelect');
+  if (bioSel) bioSel.value = 'all';
+  const eventSel = document.getElementById('scientificEventTypeSelect');
+  if (eventSel) eventSel.value = 'all';
+  const prodSel = document.getElementById('scientificProductSelect');
+  if (prodSel) prodSel.value = 'all';
+
+  document.querySelectorAll('.scientific-pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-event') === 'all');
+  });
+
+  window.updateScientificResourcesCards();
+};
+
+window.updateScientificResourcesCards = function() {
+  const container = document.getElementById('scientificCasesGrid');
+  const countEl = document.getElementById('scientificCountBadge');
+  if (!container) return;
+
+  const allCases = db.cases || [];
+  const filtered = allCases.filter(c => {
+    // 1. Product Filter
+    if (scientificProductFilter !== 'all' && c.relatedProduct !== scientificProductFilter) return false;
+
+    // 2. Cancer Type Filter
+    if (scientificCancerFilter !== 'all') {
+      const cCancer = (c.cancerType || '').toLowerCase();
+      const targetCancer = scientificCancerFilter.toLowerCase();
+      if (!cCancer.includes(targetCancer.replace(' cancer', '')) && !targetCancer.includes(cCancer.replace(' cancer', ''))) {
+        return false;
+      }
+    }
+
+    // 3. Biomarker Filter
+    if (scientificBiomarkerFilter !== 'all') {
+      const cBio = (c.biomarker || '').toLowerCase();
+      const targetBio = scientificBiomarkerFilter.toLowerCase();
+      if (!cBio.includes(targetBio)) return false;
+    }
+
+    // 4. Event Type Filter (MTB, RTM, Webinar, Case Review)
+    if (scientificEventTypeFilter !== 'all') {
+      const cEvent = (c.eventType || 'Case Review').toLowerCase();
+      const targetEvent = scientificEventTypeFilter.toLowerCase();
+      if (cEvent !== targetEvent) return false;
+    }
+
+    // 5. Search query
+    if (scientificSearchQuery) {
+      const q = scientificSearchQuery;
+      const matchTitle = (c.title || '').toLowerCase().includes(q);
+      const matchDoc = (c.doctor || '').toLowerCase().includes(q);
+      const matchHosp = (c.hospital || '').toLowerCase().includes(q);
+      const matchSummary = (c.summary || '').toLowerCase().includes(q);
+      const matchCancer = (c.cancerType || '').toLowerCase().includes(q);
+      const matchBio = (c.biomarker || '').toLowerCase().includes(q);
+      const matchEvent = (c.eventType || '').toLowerCase().includes(q);
+      const prodObj = db.products.find(p => p.id === c.relatedProduct);
+      const matchProd = prodObj && prodObj.name.toLowerCase().includes(q);
+
+      if (!matchTitle && !matchDoc && !matchHosp && !matchSummary && !matchCancer && !matchBio && !matchEvent && !matchProd) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  if (countEl) countEl.innerText = `${filtered.length} Resources Found`;
+
+  // Update event pills active state
+  document.querySelectorAll('.scientific-pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-event') === scientificEventTypeFilter);
+  });
+
+  // Sync select dropdowns if changed via pills
+  const eventSel = document.getElementById('scientificEventTypeSelect');
+  if (eventSel && eventSel.value !== scientificEventTypeFilter) {
+    eventSel.value = scientificEventTypeFilter;
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align:center; padding: 48px 24px; background:var(--bg-secondary); border-radius:var(--radius-lg); border:1px dashed var(--border-color); width:100%;">
+        <div style="font-size:36px; margin-bottom:12px;">🔬</div>
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:6px; color:var(--text-primary);">No Scientific Resources Matched</h3>
+        <p style="font-size:13px; color:var(--text-secondary); max-width:480px; margin:0 auto 16px;">No cases, MTB discussions, RTM meetings, or webinars match your current filter combination. You can clear filters or register a new clinical case.</p>
+        <div style="display:flex; justify-content:center; gap:10px;">
+          <button class="btn-outline" onclick="window.clearScientificFilters()">Clear All Filters</button>
+          <button class="btn-primary" onclick="window.triggerRegisterAssetModal('case-library')">+ Add Scientific Resource</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(c => {
+    const prod = db.products.find(p => p.id === c.relatedProduct);
+    const prodName = prod ? prod.name : (c.relatedProduct ? c.relatedProduct.toUpperCase() : '1Cell.Ai');
+    const evType = c.eventType || 'Case Review';
+    let evBadgeClass = 'badge-event-case';
+    let evIcon = '🔬';
+    if (evType === 'MTB') {
+      evBadgeClass = 'badge-event-mtb';
+      evIcon = '🧬';
+    } else if (evType === 'RTM') {
+      evBadgeClass = 'badge-event-rtm';
+      evIcon = '🤝';
+    } else if (evType === 'Webinar') {
+      evBadgeClass = 'badge-event-webinar';
+      evIcon = '🎥';
+    }
+
+    return `
+      <div class="doc-card" onclick="window.openSharePoint('${c.id}')" style="cursor:pointer;" title="Click to view case in SharePoint">
+        <div class="case-card-header">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+              <span class="badge badge-prod">${prodName}</span>
+              <span class="badge ${evBadgeClass}">${evIcon} ${evType}</span>
+              ${c.biomarker ? `<span class="badge badge-biomarker">${c.biomarker}</span>` : ''}
+            </div>
+          </div>
+          <h3 style="font-size:15.5px; font-weight:700; margin-top:4px; line-height:1.4; color:var(--text-primary);">${c.title}</h3>
+          <div class="case-hospital">${c.doctor} • ${c.hospital}</div>
+        </div>
+        <div class="card-body" style="padding-top:14px; display:flex; flex-direction:column; flex:1;">
+          <div class="case-details-summary">${c.summary}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; font-size:12px;">
+            <div>
+              <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase; font-weight:600;">Cancer Type</span>
+              <div style="font-size:12px; font-weight:600; margin-top:1px; color:var(--text-primary);">${c.cancerType}</div>
+            </div>
+            ${c.outcome ? `
+              <div style="text-align:right;">
+                <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase; font-weight:600;">Clinical Impact</span>
+                <div style="font-size:12px; font-weight:600; color:var(--accent-color); margin-top:1px;">${c.outcome}</div>
               </div>
-            </div>
-            <h3 style="font-size:16px; font-weight:700; margin-top:4px;">${c.title}</h3>
-            <div class="case-hospital">${c.doctor} • ${c.hospital}</div>
+            ` : ''}
           </div>
-          <div class="card-body" style="padding-top:16px;">
-            <div class="case-details-summary">${c.summary}</div>
-            <div style="margin-bottom:10px;">
-              <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Cancer Type</span>
-              <div style="font-size:12px; font-weight:600; margin-top:2px;">${c.cancerType}</div>
-            </div>
-            <div class="card-metadata" style="margin-top:auto; padding-top:8px;">
-              ${renderCardLastUpdatedRow(c)}
-            </div>
-          </div>
-          <div class="card-actions-bar">
-            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${c.id}')">Edit Link</button>
-            <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${c.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : (db.documents[0] ? db.documents[0].id : 'doc-041'))">Preview Metadata</button>
-            <button class="btn-primary" style="padding:6px 16px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${c.id}')">View</button>
+          <div class="card-metadata" style="margin-top:auto; padding-top:8px;">
+            ${renderCardLastUpdatedRow(c)}
           </div>
         </div>
-      `).join('')}
+        <div class="card-actions-bar" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${c.id}')">View</button>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="btn-outline" style="padding:5px 10px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${c.id}')">Edit</button>
+            <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${c.id}')" title="Delete Resource" style="color:#ef4444;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+function renderCaseLibrary() {
+  const allCases = db.cases || [];
+  const mtbCount = allCases.filter(c => c.eventType === 'MTB').length;
+  const rtmCount = allCases.filter(c => c.eventType === 'RTM').length;
+  const webinarCount = allCases.filter(c => c.eventType === 'Webinar').length;
+  const totalCount = allCases.length;
+
+  workspaceViewport.innerHTML = `
+    ${window.renderCategoryHeader ? window.renderCategoryHeader('Scientific Resources', 'Search real-world medical responses, MTB discussions, RTM meetings, and clinical validation evidence.', 'case-library') : `
+    <div class="welcome-banner">
+      <div>
+        <h1 class="welcome-title">Scientific Resources</h1>
+        <p class="welcome-subtitle">Search real-world medical responses, MTB discussions, RTM meetings, and clinical validation evidence.</p>
+      </div>
     </div>
+    `}
+
+    <div class="scientific-filter-container">
+      <div class="scientific-filter-top-row">
+        <div class="scientific-search-box">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input type="text" id="scientificSearchInput" placeholder="Search title, doctor, hospital, gene, clinical notes..." oninput="window.searchScientificResources(this.value)" value="${scientificSearchQuery}" style="border:none;background:transparent;outline:none;width:100%;font-size:13px;color:var(--text-primary);">
+          <button id="scientificSearchClearBtn" class="search-clear-btn" style="display:${scientificSearchQuery ? 'inline-flex' : 'none'};" onclick="document.getElementById('scientificSearchInput').value=''; window.searchScientificResources('');">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:14px; height:14px;">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+            </svg>
+          </button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="scientificCountBadge" class="badge badge-prod" style="font-size:12px; padding:6px 12px;">${totalCount} Resources Found</span>
+          <button class="btn-primary" onclick="window.triggerRegisterAssetModal('case-library')" style="display:inline-flex; align-items:center; gap:6px; padding:7px 14px; font-size:12px; font-weight:600;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>+ Add Resource</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="scientific-filter-selects-row">
+        <!-- Event Type Filter -->
+        <div class="scientific-select-group">
+          <label for="scientificEventTypeSelect">Event Type</label>
+          <select id="scientificEventTypeSelect" onchange="window.setScientificFilter('eventType', this.value)">
+            <option value="all" ${scientificEventTypeFilter === 'all' ? 'selected' : ''}>All Event Types</option>
+            <option value="MTB" ${scientificEventTypeFilter === 'MTB' ? 'selected' : ''}>🧬 MTB (Molecular Tumor Board)</option>
+            <option value="RTM" ${scientificEventTypeFilter === 'RTM' ? 'selected' : ''}>🤝 RTM (Round Table Meeting)</option>
+            <option value="Webinar" ${scientificEventTypeFilter === 'Webinar' ? 'selected' : ''}>🎥 Webinar (Grand Rounds)</option>
+            <option value="Case Review" ${scientificEventTypeFilter === 'Case Review' ? 'selected' : ''}>🔬 Clinical Case Review</option>
+          </select>
+        </div>
+
+        <!-- Cancer Type Filter -->
+        <div class="scientific-select-group">
+          <label for="scientificCancerSelect">Cancer Type</label>
+          <select id="scientificCancerSelect" onchange="window.setScientificFilter('cancer', this.value)">
+            <option value="all" ${scientificCancerFilter === 'all' ? 'selected' : ''}>All Cancer Types</option>
+            <option value="Breast" ${scientificCancerFilter === 'Breast' ? 'selected' : ''}>Breast Cancer</option>
+            <option value="Lung" ${scientificCancerFilter === 'Lung' ? 'selected' : ''}>Lung Cancer / NSCLC</option>
+            <option value="Endometrial" ${scientificCancerFilter === 'Endometrial' ? 'selected' : ''}>Endometrial / Uterine</option>
+            <option value="Colorectal" ${scientificCancerFilter === 'Colorectal' ? 'selected' : ''}>Colorectal Cancer</option>
+            <option value="Pancreatic" ${scientificCancerFilter === 'Pancreatic' ? 'selected' : ''}>Pancreatic Cancer</option>
+            <option value="Prostate" ${scientificCancerFilter === 'Prostate' ? 'selected' : ''}>Prostate Cancer</option>
+            <option value="Cervical" ${scientificCancerFilter === 'Cervical' ? 'selected' : ''}>Cervical Cancer</option>
+            <option value="Hepatocellular" ${scientificCancerFilter === 'Hepatocellular' ? 'selected' : ''}>Liver / Hepatobiliary</option>
+            <option value="Rare" ${scientificCancerFilter === 'Rare' ? 'selected' : ''}>Rare & Dual Primaries</option>
+          </select>
+        </div>
+
+        <!-- Biomarker Filter -->
+        <div class="scientific-select-group">
+          <label for="scientificBiomarkerSelect">Biomarker</label>
+          <select id="scientificBiomarkerSelect" onchange="window.setScientificFilter('biomarker', this.value)">
+            <option value="all" ${scientificBiomarkerFilter === 'all' ? 'selected' : ''}>All Biomarkers</option>
+            <option value="MSI" ${scientificBiomarkerFilter === 'MSI' ? 'selected' : ''}>MSI-High / dMMR</option>
+            <option value="HRD" ${scientificBiomarkerFilter === 'HRD' ? 'selected' : ''}>HRD | BRCA1/2</option>
+            <option value="ALK" ${scientificBiomarkerFilter === 'ALK' ? 'selected' : ''}>ALK / ROS1 / RET</option>
+            <option value="KRAS" ${scientificBiomarkerFilter === 'KRAS' ? 'selected' : ''}>KRAS / NRAS / BRAF</option>
+            <option value="PIK3CA" ${scientificBiomarkerFilter === 'PIK3CA' ? 'selected' : ''}>PIK3CA / PTEN</option>
+            <option value="ESR1" ${scientificBiomarkerFilter === 'ESR1' ? 'selected' : ''}>ESR1 / Endocrine</option>
+            <option value="TP53" ${scientificBiomarkerFilter === 'TP53' ? 'selected' : ''}>TP53 / DNA Repair</option>
+            <option value="CTC" ${scientificBiomarkerFilter === 'CTC' ? 'selected' : ''}>CTC / Single-Cell</option>
+            <option value="Multi-Omics" ${scientificBiomarkerFilter === 'Multi-Omics' ? 'selected' : ''}>Multi-Omics / CGP</option>
+          </select>
+        </div>
+
+        <!-- Product Filter -->
+        <div class="scientific-select-group">
+          <label for="scientificProductSelect">Product Workspace</label>
+          <select id="scientificProductSelect" onchange="window.setScientificFilter('product', this.value)">
+            <option value="all" ${scientificProductFilter === 'all' ? 'selected' : ''}>All Products</option>
+            ${db.products.filter(p => p.id !== 'icore' && p.id !== 'icare').map(p => `
+              <option value="${p.id}" ${scientificProductFilter === p.id ? 'selected' : ''}>${p.name}</option>
+            `).join('')}
+          </select>
+        </div>
+
+        <!-- Reset Button -->
+        <div style="display:flex; align-items:flex-end;">
+          <button class="btn-outline" style="width:100%; padding:8px 12px; font-size:12px;" onclick="window.clearScientificFilters()">Clear Filters</button>
+        </div>
+      </div>
+
+      <!-- Quick Event Pills -->
+      <div class="scientific-pills-row">
+        <span style="font-size:11px; font-weight:600; color:var(--text-tertiary); text-transform:uppercase;">Quick Filter:</span>
+        <button class="scientific-pill-btn ${scientificEventTypeFilter === 'all' ? 'active' : ''}" data-event="all" onclick="window.setScientificFilter('eventType', 'all')">
+          All (${totalCount})
+        </button>
+        <button class="scientific-pill-btn ${scientificEventTypeFilter === 'MTB' ? 'active' : ''}" data-event="MTB" onclick="window.setScientificFilter('eventType', 'MTB')">
+          🧬 MTB (${mtbCount})
+        </button>
+        <button class="scientific-pill-btn ${scientificEventTypeFilter === 'RTM' ? 'active' : ''}" data-event="RTM" onclick="window.setScientificFilter('eventType', 'RTM')">
+          🤝 RTM (${rtmCount})
+        </button>
+        <button class="scientific-pill-btn ${scientificEventTypeFilter === 'Webinar' ? 'active' : ''}" data-event="Webinar" onclick="window.setScientificFilter('eventType', 'Webinar')">
+          🎥 Webinar (${webinarCount})
+        </button>
+      </div>
+    </div>
+
+    <div id="scientificCasesGrid" class="assets-grid"></div>
   `;
+
+  updateScientificResourcesCards();
 }
 
 // 4.1. Report Library Route (1Cell.Ai Clinical Sample Reports)
@@ -3813,6 +4102,7 @@ async function handleMockUpload(e) {
   const region = document.getElementById('formRegion').value;
   const cancerType = document.getElementById('formCancer').value || 'None';
   const biomarker = document.getElementById('formBiomarker').value || 'None';
+  const eventType = (document.getElementById('formEventType') ? document.getElementById('formEventType').value : 'Case Review') || 'Case Review';
   const status = document.getElementById('formStatus').value;
   const version = document.getElementById('formVersion').value || 'v1.0';
   let sharePointUrl = document.getElementById('formSpUrl').value.trim();
@@ -3885,6 +4175,8 @@ async function handleMockUpload(e) {
     region,
     cancer_type: cancerType,
     biomarkers: biomarker,
+    event_type: eventType,
+    eventType: eventType,
     owner_author: authName,
     version,
     status,
@@ -4519,6 +4811,8 @@ window.openEditAssetModal = function(id) {
       if (cancerEl) cancerEl.value = c.cancerType || 'None';
       const biomarkerEl = document.getElementById('editDocBiomarker');
       if (biomarkerEl) biomarkerEl.value = c.biomarker || 'None';
+      const eventTypeEl = document.getElementById('editDocEventType');
+      if (eventTypeEl) eventTypeEl.value = c.eventType || 'Case Review';
     } else {
       // Check if publication
       const pub = (db.publications || []).find(item => String(item.id) === String(id));
@@ -4645,8 +4939,10 @@ window.saveAssetEdit = async function() {
     const desc = (document.getElementById('editDocDesc') ? document.getElementById('editDocDesc').value.trim() : '');
     const cancerEl = document.getElementById('editDocCancer');
     const biomarkerEl = document.getElementById('editDocBiomarker');
+    const eventTypeEl = document.getElementById('editDocEventType');
     const cancerVal = (cancerEl && cancerEl.value && cancerEl.value !== 'None') ? cancerEl.value : 'None';
     const biomarkerVal = (biomarkerEl && biomarkerEl.value && biomarkerEl.value !== 'None') ? biomarkerEl.value : 'None';
+    const eventTypeVal = (eventTypeEl && eventTypeEl.value) ? eventTypeEl.value : 'Case Review';
 
     const userTeam = getCurrentUserTeam();
     const authName = sessionStorage.getItem("authName") || owner || '1Cell.Ai';
@@ -4687,6 +4983,7 @@ window.saveAssetEdit = async function() {
       description: desc,
       cancerType: cancerVal,
       biomarker: biomarkerVal,
+      eventType: eventTypeVal,
       updatedDate: new Date().toISOString().split('T')[0],
       updated_at: new Date().toISOString()
     };
@@ -4718,6 +5015,7 @@ window.saveAssetEdit = async function() {
           description: desc,
           cancerType: cancerVal,
           biomarker: biomarkerVal,
+          eventType: eventTypeVal,
           updatedDate: new Date().toISOString().split('T')[0],
           updated_at: new Date().toISOString()
         };

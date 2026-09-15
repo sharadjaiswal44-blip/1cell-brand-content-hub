@@ -781,6 +781,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "MSI-High",
       cancerType: "Endometrial Cancer",
+      eventType: "MTB",
       outcome: "Target Identified",
       summary: "Hysterectomy findings and clinical sequencing matching treatment protocols.",
       readMoreUrl: "https://1cell.ai/tissue-genomic-profiling-in-a-case-of-endometrioid-adenocarcinoma-of-the-endometrium/"
@@ -793,6 +794,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "HRD",
       cancerType: "Carcinosarcoma",
+      eventType: "RTM",
       outcome: "Guided Therapy",
       summary: "A 74-year-old female patient diagnosed with metastatic endometrioid carcinoma molecular risk reclassification.",
       readMoreUrl: "https://1cell.ai/high-risk-endometrial-carcinosarcoma-in-a-heavily-pretreated-breast-cancer-survivor-molecular-insights-guiding-targeted-strategies/"
@@ -805,6 +807,7 @@ const db = {
       relatedProduct: "oncotarget",
       biomarker: "ALK-EML4",
       cancerType: "Lung Adenocarcinoma",
+      eventType: "Webinar",
       outcome: "Target Identified",
       summary: "Identifying Osimertinib sensitivity mutations in solid tumor samples.",
       readMoreUrl: "https://1cell.ai/comprehensive-tissue-genomic-profiling-reveals-alk-eml4-fusionand-tp53-splice-site-mutation-in-metastatic-lung-adenocarcinoma-2/"
@@ -817,6 +820,7 @@ const db = {
       relatedProduct: "oncomonitor",
       biomarker: "PIK3CA",
       cancerType: "Cervical Cancer",
+      eventType: "MTB",
       outcome: "Resistance Detected",
       summary: "A 50-year-old female patient with poorly differentiated squamous cell carcinoma of the cervix.",
       readMoreUrl: "https://1cell.ai/liquid-biopsy-reveals-erbb3-pik3ca-activation-and-myc-amplification-driving-resistance-in-metastatic-cervical-cancer/"
@@ -829,6 +833,7 @@ const db = {
       relatedProduct: "oncomonitor",
       biomarker: "ESR1",
       cancerType: "Breast Carcinoma",
+      eventType: "RTM",
       outcome: "Guided Therapy",
       summary: "73-year-old female patient with invasive ductal carcinoma (IDC) and endocrine therapy resistance markers.",
       readMoreUrl: "https://1cell.ai/comprehensive-liquid-biopsy-profiling-reveals-dual-pik3ca-and-esr1-mutations-in-hormone-receptor-positive-metastatic-breast-carcinoma-2/"
@@ -841,6 +846,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "TP53",
       cancerType: "Squamous Lung Carcinoma",
+      eventType: "Webinar",
       outcome: "Target Identified",
       summary: "50-year-old male with scapular metastases profiling molecular drivers.",
       readMoreUrl: "https://1cell.ai/molecular-drivers-of-tumorigenesis-and-metastasis-in-squamous-cell-lung-carcinoma/"
@@ -853,6 +859,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "KRAS",
       cancerType: "Dual Primaries",
+      eventType: "MTB",
       outcome: "Target Identified",
       summary: "De-convoluting dual primary signals using matched tissue and blood sequencing.",
       readMoreUrl: "https://1cell.ai/a-tale-of-two-primaries-hepatocellular-and-pancreatic-carcinomas-integrating-tissue-and-liquid-biopsy-insights/"
@@ -865,6 +872,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "MSI-High",
       cancerType: "Endometrial Cancer",
+      eventType: "RTM",
       outcome: "Guided Therapy",
       summary: "Resolving diagnostic ambiguity in postmenopausal bleeding cases.",
       readMoreUrl: "https://1cell.ai/from-fragmented-results-to-precision-carean-endometrial-cancer-case-study/"
@@ -877,6 +885,7 @@ const db = {
       relatedProduct: "oncoctc",
       biomarker: "DNA Repair",
       cancerType: "Advanced NSCLC",
+      eventType: "Webinar",
       outcome: "Target Identified",
       summary: "67-year-old male with Stage IV NSCLC resolving DNA repair deficiency variants.",
       readMoreUrl: "https://1cell.ai/circulating-tumor-cell-ctc-analysis-identifies-actionable-dna-repair-deficiency-in-advanced-nsclc-undetected-by-ctdna/"
@@ -889,6 +898,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "CGP",
       cancerType: "Rare Hepatocellular Carcinoma",
+      eventType: "MTB",
       outcome: "Guided Therapy",
       summary: "66-year-old male with chronic hepatitis B and rare presentation of tumor biology.",
       readMoreUrl: "https://1cell.ai/rare-or-uncommon-cancers-where-tissue-specific-guidelines-are-limited-and-broad-genomic-insight-is-critical/"
@@ -901,6 +911,7 @@ const db = {
       relatedProduct: "oncomonitor",
       biomarker: "Longitudinal",
       cancerType: "Breast Cancer",
+      eventType: "Webinar",
       outcome: "Target Identified",
       summary: "52-year-old pre-menopausal woman tracking somatic mutation updates.",
       readMoreUrl: "https://1cell.ai/uncovering-tumor-evolution-in-multi-treated-breast-cancer-using-liquid-biopsy-and-longitudinal-ngs/"
@@ -913,6 +924,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "MSI-High",
       cancerType: "MSI-High Endometrial Carcinoma",
+      eventType: "MTB",
       outcome: "Guided Therapy",
       summary: "64-year-old female Grade 3 Endometrioid adenocarcinoma response monitoring.",
       readMoreUrl: "https://1cell.ai/genomic-profiling-of-rapidly-dedifferentiating-msi-highendometrial-carcinoma/"
@@ -925,6 +937,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "Multi-Omics",
       cancerType: "Personalized Breast Cancer",
+      eventType: "RTM",
       outcome: "Target Identified",
       summary: "55-year-old female neoadjuvant therapy response profiling.",
       readMoreUrl: "https://1cell.ai/multi-omics-insights-driving-personalized-therapy-in-breast-cancer/"
@@ -937,6 +950,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "WHO Risk",
       cancerType: "Stage II Endometrial Carcinoma",
+      eventType: "Webinar",
       outcome: "Guided Therapy",
       summary: "64-year-old female patient high-grade molecular reclassification.",
       readMoreUrl: "https://1cell.ai/molecular-risk-reclassification-in-stage-ii-endometrialcarcinoma-when-biology-redefines-prognosis/"
@@ -949,6 +963,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "MSI-High",
       cancerType: "Metastatic Prostate Adenocarcinoma",
+      eventType: "MTB",
       outcome: "Target Identified",
       summary: "70-year-old male with Gleason 9 prostate carcinoma immunotherapy response.",
       readMoreUrl: "https://1cell.ai/metastatic-prostate-adenocarcinoma-withtmprss2-erg-fusion-and-msi-high-immunogenic-profile/"
@@ -961,6 +976,7 @@ const db = {
       relatedProduct: "oncoindx",
       biomarker: "CGP",
       cancerType: "Advanced Endometrial Cancer",
+      eventType: "RTM",
       outcome: "Guided Therapy",
       summary: "Hysterectomy genomic profiles guiding target selections.",
       readMoreUrl: "https://1cell.ai/from-genomics-to-therapy-a-precision-medicine-approachin-advanced-endometrial-cancer/"
@@ -973,6 +989,7 @@ const db = {
       relatedProduct: "oncomonitor",
       biomarker: "Multi-Omics",
       cancerType: "Advanced Lung Cancer",
+      eventType: "Webinar",
       outcome: "Target Identified",
       summary: "Matching solid biopsy genomic alterations to cell-free DNA signals.",
       readMoreUrl: "https://1cell.ai/case-study-05-lung-cancer-2/"
@@ -985,6 +1002,7 @@ const db = {
       relatedProduct: "oncoctc",
       biomarker: "CTC Genomics",
       cancerType: "Therapy Resistant Colorectal Cancer",
+      eventType: "MTB",
       outcome: "Guided Therapy",
       summary: "Tracing therapy-resistance markers in CTCs missed by plasma DNA assays.",
       readMoreUrl: "https://1cell.ai/therapy-resistance-detected-in-colorectal-cancer-by-single-circulating-tumor-cell-genomics/"
@@ -997,6 +1015,7 @@ const db = {
       relatedProduct: "oncoctc",
       biomarker: "Single-Cell",
       cancerType: "Metastatic Colorectal Cancer",
+      eventType: "RTM",
       outcome: "Target Identified",
       summary: "Abstract presentation on single circulating tumor cell genomics.",
       readMoreUrl: "https://1cell.ai/single-cell-genomics-reveals-resistance-signatures-in-colorectal-cancer-2/"
@@ -1009,6 +1028,7 @@ const db = {
       relatedProduct: "oncoalibrex",
       biomarker: "KRAS WT | CEA-Negative | Real-Time Monitoring",
       cancerType: "Colorectal Cancer",
+      eventType: "MTB",
       outcome: "Progression Tracked & Escalation Defined",
       summary: "A 65-year-old male with Stage IV colorectal cancer and liver/lung metastases who did not express CEA. OncoAlibrex provided antigen-independent longitudinal molecular monitoring during FOLFOX chemotherapy with an established escalation pathway to add cetuximab on progression.",
       readMoreUrl: "https://1cell.ai/oncoalibrex-colorectal-cancer-longitudinal-molecular-monitoring/",
