@@ -126,6 +126,12 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
             <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search files, cancer types, doctors, biomarkers..." autocomplete="off">
+            <button id="searchClearBtn" class="search-clear-btn" title="Clear search" style="display:none;" onclick="window.clearSearchInput()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:14px; height:14px;">
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
+            </button>
+            <kbd class="search-kbd-badge" title="Press ⌘K or / to search">⌘K</kbd>
           </div>
           <!-- Auto Suggestions List -->
           <div id="suggestionsDropdown" class="search-suggestions-dropdown"></div>

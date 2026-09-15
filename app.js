@@ -655,11 +655,59 @@ function init() {
     showToast(`Switched to ${currentTheme} theme`);
   });
 
-  // Global Search Box Listeners
+  // Global Search Box Listeners & Clear Button
+  window.clearSearchInput = function() {
+    if (globalSearchInput) {
+      globalSearchInput.value = '';
+      globalSearchInput.focus();
+    }
+    const clearBtn = document.getElementById('searchClearBtn');
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (suggestionsDropdown) {
+      suggestionsDropdown.style.display = 'none';
+      suggestionsDropdown.innerHTML = '';
+    }
+  };
+
+  const searchClearBtn = document.getElementById('searchClearBtn');
+  if (searchClearBtn) {
+    searchClearBtn.addEventListener('click', window.clearSearchInput);
+  }
+
   globalSearchInput.addEventListener('input', handleSearchInput);
   globalSearchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       triggerSearchHub(globalSearchInput.value);
+    }
+  });
+
+  // Global Keyboard Shortcuts (⌘K, Ctrl+K, /, Escape)
+  document.addEventListener('keydown', (e) => {
+    const isEditing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (globalSearchInput) {
+        globalSearchInput.focus();
+        globalSearchInput.select();
+      }
+      return;
+    }
+    if (e.key === '/' && !isEditing) {
+      e.preventDefault();
+      if (globalSearchInput) {
+        globalSearchInput.focus();
+        globalSearchInput.select();
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      if (suggestionsDropdown && suggestionsDropdown.style.display !== 'none') {
+        suggestionsDropdown.style.display = 'none';
+      }
+      document.querySelectorAll('.modal-overlay.active, .modal.active').forEach(m => m.classList.remove('active'));
+      if (document.activeElement === globalSearchInput) {
+        globalSearchInput.blur();
+      }
     }
   });
 
@@ -1583,6 +1631,17 @@ window.openProductMicrosite = function(prodId) {
   const totalAllCount = allDocs.length + relatedCases.length + relatedReports.length + relatedPubs.length + relatedVideos.length;
 
   workspaceViewport.innerHTML = `
+    <div class="breadcrumb-bar">
+      <button class="breadcrumb-back-btn" onclick="window.renderRoute('products')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px; height:13px;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        <span>Back to Product Hub</span>
+      </button>
+      <span style="color:var(--text-tertiary); font-size:12px;">/</span>
+      <span style="color:var(--text-secondary); font-size:12.5px; font-weight:600;">${product.name}</span>
+    </div>
+
     <div class="product-workspace-header">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:16px;">
@@ -3326,6 +3385,11 @@ function handleSearchInput(e) {
   const qRaw = e.target.value.trim();
   const qLower = qRaw.toLowerCase();
   const qClean = qLower.replace(/[^a-z0-9]/g, '');
+
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (clearBtn) {
+    clearBtn.style.display = e.target.value ? 'inline-flex' : 'none';
+  }
 
   if (!qRaw) {
     suggestionsDropdown.style.display = 'none';

@@ -297,6 +297,68 @@ button, input, select, textarea {
   font-size: 13px;
 }
 
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color var(--transition-fast);
+}
+
+.search-clear-btn:hover {
+  color: var(--text-primary);
+}
+
+.search-kbd-badge {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  padding: 2px 6px;
+  border-radius: 5px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  pointer-events: none;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+
+.breadcrumb-back-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.breadcrumb-back-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--accent-color);
+  border-color: rgba(26, 54, 93, 0.2);
+}
+
 /* Suggestions Dropdown */
 .search-suggestions-dropdown {
   position: absolute;
@@ -2010,7 +2072,10 @@ button, input, select, textarea {
     padding: 0 16px;
   }
   .global-search-container {
-    width: 180px;
+    width: 200px;
+  }
+  .search-kbd-badge {
+    display: none;
   }
 }
 
