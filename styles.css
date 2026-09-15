@@ -1174,11 +1174,7 @@ button, input, select, textarea {
 }
 
 .product-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 14px;
-  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .product-name {
@@ -1188,78 +1184,87 @@ button, input, select, textarea {
   letter-spacing: -0.015em;
 }
 
+.product-description-full {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
 .product-stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 10px;
+  width: 100%;
+  margin-bottom: 18px;
 }
 
 .product-stat-box {
   background-color: var(--bg-tertiary);
-  padding: 6px 14px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
   text-align: center;
   border: 1px solid var(--border-subtle);
-  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
 }
 
 .product-stat-num {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .product-stat-lbl {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-tertiary);
   font-weight: 500;
-}
-
-.product-description-full {
-  font-size: 13.5px;
-  color: var(--text-secondary);
-  line-height: 1.55;
-  margin-bottom: 18px;
-  max-width: 800px;
+  margin-top: 2px;
 }
 
 .product-tabs-row {
   display: flex;
   border-bottom: 1px solid var(--border-color);
-  gap: 24px;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 0;
+  margin-top: 6px;
 }
 
 .product-tab-btn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 12px 4px;
-  font-size: 14px;
+  padding: 10px 14px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--text-secondary);
   position: relative;
-  transition: color var(--transition-fast);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 
 .product-tab-btn:hover {
   color: var(--text-primary);
+  background-color: var(--bg-tertiary);
 }
 
 .product-tab-btn.active {
   color: var(--accent-color);
-}
-
-.product-tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--accent-color);
+  border-bottom: 2px solid var(--accent-color);
+  background-color: var(--bg-tertiary);
 }
 
 .product-workspace-content {
-  padding-top: 24px;
+  padding-top: 20px;
 }
 
 /* Product Clinical & Competitor Info Cards */

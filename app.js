@@ -1228,7 +1228,7 @@ function renderDashboard() {
       
       <!-- Product Tabs Container -->
       <div class="product-tabs-container">
-        ${db.products.map((p, idx) => `
+        ${db.products.filter(p => p.id !== 'icore' && p.id !== 'icare').map((p, idx) => `
           <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
         `).join('')}
       </div>
@@ -1565,6 +1565,7 @@ function renderCompanyAssets() {
 
 // 3. Product Hub View
 function renderProductHub() {
+  const visibleProducts = db.products.filter(p => p.id !== 'icore' && p.id !== 'icare');
   workspaceViewport.innerHTML = `
     ${window.renderCategoryHeader ? window.renderCategoryHeader('1Cell.Ai Product Hub Workspaces', 'Detailed workspace microsites for every clinical genomics assay model.', 'products') : `
     <div class="welcome-banner">
@@ -1576,7 +1577,7 @@ function renderProductHub() {
     `}
 
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 24px;">
-      ${db.products.map(p => {
+      ${visibleProducts.map(p => {
         const docCount = db.documents.filter(d => d.product === p.id).length;
         const caseCount = db.cases.filter(c => c.relatedProduct === p.id).length;
         const pubCount = db.publications.filter(pub => pub.relatedProduct === p.id).length;
@@ -1643,19 +1644,19 @@ window.openProductMicrosite = function(prodId) {
     </div>
 
     <div class="product-workspace-header">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
-        <div style="display:flex; align-items:center; gap:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:18px;">
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
           <div class="product-microsite-logo-badge">
             <img src="${product.logo}" alt="${product.name} Logo" class="product-header-brand-logo" onerror="this.onerror=null;this.src='assets/logos/logo_1cell.png';" />
           </div>
           <div>
             <div class="product-tagline">1Cell.Ai Genomic Assays • Product Hub Workspace</div>
-            <h1 class="product-name" style="margin-top:2px;">${product.name}</h1>
+            <h1 class="product-name" style="margin:2px 0 0 0;">${product.name}</h1>
           </div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
-          <button class="btn-primary" onclick="window.triggerRegisterProductAsset('${prodId}', '${currentMicrositeTab}')" style="display:flex; align-items:center; gap:6px; padding:9px 18px; font-weight:600; box-shadow:var(--shadow-md);">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;">
+          <button class="btn-primary" onclick="window.triggerRegisterProductAsset('${prodId}', '${currentMicrositeTab}')" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; font-weight:600; font-size:13px; box-shadow:var(--shadow-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:15px;height:15px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             <span>Add New Asset</span>
@@ -1663,9 +1664,19 @@ window.openProductMicrosite = function(prodId) {
         </div>
       </div>
 
-      <div class="product-title-row" style="margin-bottom:16px;">
-        <p class="product-description-full" style="margin:0; flex:1;">${product.details || product.description}</p>
-        <div class="product-stats" style="margin-left:auto;">
+      <div class="product-title-row">
+        <p class="product-description-full">${product.details || product.description}</p>
+        ${product.clinicalBenefits && product.clinicalBenefits.length > 0 ? `
+          <div class="product-benefits-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:10px; margin-bottom:16px;">
+            ${product.clinicalBenefits.slice(0, 3).map(b => `
+              <div style="display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text-secondary); background:var(--bg-tertiary); padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+                <span style="color:var(--accent-color); font-weight:700; flex-shrink:0;">✓</span>
+                <span style="line-height:1.4;">${b}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+        <div class="product-stats">
           <div class="product-stat-box">
             <div class="product-stat-num">${totalAllCount}</div>
             <div class="product-stat-lbl">Total Assets</div>
@@ -1693,7 +1704,7 @@ window.openProductMicrosite = function(prodId) {
         </div>
       </div>
 
-      <div class="product-tabs-row" style="display:flex; flex-wrap:wrap; gap:8px;">
+      <div class="product-tabs-row">
         <button class="product-tab-btn ${currentMicrositeTab === 'all' ? 'active' : ''}" data-tab="all" onclick="window.switchProductTab(event, '${prodId}', 'all')">All Assets (${totalAllCount})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'about-product' ? 'active' : ''}" data-tab="about-product" onclick="window.switchProductTab(event, '${prodId}', 'about-product')">About Product (${aboutProductDocs.length})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'evidence' ? 'active' : ''}" data-tab="evidence" onclick="window.switchProductTab(event, '${prodId}', 'evidence')">Evidence (${totalEvidenceCount})</button>
@@ -1730,7 +1741,7 @@ function renderProductTabContent(prodId, tabName) {
   const relatedVideos = db.videos.filter(v => v.product === prodId);
 
   const emptyState = (catName) => `
-    <div style="text-align:center; padding:48px 24px; background:var(--card-bg); border:1px dashed var(--border-color); border-radius:12px; width:100%;">
+    <div style="text-align:center; padding:48px 24px; background:var(--bg-secondary); border:1px dashed var(--border-color); border-radius:12px; width:100%; grid-column:1 / -1; margin:8px 0;">
       <div style="font-size:36px; margin-bottom:10px;">📁</div>
       <h3 style="font-size:16px; font-weight:700; margin-bottom:6px; color:var(--text-primary);">No ${catName} files registered for ${product.name}</h3>
       <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;">Add a new ${catName} card with its direct OneDrive / SharePoint link to make it accessible to your team.</p>
@@ -1791,22 +1802,25 @@ function renderProductTabContent(prodId, tabName) {
     if (relatedPubs.length > 0) {
       relatedPubs.filter(p => !docIds.has(p.id)).forEach(pub => {
         html += `
-          <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
+          <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer; margin-bottom:0;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
               <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
               </div>
             </div>
-            <h3 style="font-size:17px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
-            <div class="pub-authors">${pub.authors}</div>
-            <div class="pub-abstract-box"><strong>Abstract:</strong> ${pub.abstract}</div>
+            <h3 style="font-size:16px; font-weight:700; margin:6px 0 8px 0; color:var(--text-primary);">${pub.title}</h3>
+            <div class="pub-authors" style="margin-bottom:10px;">${pub.authors}</div>
+            <div class="pub-abstract-box" style="margin-bottom:12px;"><strong>Abstract:</strong> ${pub.abstract}</div>
+            <div class="card-metadata" style="margin-bottom:12px;">
+              ${renderCardLastUpdatedRow(pub)}
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
-              <div style="display:flex; gap:8px;">
-                <button class="btn-outline" style="padding:6px 12px; font-size:12px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
-                <button class="btn-outline" style="padding:6px 12px; font-size:12px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
-                <button class="btn-primary" style="padding:6px 16px; font-size:12px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
+              <div style="display:flex; gap:6px;">
+                <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
+                <button class="btn-outline" style="padding:5px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
+                <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
               </div>
             </div>
           </div>
@@ -1822,16 +1836,29 @@ function renderProductTabContent(prodId, tabName) {
               <div class="video-play-icon">▶</div>
               <span class="video-duration">${vid.duration}</span>
             </div>
-            <div class="card-body" style="padding:16px;">
+            <div class="card-body" style="padding:16px; display:flex; flex-direction:column; flex:1;">
               <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
               <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
                 <span>Speaker: ${vid.speaker}</span>
                 <span>Type: ${vid.type}</span>
               </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:8px;">
-                <button class="btn-outline" style="padding:4px 8px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')">Edit</button>
-                <button class="btn-outline" style="padding:4px 8px; font-size:11px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${vid.id}')">Delete</button>
-                <button class="btn-primary" style="padding:4px 12px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
+              <div class="card-metadata" style="margin-top:auto; margin-bottom:10px;">
+                ${renderCardLastUpdatedRow(vid)}
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:10px;">
+                <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
+                <div style="display:flex; gap:4px;">
+                  <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')" title="Edit Video">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                  </button>
+                  <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${vid.id}')" title="Delete Video" style="color:#ef4444;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1917,22 +1944,25 @@ function renderProductTabContent(prodId, tabName) {
       }
       if (relatedPubs.length > 0) {
         html += relatedPubs.map(pub => `
-          <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
+          <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer; margin-bottom:0;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
               <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
               <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
               </div>
             </div>
-            <h3 style="font-size:17px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
-            <div class="pub-authors">${pub.authors}</div>
-            <div class="pub-abstract-box"><strong>Abstract:</strong> ${pub.abstract}</div>
+            <h3 style="font-size:16px; font-weight:700; margin:6px 0 8px 0; color:var(--text-primary);">${pub.title}</h3>
+            <div class="pub-authors" style="margin-bottom:10px;">${pub.authors}</div>
+            <div class="pub-abstract-box" style="margin-bottom:12px;"><strong>Abstract:</strong> ${pub.abstract}</div>
+            <div class="card-metadata" style="margin-bottom:12px;">
+              ${renderCardLastUpdatedRow(pub)}
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
-              <div style="display:flex; gap:8px;">
-                <button class="btn-outline" style="padding:6px 12px; font-size:12px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
-                <button class="btn-outline" style="padding:6px 12px; font-size:12px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
-                <button class="btn-primary" style="padding:6px 16px; font-size:12px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
+              <div style="display:flex; gap:6px;">
+                <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
+                <button class="btn-outline" style="padding:5px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
+                <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
               </div>
             </div>
           </div>
@@ -1957,22 +1987,40 @@ function renderProductTabContent(prodId, tabName) {
               <div class="video-play-icon">▶</div>
               <span class="video-duration">${vid.duration}</span>
             </div>
-            <div class="card-body" style="padding:16px;">
+            <div class="card-body" style="padding:16px; display:flex; flex-direction:column; flex:1;">
               <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
               <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
                 <span>Speaker: ${vid.speaker}</span>
                 <span>Type: ${vid.type}</span>
               </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:8px;">
-                <button class="btn-outline" style="padding:4px 8px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')">Edit</button>
-                <button class="btn-outline" style="padding:4px 8px; font-size:11px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${vid.id}')">Delete</button>
-                <button class="btn-primary" style="padding:4px 12px; font-size:11px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
+              <div class="card-metadata" style="margin-top:auto; margin-bottom:10px;">
+                ${renderCardLastUpdatedRow(vid)}
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:10px;">
+                <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
+                <div style="display:flex; gap:4px;">
+                  <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')" title="Edit Video">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                  </button>
+                  <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${vid.id}')" title="Delete Video" style="color:#ef4444;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        `).join('');
-      }
-      html += '</div>';
+        `;
+        renderedCount++;
+      });
+    }
+    html += '</div>';
+    if (renderedCount === 0) {
+      container.innerHTML = emptyState('All Assets');
+    } else {
       container.innerHTML = html;
     }
   } else if (tabName === 'other') {
