@@ -437,7 +437,8 @@ const authorizedMarketingEmails = [
   "tanisha.tolani@1cell.ai",
   "pranad.kshirsagar@1cell.ai",
   "richa@1cell.ai",
-  "ishita.dhaddha@1cell.ai"
+  "ishita.dhaddha@1cell.ai",
+  "sanskar.haldankar@1cell.ai"
 ];
 window.authorizedMarketingEmails = authorizedMarketingEmails;
 
