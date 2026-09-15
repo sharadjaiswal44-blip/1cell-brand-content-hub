@@ -1912,10 +1912,10 @@ window.triggerRegisterProductAsset = function(prodId, categoryTab) {
   if (uploadModal) openModal(uploadModal);
 };
 
-// 4. Case Library Route
+// 4. Scientific Resources Route
 function renderCaseLibrary() {
   workspaceViewport.innerHTML = `
-${window.renderCategoryHeader('Clinical Case Library', 'Search real-world medical responses and genomics validation summaries.', 'case-library')}
+${window.renderCategoryHeader('Scientific Resources', 'Search real-world medical responses, case summaries, and clinical validation evidence.', 'case-library')}
     
     <div class="assets-grid">
       ${db.cases.map(c => `
