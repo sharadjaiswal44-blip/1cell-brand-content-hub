@@ -34,6 +34,18 @@ function getCurrentUserTeam() {
 }
 window.getCurrentUserTeam = getCurrentUserTeam;
 
+function getCurrentUserName() {
+  const authName = sessionStorage.getItem("authName");
+  if (authName) return authName;
+  if (typeof userProfiles !== 'undefined' && userProfiles[currentRole] && userProfiles[currentRole].name) {
+    return userProfiles[currentRole].name;
+  }
+  const label = document.getElementById('userNameLabel');
+  if (label && label.textContent && label.textContent.trim()) return label.textContent.trim();
+  return 'Jane Doe';
+}
+window.getCurrentUserName = getCurrentUserName;
+
 // Map a Supabase row to the format expected by the Content Hub frontend
 function mapSupabaseRowToCard(row) {
   if (!row) return null;
@@ -59,6 +71,7 @@ function mapSupabaseRowToCard(row) {
     folderPath: row.sharepoint_folder_path || 'Shared Documents',
     created_by: row.created_by || 'Team Member',
     created_by_email: row.created_by_email || '',
+    updatedBy: row.updated_by || row.created_by || row.owner_author || 'Jane Doe',
     createdDate: (row.created_at || '').split('T')[0],
     updatedDate: (row.updated_at || '').split('T')[0],
     created_at: row.created_at,
@@ -1252,6 +1265,7 @@ function renderDashboard() {
 }
 
 // Helper to derive clean standard content category name for cards
+// Helper to derive clean standard content category name for cards
 function getCardCategoryLabel(doc) {
   const cat = getProductAssetCategory(doc);
   if (cat === 'about-product') return 'About Product';
@@ -1261,6 +1275,85 @@ function getCardCategoryLabel(doc) {
   return 'Other';
 }
 window.getCardCategoryLabel = getCardCategoryLabel;
+
+// Helper to format any date into DD-MM-YYYY
+function formatCardDateDDMMYYYY(dateInput) {
+  if (!dateInput) {
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  }
+
+  const str = String(dateInput).trim();
+
+  // If already DD-MM-YYYY format (e.g. 15-09-2026)
+  if (/^\d{2}-\d{2}-\d{4}$/.test(str)) {
+    return str;
+  }
+
+  // If YYYY-MM-DD or ISO timestamp (e.g. 2026-09-15 or 2026-09-15T11:43:21Z)
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    const parts = str.split('T')[0].split('-');
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+
+  // If YYYY-MM (e.g. 2026-09)
+  if (/^\d{4}-\d{2}$/.test(str)) {
+    const parts = str.split('-');
+    return `15-${parts[1]}-${parts[0]}`;
+  }
+
+  // If YYYY (e.g. 2026)
+  if (/^\d{4}$/.test(str)) {
+    return `15-09-${str}`;
+  }
+
+  // General Date parse
+  try {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
+    }
+  } catch (e) {}
+
+  return '15-09-2026';
+}
+window.formatCardDateDDMMYYYY = formatCardDateDDMMYYYY;
+
+// Helper to retrieve the updater or author's name for any card
+function getCardUpdatedByUser(item) {
+  if (!item) return getCurrentUserName();
+  if (item.updatedBy && String(item.updatedBy).trim()) return String(item.updatedBy).trim();
+  if (item.updated_by && String(item.updated_by).trim()) return String(item.updated_by).trim();
+  if (item.author && String(item.author).trim() && item.author !== '1Cell.Ai' && item.author !== '1Cell') return String(item.author).trim();
+  if (item.created_by && String(item.created_by).trim() && item.created_by !== '1Cell.Ai') return String(item.created_by).trim();
+  if (item.createdBy && String(item.createdBy).trim() && item.createdBy !== '1Cell.Ai') return String(item.createdBy).trim();
+  if (item.uploadedBy && String(item.uploadedBy).trim()) return String(item.uploadedBy).trim();
+  if (item.doctor && String(item.doctor).trim()) return String(item.doctor).trim();
+  if (item.speaker && String(item.speaker).trim()) return String(item.speaker).trim();
+  if (item.owner && String(item.owner).trim() && item.owner !== '1Cell.Ai') return String(item.owner).trim();
+  return 'Jane Doe';
+}
+window.getCardUpdatedByUser = getCardUpdatedByUser;
+
+// Single-row Last Updated metadata renderer
+function renderCardLastUpdatedRow(item) {
+  if (!item) return '';
+  const rawDate = item.updatedDate || item.updated_at || item.date || item.createdDate || item.created_at || '2026-09-15';
+  const formattedDate = formatCardDateDDMMYYYY(rawDate);
+  const userName = getCardUpdatedByUser(item);
+  return `
+    <div class="card-last-updated-row" title="Last Updated: ${formattedDate} by ${userName}">
+      <span class="last-updated-text">Last Updated: <strong class="last-updated-date">${formattedDate}</strong> by <strong class="last-updated-user">${userName}</strong></span>
+    </div>
+  `;
+}
+window.renderCardLastUpdatedRow = renderCardLastUpdatedRow;
 
 // Render document card template
 function renderDocumentCard(doc) {
@@ -1284,10 +1377,7 @@ function renderDocumentCard(doc) {
         <h3 class="card-title">${doc.title}</h3>
         <p class="card-description">${doc.description || ''}</p>
         <div class="card-metadata">
-          <div class="meta-row">
-            <span>Updated:</span>
-            <span class="meta-value">${doc.updatedDate || doc.createdDate || 'Recent'}</span>
-          </div>
+          ${renderCardLastUpdatedRow(doc)}
         </div>
       </div>
       <div class="card-actions-bar" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -1932,9 +2022,12 @@ ${window.renderCategoryHeader('Scientific Resources', 'Search real-world medical
           </div>
           <div class="card-body" style="padding-top:16px;">
             <div class="case-details-summary">${c.summary}</div>
-            <div style="margin-bottom:14px;">
+            <div style="margin-bottom:10px;">
               <span style="font-size:10px; color:var(--text-tertiary); text-transform:uppercase;">Cancer Type</span>
               <div style="font-size:12px; font-weight:600; margin-top:2px;">${c.cancerType}</div>
+            </div>
+            <div class="card-metadata" style="margin-top:auto; padding-top:8px;">
+              ${renderCardLastUpdatedRow(c)}
             </div>
           </div>
           <div class="card-actions-bar">
@@ -2034,8 +2127,8 @@ window.updateReportLibraryCards = function() {
               ${r.summary || r.description || ''}
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-tertiary); padding-top:8px; border-top:1px solid var(--border-color); flex-wrap:wrap; gap:4px;">
-              <span>Updated: <strong style="color:var(--text-secondary);">${r.updatedDate || r.createdDate || '2026'}</strong></span>
+            <div class="card-metadata" style="margin-top:auto; padding-top:8px;">
+              ${renderCardLastUpdatedRow(r)}
             </div>
           </div>
         </div>
@@ -2250,6 +2343,9 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
           <h3 style="font-size:18px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
           <div class="pub-authors">${pub.authors}</div>
           <div class="pub-abstract-box"><strong>Abstract:</strong> ${pub.abstract}</div>
+          <div style="margin-bottom:12px;">
+            ${renderCardLastUpdatedRow(pub)}
+          </div>
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 12px;">
             <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
             <div style="display:flex; gap:8px;">
@@ -2356,9 +2452,12 @@ ${window.renderCategoryHeader('1Cell.Ai Digital Video Library', 'Browse doctor i
           <div class="card-body" style="padding:16px;">
             <span class="badge badge-prod" style="align-self: flex-start; margin-bottom:8px;">${productName}</span>
             <h3 style="font-size:14px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
-            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-tertiary); margin-top:auto; margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-tertiary); margin-bottom:8px;">
               <span>Speaker: ${vid.speaker}</span>
               <span>Type: ${vid.type}</span>
+            </div>
+            <div class="card-metadata" style="margin-top:auto; padding-top:6px; margin-bottom:4px;">
+              ${renderCardLastUpdatedRow(vid)}
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; border-top:1px solid var(--border-color); padding-top:8px;">
               <button class="btn-outline" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')">Edit Link</button>
@@ -2481,15 +2580,12 @@ ${window.renderCategoryHeader('Corporate Brand Assets & Guidelines', 'Core logos
           </div>
           <div class="card-body">
             <h3 class="card-title">${asset.title}</h3>
-            <div class="card-metadata" style="border-top:none; padding:0; margin-bottom:12px;">
-              <div class="meta-row">
+            <div class="card-metadata" style="border-top:none; padding:0; margin-bottom:10px;">
+              <div class="meta-row" style="margin-bottom:2px;">
                 <span>Category:</span>
-                <span class="meta-value">${asset.category}</span>
+                <span class="meta-value">${asset.category} (${asset.fileType})</span>
               </div>
-              <div class="meta-row">
-                <span>Format:</span>
-                <span class="meta-value">${asset.fileType}</span>
-              </div>
+              ${renderCardLastUpdatedRow(asset)}
             </div>
           </div>
           <div class="card-actions-bar" style="justify-content: space-between;">
@@ -2527,11 +2623,12 @@ ${window.renderCategoryHeader('Document Templates & Outlines', 'Pre-approved lay
           </div>
           <div class="card-body">
             <h3 class="card-title">${temp.title}</h3>
-            <div class="card-metadata" style="border-top:none; padding:0; margin-bottom:12px;">
-              <div class="meta-row">
+            <div class="card-metadata" style="border-top:none; padding:0; margin-bottom:10px;">
+              <div class="meta-row" style="margin-bottom:2px;">
                 <span>Category:</span>
                 <span class="meta-value">${temp.category} Templates</span>
               </div>
+              ${renderCardLastUpdatedRow(temp)}
             </div>
           </div>
           <div class="card-actions-bar" style="justify-content: space-between;">
@@ -3683,8 +3780,11 @@ async function handleMockUpload(e) {
     sharepoint_folder_path: product ? `${department}/${contentType}s` : `Shared Documents/Corporate/${contentType}s`,
     created_by: authName,
     created_by_email: authEmail,
+    updated_by: authName,
+    updatedBy: authName,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    updatedDate: new Date().toISOString().split('T')[0],
     is_deleted: false,
     extra_metadata: {
       size,
@@ -4455,6 +4555,7 @@ window.saveAssetEdit = async function() {
     // 1. Update in canonical db.documents
     if (!db.documents) db.documents = [];
     const docIdx = db.documents.findIndex(d => String(d.id) === String(id));
+    const currentUserName = getCurrentUserName();
     const updatedDocData = {
       title: title,
       sharePointUrl: spUrl,
@@ -4466,6 +4567,7 @@ window.saveAssetEdit = async function() {
       department: department,
       owner: owner || authName,
       author: owner || authName,
+      updatedBy: owner || authName || currentUserName,
       version: version,
       status: status,
       description: desc,
@@ -4497,10 +4599,12 @@ window.saveAssetEdit = async function() {
           relatedProduct: product || db.cases[cIdx].relatedProduct,
           doctor: owner || authName,
           owner: owner || authName,
+          updatedBy: owner || authName || currentUserName,
           summary: desc,
           description: desc,
           cancerType: cancerVal,
           biomarker: biomarkerVal,
+          updatedDate: new Date().toISOString().split('T')[0],
           updated_at: new Date().toISOString()
         };
         try { localStorage.setItem('1cell_custom_cases', JSON.stringify(db.cases)); } catch (e) {}
@@ -4519,8 +4623,10 @@ window.saveAssetEdit = async function() {
           relatedProduct: product || db.publications[pIdx].relatedProduct,
           authors: owner || authName,
           owner: owner || authName,
+          updatedBy: owner || authName || currentUserName,
           abstract: desc,
           description: desc,
+          updatedDate: new Date().toISOString().split('T')[0],
           updated_at: new Date().toISOString()
         };
         try { localStorage.setItem('1cell_custom_pubs', JSON.stringify(db.publications)); } catch (e) {}
@@ -4539,8 +4645,10 @@ window.saveAssetEdit = async function() {
           product: product || db.videos[vIdx].product,
           speaker: owner || authName,
           owner: owner || authName,
+          updatedBy: owner || authName || currentUserName,
           description: desc,
           summary: desc,
+          updatedDate: new Date().toISOString().split('T')[0],
           updated_at: new Date().toISOString()
         };
         try { localStorage.setItem('1cell_custom_videos', JSON.stringify(db.videos)); } catch (e) {}
@@ -4562,6 +4670,7 @@ window.saveAssetEdit = async function() {
           biomarker: biomarkerVal,
           author: owner || authName,
           owner: owner || authName,
+          updatedBy: owner || authName || currentUserName,
           summary: desc,
           description: desc,
           version: version || db.reports[rIdx].version,
@@ -4585,7 +4694,9 @@ window.saveAssetEdit = async function() {
           visibility: 'all',
           owner: owner || authName,
           author: owner || authName,
+          updatedBy: owner || authName || currentUserName,
           description: desc,
+          updatedDate: new Date().toISOString().split('T')[0],
           updated_at: new Date().toISOString()
         };
         try { localStorage.setItem('1cell_custom_brandAssets', JSON.stringify(db.brandAssets)); } catch (e) {}
@@ -4604,7 +4715,9 @@ window.saveAssetEdit = async function() {
           visibility: 'all',
           owner: owner || authName,
           author: owner || authName,
+          updatedBy: owner || authName || currentUserName,
           description: desc,
+          updatedDate: new Date().toISOString().split('T')[0],
           updated_at: new Date().toISOString()
         };
         try { localStorage.setItem('1cell_custom_templates', JSON.stringify(db.templates)); } catch (e) {}
