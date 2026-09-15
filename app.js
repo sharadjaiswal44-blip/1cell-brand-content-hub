@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260911-v30';
+import db from './db.js?v=20260915-v41';
 import { 
   normalizeTeam,
   canTeamViewVisibility,
@@ -22,9 +22,13 @@ window.VISIBILITY = VISIBILITY;
 window.supabaseService = supabaseService;
 
 function getCurrentUserTeam() {
-  const authTeam = sessionStorage.getItem("authTeam");
+  let authTeam = null;
+  let authDept = null;
+  try {
+    authTeam = sessionStorage.getItem("authTeam") || localStorage.getItem("1cell_auth_team");
+    authDept = sessionStorage.getItem("authDept") || localStorage.getItem("1cell_auth_dept");
+  } catch (e) {}
   if (authTeam) return authTeam;
-  const authDept = sessionStorage.getItem("authDept");
   if (authDept) return normalizeTeam(authDept);
   if (currentRole === 'marketing_admin') return TEAMS.MARKETING;
   if (currentRole === 'medical') return TEAMS.SCIENTIFIC;
@@ -35,14 +39,17 @@ function getCurrentUserTeam() {
 window.getCurrentUserTeam = getCurrentUserTeam;
 
 function getCurrentUserName() {
-  const authName = sessionStorage.getItem("authName");
+  let authName = null;
+  try {
+    authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+  } catch (e) {}
   if (authName) return authName;
   if (typeof userProfiles !== 'undefined' && userProfiles[currentRole] && userProfiles[currentRole].name) {
     return userProfiles[currentRole].name;
   }
   const label = document.getElementById('userNameLabel');
   if (label && label.textContent && label.textContent.trim()) return label.textContent.trim();
-  return 'Jane Doe';
+  return 'Sharad Jaiswal';
 }
 window.getCurrentUserName = getCurrentUserName;
 
@@ -447,16 +454,35 @@ window.authorizedMarketingEmails = authorizedMarketingEmails;
 
 // Authentication state controller
 function checkAuth() {
-  const authName = sessionStorage.getItem("authName");
-  const authEmail = sessionStorage.getItem("authEmail");
+  let authName = null;
+  let authEmail = null;
+  try {
+    authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+    authEmail = sessionStorage.getItem("authEmail") || localStorage.getItem("1cell_auth_email");
+  } catch (e) {}
+
+  const overlay = document.getElementById('loginOverlay');
   if (authName && authEmail) {
     document.body.classList.add("authenticated");
+    if (overlay) {
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      overlay.style.visibility = 'hidden';
+      setTimeout(() => { if (document.body.classList.contains("authenticated")) overlay.style.display = 'none'; }, 200);
+    }
     return true;
   } else {
     document.body.classList.remove("authenticated");
+    if (overlay) {
+      overlay.style.display = 'flex';
+      overlay.style.opacity = '1';
+      overlay.style.visibility = 'visible';
+      overlay.style.pointerEvents = 'all';
+    }
     return false;
   }
 }
+window.checkAuth = checkAuth;
 
 // Name initials generator
 function getInitials(name) {
@@ -767,7 +793,102 @@ function init() {
   if (sampleReportModalSave) sampleReportModalSave.addEventListener('click', window.saveNewSampleReport);
 
 
-  // Authentication Event Listeners
+  // Authentication Global Event Handlers
+  window.handleLoginPortalSubmit = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const nameEl = document.getElementById('loginName');
+    const emailEl = document.getElementById('loginEmail');
+    const deptEl = document.getElementById('loginDept');
+    const errorMsg = document.getElementById('loginErrorMessage');
+
+    const name = nameEl ? nameEl.value.trim() : '';
+    const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
+    const dept = deptEl ? deptEl.value : 'Marketing';
+
+    if (!name) {
+      showToast("Please enter your full name.");
+      if (nameEl) nameEl.focus();
+      return false;
+    }
+
+    // Email domain validation
+    if (!email || !email.endsWith('@1cell.ai')) {
+      if (emailEl) emailEl.classList.add('input-error');
+      if (errorMsg) {
+        const span = errorMsg.querySelector('span');
+        if (span) span.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
+        errorMsg.style.display = 'flex';
+      }
+      showToast("Access denied: Only official @1cell.ai email domains are authorized.");
+      return false;
+    }
+
+    const normTeam = normalizeTeam(dept);
+
+    // Marketing team authorization validation
+    if (normTeam === TEAMS.MARKETING) {
+      const isAuthorized = authorizedMarketingEmails.map(m => m.toLowerCase().trim()).includes(email);
+      if (!isAuthorized) {
+        if (emailEl) emailEl.classList.add('input-error');
+        if (errorMsg) {
+          const span = errorMsg.querySelector('span');
+          if (span) span.innerText = "Access denied: Your email is not registered in the Marketing team. Choose another department.";
+          errorMsg.style.display = 'flex';
+        }
+        showToast("Access denied: Email not registered in the Marketing team.");
+        return false;
+      }
+    }
+
+    try {
+      sessionStorage.setItem("authName", name);
+      sessionStorage.setItem("authEmail", email);
+      sessionStorage.setItem("authDept", dept);
+      sessionStorage.setItem("authTeam", normTeam);
+      localStorage.setItem("1cell_auth_name", name);
+      localStorage.setItem("1cell_auth_email", email);
+      localStorage.setItem("1cell_auth_dept", dept);
+      localStorage.setItem("1cell_auth_team", normTeam);
+    } catch (err) {}
+
+    // Map team to matching role view
+    let targetRole = 'marketing_admin';
+    if (normTeam === TEAMS.SCIENTIFIC) targetRole = 'medical';
+    else if (normTeam === TEAMS.SALES) targetRole = 'sales';
+    else if (normTeam === TEAMS.LEADERSHIP) targetRole = 'leadership';
+
+    currentRole = targetRole;
+    if (roleSelect) {
+      roleSelect.value = targetRole;
+    }
+
+    checkAuth();
+    updateUserBadge();
+    updateSidebarCategories();
+    renderRoute('dashboard');
+    const teamLabel = normTeam === 'scientific' ? 'Scientific Team' : normTeam === 'marketing' ? 'Marketing Team' : `${dept} Team`;
+    showToast(`Welcome to 1Cell.Ai, ${name} (${teamLabel})!`);
+    return false;
+  };
+
+  window.handleSignOut = function(e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    try {
+      sessionStorage.removeItem("authName");
+      sessionStorage.removeItem("authEmail");
+      sessionStorage.removeItem("authDept");
+      sessionStorage.removeItem("authTeam");
+      localStorage.removeItem("1cell_auth_name");
+      localStorage.removeItem("1cell_auth_email");
+      localStorage.removeItem("1cell_auth_dept");
+      localStorage.removeItem("1cell_auth_team");
+    } catch (err) {}
+    checkAuth();
+    updateUserBadge();
+    updateSidebarCategories();
+    showToast("Signed out successfully.");
+  };
+
   if (loginForm) {
     const emailInput = document.getElementById('loginEmail');
     const errorMsg = document.getElementById('loginErrorMessage');
@@ -779,80 +900,11 @@ function init() {
       });
     }
 
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = document.getElementById('loginName').value.trim();
-      const email = document.getElementById('loginEmail').value.trim();
-      const dept = document.getElementById('loginDept').value;
-
-      // Email domain validation
-      if (!email.toLowerCase().endsWith('@1cell.ai')) {
-        if (emailInput) emailInput.classList.add('input-error');
-        if (errorMsg) {
-          const span = errorMsg.querySelector('span');
-          if (span) span.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
-          errorMsg.style.display = 'flex';
-        }
-        showToast("Access denied: Only official @1cell.ai email domains are authorized.");
-        return;
-      }
-
-      const normTeam = normalizeTeam(dept);
-
-      // Marketing team authorization validation
-      if (normTeam === TEAMS.MARKETING) {
-        const cleanEmail = email.toLowerCase().trim();
-        if (!authorizedMarketingEmails.includes(cleanEmail)) {
-          if (emailInput) emailInput.classList.add('input-error');
-          if (errorMsg) {
-            const span = errorMsg.querySelector('span');
-            if (span) span.innerText = "Access denied: Your email is not registered in the Marketing team. Choose another department.";
-            errorMsg.style.display = 'flex';
-          }
-          showToast("Access denied: Email not registered in the Marketing team.");
-          return;
-        }
-      }
-
-      if (name && email && dept) {
-        sessionStorage.setItem("authName", name);
-        sessionStorage.setItem("authEmail", email);
-        sessionStorage.setItem("authDept", dept);
-        sessionStorage.setItem("authTeam", normTeam);
-
-        // Map team to matching role view
-        let targetRole = 'marketing_admin';
-        if (normTeam === TEAMS.SCIENTIFIC) targetRole = 'medical';
-        else if (normTeam === TEAMS.SALES) targetRole = 'sales';
-        else if (normTeam === TEAMS.LEADERSHIP) targetRole = 'leadership';
-
-        currentRole = targetRole;
-        if (roleSelect) {
-          roleSelect.value = targetRole;
-        }
-
-        checkAuth();
-        updateUserBadge();
-        updateSidebarCategories();
-        renderRoute('dashboard');
-        const teamLabel = normTeam === 'scientific' ? 'Scientific Team' : normTeam === 'marketing' ? 'Marketing Team' : `${dept} Team`;
-        showToast(`Welcome to 1Cell.Ai, ${name} (${teamLabel})!`);
-      }
-    });
+    loginForm.addEventListener('submit', window.handleLoginPortalSubmit);
   }
 
   if (signOutBtn) {
-    signOutBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      sessionStorage.removeItem("authName");
-      sessionStorage.removeItem("authEmail");
-      sessionStorage.removeItem("authDept");
-      sessionStorage.removeItem("authTeam");
-      checkAuth();
-      updateUserBadge();
-      updateSidebarCategories();
-      showToast("Signed out successfully.");
-    });
+    signOutBtn.addEventListener('click', window.handleSignOut);
   }
 
   // Set default profile details & render dashboard
@@ -864,27 +916,37 @@ function init() {
 // Update bottom profile badge when role changes or custom login occurs
 function updateUserBadge() {
   const profile = userProfiles[currentRole];
-  const authName = sessionStorage.getItem("authName");
-  const authDept = sessionStorage.getItem("authDept");
+  let authName = null;
+  let authDept = null;
+  try {
+    authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+    authDept = sessionStorage.getItem("authDept") || localStorage.getItem("1cell_auth_dept");
+  } catch (e) {}
   
+  const avatarEl = document.getElementById('avatarPill');
+  const userLabel = document.getElementById('userNameLabel');
+  const roleLabel = document.getElementById('userRoleLabel');
+
   if (authName) {
-    document.getElementById('avatarPill').innerText = getInitials(authName);
-    document.getElementById('userNameLabel').innerText = authName;
-    if (authDept) {
-      document.getElementById('userRoleLabel').innerText = `${authDept} (${profile.role})`;
-    } else {
-      document.getElementById('userRoleLabel').innerText = profile.role;
+    if (avatarEl) avatarEl.innerText = getInitials(authName);
+    if (userLabel) userLabel.innerText = authName;
+    if (roleLabel) {
+      if (authDept) {
+        roleLabel.innerText = `${authDept} (${profile.role})`;
+      } else {
+        roleLabel.innerText = profile.role;
+      }
     }
   } else {
-    document.getElementById('avatarPill').innerText = profile.avatar;
-    document.getElementById('userNameLabel').innerText = profile.name;
-    document.getElementById('userRoleLabel').innerText = profile.role;
+    if (avatarEl) avatarEl.innerText = profile.avatar;
+    if (userLabel) userLabel.innerText = profile.name;
+    if (roleLabel) roleLabel.innerText = profile.role;
   }
 
   // Sync author fields
   const authorInput = document.getElementById('formAuthor');
   if (authorInput) {
-    authorInput.value = '1Cell.Ai';
+    authorInput.value = authName || '1Cell.Ai';
   }
 }
 
@@ -4493,8 +4555,12 @@ function renderLeaderboardView(container) {
   `;
 }
 
-// Call entrypoint on window load
-window.addEventListener('DOMContentLoaded', init);
+// Call entrypoint on window load or immediately if DOM is ready
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 window.previewDocument = previewDocument;
 window.inspectSharepoint = inspectSharepoint;
 window.toggleFavorite = toggleFavorite;
