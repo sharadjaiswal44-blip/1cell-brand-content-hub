@@ -1779,9 +1779,9 @@ function renderProductHub() {
 
 // Product Microsite Workspace Detail view with 5 Standard Category Tabs:
 // All Assets, About Product, Evidence, Scientific, Training & Sales Enablement, Other
-window.openProductMicrosite = function(prodId) {
+window.openProductMicrosite = function(prodId, defaultTab = 'all') {
   currentMicrositeId = prodId;
-  if (!currentMicrositeTab) currentMicrositeTab = 'all';
+  currentMicrositeTab = defaultTab || 'all';
 
   const product = db.products.find(p => p.id === prodId);
   if (!product) return;
