@@ -1480,11 +1480,16 @@ function renderCardLastUpdatedRow(item) {
 window.renderCardLastUpdatedRow = renderCardLastUpdatedRow;
 
 // Render document card template
-function renderDocumentCard(doc) {
+function renderDocumentCard(doc, options = {}) {
   const isFav = userFavorites.has(doc.id);
   const biomarkerBadge = (doc.biomarker && doc.biomarker !== 'None') ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
-  const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
-  const productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : `<span class="badge badge-prod" style="background:#e8edf5; color:#1a365d; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />Corporate</span>`);
+  const hideProductTag = options && options.hideProductTag;
+  
+  let productTag = '';
+  if (!hideProductTag) {
+    const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
+    productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : `<span class="badge badge-prod" style="background:#e8edf5; color:#1a365d; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />Corporate</span>`);
+  }
 
   return `
     <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
@@ -1803,7 +1808,7 @@ function renderProductTabContent(prodId, tabName) {
     let html = '<div class="assets-grid">';
     let renderedCount = 0;
     if (allDocs.length > 0) {
-      html += allDocs.map(d => renderDocumentCard(d)).join('');
+      html += allDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('');
       renderedCount += allDocs.length;
     }
     const docIds = new Set(allDocs.map(d => d.id));
@@ -1822,7 +1827,7 @@ function renderProductTabContent(prodId, tabName) {
           author: c.doctor || '1Cell.Ai',
           owner: c.doctor || '1Cell.Ai',
           sharePointUrl: c.readMoreUrl || c.oneDriveUrl
-        });
+        }, { hideProductTag: true });
         renderedCount++;
       });
     }
@@ -1842,7 +1847,7 @@ function renderProductTabContent(prodId, tabName) {
           author: r.author || '1Cell.Ai',
           owner: r.owner || '1Cell.Ai',
           sharePointUrl: r.sharePointUrl
-        });
+        }, { hideProductTag: true });
         renderedCount++;
       });
     }
@@ -1852,9 +1857,6 @@ function renderProductTabContent(prodId, tabName) {
           <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer; margin-bottom:0;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
               <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-              </div>
             </div>
             <h3 style="font-size:16px; font-weight:700; margin:6px 0 8px 0; color:var(--text-primary);">${pub.title}</h3>
             <div class="pub-authors" style="margin-bottom:10px;">${pub.authors}</div>
@@ -1925,7 +1927,7 @@ function renderProductTabContent(prodId, tabName) {
     } else {
       container.innerHTML = `
         <div class="assets-grid">
-          ${aboutProductDocs.map(d => renderDocumentCard(d)).join('')}
+          ${aboutProductDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('')}
         </div>
       `;
     }
@@ -1936,7 +1938,7 @@ function renderProductTabContent(prodId, tabName) {
     } else {
       let html = '<div class="assets-grid">';
       if (evidenceDocs.length > 0) {
-        html += evidenceDocs.map(d => renderDocumentCard(d)).join('');
+        html += evidenceDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('');
       }
       const docIds = new Set(evidenceDocs.map(d => d.id));
       if (relatedCases.length > 0) {
@@ -1954,7 +1956,7 @@ function renderProductTabContent(prodId, tabName) {
             author: c.doctor || '1Cell.Ai',
             owner: c.doctor || '1Cell.Ai',
             sharePointUrl: c.readMoreUrl || c.oneDriveUrl
-          });
+          }, { hideProductTag: true });
         });
       }
       if (relatedReports.length > 0) {
@@ -1973,7 +1975,7 @@ function renderProductTabContent(prodId, tabName) {
             author: r.author || '1Cell.Ai',
             owner: r.owner || '1Cell.Ai',
             sharePointUrl: r.sharePointUrl
-          });
+          }, { hideProductTag: true });
         });
       }
       html += '</div>';
@@ -1986,16 +1988,13 @@ function renderProductTabContent(prodId, tabName) {
     } else {
       let html = '<div class="assets-grid">';
       if (scientificDocs.length > 0) {
-        html += scientificDocs.map(d => renderDocumentCard(d)).join('');
+        html += scientificDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('');
       }
       if (relatedPubs.length > 0) {
         html += relatedPubs.map(pub => `
           <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer; margin-bottom:0;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
               <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-              </div>
             </div>
             <h3 style="font-size:16px; font-weight:700; margin:6px 0 8px 0; color:var(--text-primary);">${pub.title}</h3>
             <div class="pub-authors" style="margin-bottom:10px;">${pub.authors}</div>
@@ -2025,7 +2024,7 @@ function renderProductTabContent(prodId, tabName) {
       let html = '<div class="assets-grid">';
       let renderedCount = 0;
       if (trainingSalesDocs.length > 0) {
-        html += trainingSalesDocs.map(d => renderDocumentCard(d)).join('');
+        html += trainingSalesDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('');
         renderedCount += trainingSalesDocs.length;
       }
       if (relatedVideos.length > 0) {
@@ -2079,7 +2078,7 @@ function renderProductTabContent(prodId, tabName) {
     } else {
       container.innerHTML = `
         <div class="assets-grid">
-          ${otherDocs.map(d => renderDocumentCard(d)).join('')}
+          ${otherDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('')}
         </div>
       `;
     }
