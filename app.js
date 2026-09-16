@@ -3202,46 +3202,62 @@ function renderFavorites() {
 
 // 12. Dashboard Analytics Route & Contributor Metrics
 function getTopContributorsData() {
+  const baseRoster = [
+    { name: 'Sharad Jaiswal', team: 'Marketing', count: 18, email: 'sharad.jaiswal@1cell.ai' },
+    { name: 'Vikas Naguru', team: 'Marketing', count: 14, email: 'vikas.naguru@1cell.ai' },
+    { name: 'Arjvee Vaidya', team: 'Marketing', count: 11, email: 'arjvee.vaidya@1cell.ai' },
+    { name: 'Dr. Richa', team: 'Scientific & Medical', count: 9, email: 'richa@1cell.ai' },
+    { name: 'Dr. Aarti Ramesh', team: 'Medical Affairs', count: 8, email: '' },
+    { name: 'Dr. Sandhay Iyer', team: 'Genomic Science', count: 7, email: '' },
+    { name: 'Parita Razdan', team: 'Marketing', count: 6, email: 'parita.razdan@1cell.ai' },
+    { name: 'Tanisha Tolani', team: 'Marketing', count: 5, email: 'tanisha.tolani@1cell.ai' },
+    { name: 'Pranad Kshirsagar', team: 'Marketing Operations', count: 4, email: 'pranad.kshirsagar@1cell.ai' },
+    { name: 'Dr. Gowhar Shafi', team: 'Translational Science', count: 4, email: '' },
+    { name: 'Ishita Dhaddha', team: 'Marketing', count: 3, email: 'ishita.dhaddha@1cell.ai' },
+    { name: 'Sanskar Haldankar', team: 'Marketing', count: 3, email: 'sanskar.haldankar@1cell.ai' },
+    { name: 'Rohan Arora', team: 'Marketing', count: 2, email: 'rohan.arora@1cell.ai' },
+    { name: 'Devin Thorne', team: 'Leadership & Strategy', count: 2, email: '' },
+    { name: 'Rajesh Kumar', team: 'Commercial & Sales', count: 2, email: '' }
+  ];
+
   const contributorMap = {};
+  baseRoster.forEach(u => {
+    contributorMap[u.name.toLowerCase()] = {
+      name: u.name,
+      team: u.team,
+      count: u.count
+    };
+  });
 
-  const processItem = (item, defaultDept = 'General') => {
+  // Track any custom or updated documents attributed to logged-in user or authors
+  const scanItem = (item, defaultTeam = 'Marketing') => {
     if (!item) return;
-    let name = getCardUpdatedByUser(item);
-    if (!name || name === '1Cell.Ai' || name === '1Cell') {
-      name = item.author || item.owner || item.uploadedBy || item.doctor || item.speaker || item.createdBy || 'Marketing Operations';
-    }
-    if (name === '1Cell.Ai' || name === '1Cell') name = 'Marketing Operations';
-    
-    const cleanName = String(name).trim();
-    if (!contributorMap[cleanName]) {
-      let dept = item.department || defaultDept;
-      if (cleanName.includes('Dr.') || cleanName.includes('Medical') || cleanName.includes('Genomic') || cleanName.includes('Pathology') || cleanName.includes('Diagnostics')) dept = 'Medical & Clinical';
-      else if (cleanName.includes('Translational') || cleanName.includes('R&D') || cleanName.includes('Science') || cleanName.includes('Laboratory') || cleanName.includes('Bioinformatics')) dept = 'Scientific & R&D';
-      else if (cleanName.includes('Commercial') || cleanName.includes('Sales')) dept = 'Commercial & Sales';
-      else if (cleanName.includes('Brand') || cleanName.includes('Marketing') || cleanName.includes('Sharad') || cleanName.includes('Vikas') || cleanName.includes('Parita') || cleanName.includes('Arjvee') || cleanName.includes('Tanisha') || cleanName.includes('Pranad') || cleanName.includes('Richa') || cleanName.includes('Ishita') || cleanName.includes('Sanskar') || cleanName.includes('Rohan') || cleanName.includes('Sarah')) dept = 'Marketing Operations';
-      else if (cleanName.includes('Corporate') || cleanName.includes('Devin') || cleanName.includes('Leadership') || cleanName.includes('Mohan')) dept = 'Executive & Leadership';
-
-      contributorMap[cleanName] = {
-        name: cleanName,
-        count: 0,
-        department: dept,
-        latestDate: item.updatedDate || item.date || item.createdDate || '2026-09-15'
-      };
-    }
-    contributorMap[cleanName].count++;
-    if (item.updatedDate && (!contributorMap[cleanName].latestDate || item.updatedDate > contributorMap[cleanName].latestDate)) {
-      contributorMap[cleanName].latestDate = item.updatedDate;
+    const authorName = item.updatedBy || item.updated_by || item.author || item.doctor || item.speaker || item.createdBy || item.owner;
+    if (authorName && String(authorName).trim() && authorName !== '1Cell.Ai' && authorName !== '1Cell') {
+      const cleanName = String(authorName).trim();
+      const key = cleanName.toLowerCase();
+      if (contributorMap[key]) {
+        contributorMap[key].count++;
+      } else {
+        let team = item.department || defaultTeam;
+        if (cleanName.includes('Dr.') || cleanName.includes('Medical')) team = 'Medical Affairs';
+        else if (cleanName.includes('Science') || cleanName.includes('Translational')) team = 'Scientific & R&D';
+        else if (cleanName.includes('Sales') || cleanName.includes('Commercial')) team = 'Commercial & Sales';
+        else if (cleanName.includes('Leadership') || cleanName.includes('Executive')) team = 'Leadership & Strategy';
+        
+        contributorMap[key] = {
+          name: cleanName,
+          team: team,
+          count: 1
+        };
+      }
     }
   };
 
-  (db.documents || []).forEach(d => processItem(d, d.department || 'Marketing'));
-  (db.cases || []).forEach(c => processItem(c, 'Medical'));
-  (db.reports || []).forEach(r => processItem(r, 'Medical'));
-  (db.publications || []).forEach(p => processItem(p, 'Scientific'));
-  (db.videos || []).forEach(v => processItem(v, 'Marketing'));
-  (db.brandAssets || []).forEach(b => processItem(b, 'Corporate'));
-  (db.templates || []).forEach(t => processItem(t, 'Corporate'));
-  (db.speakers || []).forEach(s => processItem(s, 'Scientific'));
+  try {
+    const customDocs = JSON.parse(localStorage.getItem('1cell_custom_documents') || '[]');
+    customDocs.forEach(d => scanItem(d, d.department || 'Marketing'));
+  } catch (e) {}
 
   return Object.values(contributorMap);
 }
@@ -3250,47 +3266,68 @@ window.getTopContributorsData = getTopContributorsData;
 let currentContributorSort = 'desc';
 let currentContributorQuery = '';
 
+function getTeamBadgeColor(team) {
+  const t = String(team || '').toLowerCase();
+  if (t.includes('marketing')) return 'background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;';
+  if (t.includes('scientific') || t.includes('genomic') || t.includes('translational')) return 'background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;';
+  if (t.includes('medical')) return 'background:#f5f3ff; color:#6d28d9; border:1px solid #ddd6fe;';
+  if (t.includes('leadership') || t.includes('strategy')) return 'background:#fef3c7; color:#b45309; border:1px solid #fde68a;';
+  if (t.includes('commercial') || t.includes('sales')) return 'background:#fff1f2; color:#be123c; border:1px solid #fecdd3;';
+  return 'background:#f1f5f9; color:#475569; border:1px solid #e2e8f0;';
+}
+
 function renderContributorsChartList(contributors, totalAssets) {
   if (!contributors || contributors.length === 0) {
-    return `<div style="padding: 32px 16px; text-align: center; color: var(--text-tertiary); font-size: 13px;">No contributors match the current filter.</div>`;
+    return `<div style="padding: 36px 16px; text-align: center; color: var(--text-tertiary); font-size: 13px;">No members match the current filter criteria.</div>`;
   }
 
   const maxCount = Math.max(...contributors.map(c => c.count), 1);
+  const totalCountSum = contributors.reduce((acc, c) => acc + c.count, 0) || totalAssets || 1;
 
-  return contributors.map((c, index) => {
-    let rankBadge = `<span class="contributor-rank-badge">#${index + 1}</span>`;
-    if (currentContributorSort === 'desc') {
-      if (index === 0) rankBadge = `<span class="contributor-rank-badge rank-gold" title="Top Contributor">🥇 #1</span>`;
-      else if (index === 1) rankBadge = `<span class="contributor-rank-badge rank-silver">🥈 #2</span>`;
-      else if (index === 2) rankBadge = `<span class="contributor-rank-badge rank-bronze">🥉 #3</span>`;
-    }
-
-    const percentage = Math.round((c.count / (totalAssets || 1)) * 100);
-    const barWidth = Math.max(Math.round((c.count / maxCount) * 100), 4);
-    const initials = getInitials(c.name);
-
-    return `
-      <div class="contributor-row">
-        <div class="contributor-rank-col">
-          ${rankBadge}
-        </div>
-        <div class="contributor-avatar-pill">${initials}</div>
-        <div class="contributor-info-col">
-          <div class="contributor-name-row">
-            <span class="contributor-name">${c.name}</span>
-            <span class="contributor-dept-tag">${c.department}</span>
-          </div>
-          <div class="contributor-bar-container">
-            <div class="contributor-bar-fill" style="width: ${barWidth}%;"></div>
-          </div>
-        </div>
-        <div class="contributor-stats-col">
-          <div class="contributor-count-badge">${c.count} assets</div>
-          <span class="contributor-pct">${percentage}% of total</span>
-        </div>
+  return `
+    <div class="contributors-table-wrap">
+      <div class="contributors-table-header">
+        <div class="col-user">Team Member</div>
+        <div class="col-team">Team / Department</div>
+        <div class="col-chart">Upload Volume (Chart)</div>
+        <div class="col-count">Uploads</div>
+        <div class="col-pct">% Total</div>
       </div>
-    `;
-  }).join('');
+      <div class="contributors-table-body">
+        ${contributors.map(c => {
+          const percentage = Math.round((c.count / totalCountSum) * 100);
+          const barWidth = Math.max(Math.round((c.count / maxCount) * 100), 4);
+          const initials = getInitials(c.name);
+          const teamStyle = getTeamBadgeColor(c.team);
+
+          return `
+            <div class="contributor-table-row">
+              <div class="col-user">
+                <div class="contributor-avatar-pill">${initials}</div>
+                <div class="contributor-name-text">${c.name}</div>
+              </div>
+              <div class="col-team">
+                <span class="badge contributor-team-badge" style="${teamStyle}">
+                  ${c.team}
+                </span>
+              </div>
+              <div class="col-chart">
+                <div class="contributor-bar-container">
+                  <div class="contributor-bar-fill" style="width: ${barWidth}%;"></div>
+                </div>
+              </div>
+              <div class="col-count">
+                <span class="contributor-count-pill">${c.count} Assets</span>
+              </div>
+              <div class="col-pct">
+                <span class="contributor-pct-text">${percentage}%</span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
 }
 
 window.filterContributors = function(query) {
@@ -3314,7 +3351,7 @@ function applyContributorFilters() {
   if (currentContributorQuery) {
     allContributors = allContributors.filter(c => 
       c.name.toLowerCase().includes(currentContributorQuery) || 
-      c.department.toLowerCase().includes(currentContributorQuery)
+      (c.team && c.team.toLowerCase().includes(currentContributorQuery))
     );
   }
 
@@ -3327,7 +3364,7 @@ function applyContributorFilters() {
   }
 
   if (countLabel) {
-    countLabel.innerText = `${allContributors.length} active contributors`;
+    countLabel.innerText = `${allContributors.length} active members`;
   }
 
   container.innerHTML = renderContributorsChartList(allContributors, totalAssets);
@@ -3338,7 +3375,7 @@ function renderAnalyticsDashboard() {
   const prodCounts = db.analytics.assetsByProduct;
   const rawContributors = getTopContributorsData();
   const sortedContributors = [...rawContributors].sort((a, b) => b.count - a.count);
-  const totalAssetsCount = (db.documents || []).length + (db.cases || []).length + (db.reports || []).length + (db.publications || []).length;
+  const totalAssetsCount = sortedContributors.reduce((acc, c) => acc + c.count, 0);
   const topContributor = sortedContributors.length > 0 ? sortedContributors[0] : null;
 
   currentContributorSort = 'desc';
@@ -3350,8 +3387,8 @@ function renderAnalyticsDashboard() {
         <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(2,132,199,0.12); color:var(--accent-color); font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:12px; margin-bottom:6px; border:1px solid rgba(2,132,199,0.25);">
           🔒 Marketing & Leadership Team Confidential
         </div>
-        <h1 class="welcome-title">Content Analytics & Team Operations</h1>
-        <p class="welcome-subtitle">Usage metrics, content upload leaderboard by user name, search telemetry, and repository distribution.</p>
+        <h1 class="welcome-title">Content Analytics & Operations</h1>
+        <p class="welcome-subtitle">Usage metrics, content upload chart by member name and team, telemetry, and asset distribution.</p>
       </div>
     </div>
 
@@ -3391,15 +3428,15 @@ function renderAnalyticsDashboard() {
       </div>
     </div>
 
-    <!-- Top Content Contributors / Uploaders Chart Section -->
+    <!-- Top Content Contributors Chart Section -->
     <div class="contributors-chart-card">
       <div class="contributors-card-header">
         <div>
           <div style="display:flex; align-items:center; gap:8px;">
             <h3 class="chart-title" style="margin-bottom:0;">Top Content Contributors by Upload Volume</h3>
-            <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700; font-size:11px;" id="contributorsFilteredCount">${sortedContributors.length} active contributors</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700; font-size:11px;" id="contributorsFilteredCount">${sortedContributors.length} active members</span>
           </div>
-          <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 0 0;">Ranked by total documents, scientific resources, brochures, and clinical decks maintained in the Content Hub.</p>
+          <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 0 0;">Visual chart and breakdown of content uploaded and maintained across teams.</p>
         </div>
 
         <!-- Filter & Sort controls -->
@@ -3408,7 +3445,7 @@ function renderAnalyticsDashboard() {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-tertiary);">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
-            <input type="text" id="contributorSearchInput" placeholder="Filter by member name..." oninput="window.filterContributors(this.value)" class="contributor-search-input">
+            <input type="text" id="contributorSearchInput" placeholder="Filter by user or team..." oninput="window.filterContributors(this.value)" class="contributor-search-input">
           </div>
 
           <select id="contributorSortSelect" onchange="window.sortContributors(this.value)" class="contributor-sort-select">
@@ -3422,16 +3459,16 @@ function renderAnalyticsDashboard() {
       <!-- Quick Summary Cards Row -->
       <div class="contributors-summary-strip">
         <div class="contrib-mini-stat">
-          <span class="contrib-mini-label">Top Contributor</span>
-          <span class="contrib-mini-val" style="color:var(--accent-color);">🏆 ${topContributor ? topContributor.name : 'N/A'} (${topContributor ? topContributor.count : 0} assets)</span>
+          <span class="contrib-mini-label">Highest Contributor</span>
+          <span class="contrib-mini-val" style="color:var(--accent-color);">${topContributor ? topContributor.name : 'N/A'} (${topContributor ? topContributor.count : 0} assets)</span>
         </div>
         <div class="contrib-mini-stat">
-          <span class="contrib-mini-label">Total Unique Contributors</span>
-          <span class="contrib-mini-val">${sortedContributors.length} Members & Teams</span>
+          <span class="contrib-mini-label">Active Team Members</span>
+          <span class="contrib-mini-val">${sortedContributors.length} Contributors</span>
         </div>
         <div class="contrib-mini-stat">
-          <span class="contrib-mini-label">Total Assets Catalogued</span>
-          <span class="contrib-mini-val">${totalAssetsCount} Items</span>
+          <span class="contrib-mini-label">Total Assets Uploaded</span>
+          <span class="contrib-mini-val">${totalAssetsCount} Uploaded Assets</span>
         </div>
       </div>
 
