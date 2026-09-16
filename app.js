@@ -1817,7 +1817,6 @@ function renderProductTabContent(prodId, tabName) {
           product: c.relatedProduct,
           contentType: 'Case Studies',
           cancerType: c.cancerType,
-          biomarker: c.biomarker,
           status: 'Approved',
           version: 'v1.0',
           author: c.doctor || '1Cell.Ai',
@@ -1950,7 +1949,6 @@ function renderProductTabContent(prodId, tabName) {
             product: c.relatedProduct,
             contentType: 'Case Studies',
             cancerType: c.cancerType,
-            biomarker: c.biomarker,
             status: 'Approved',
             version: 'v1.0',
             author: c.doctor || '1Cell.Ai',
@@ -2300,18 +2298,16 @@ window.updateScientificResourcesCards = function() {
   container.innerHTML = filtered.map(c => {
     const prod = db.products.find(p => p.id === c.relatedProduct);
     const prodName = prod ? prod.name : (c.relatedProduct ? c.relatedProduct.toUpperCase() : '1Cell.Ai');
-    const evType = c.eventType || 'Case Review';
-    let evBadgeClass = 'badge-event-case';
-    let evIcon = '🔬';
+    const evType = c.eventType || '';
+    let evBadgeHtml = '';
     if (evType === 'MTB') {
-      evBadgeClass = 'badge-event-mtb';
-      evIcon = '🧬';
+      evBadgeHtml = `<span class="badge badge-event-mtb">🧬 MTB</span>`;
     } else if (evType === 'RTM') {
-      evBadgeClass = 'badge-event-rtm';
-      evIcon = '🤝';
+      evBadgeHtml = `<span class="badge badge-event-rtm">🤝 RTM</span>`;
     } else if (evType === 'Webinar') {
-      evBadgeClass = 'badge-event-webinar';
-      evIcon = '🎥';
+      evBadgeHtml = `<span class="badge badge-event-webinar">🎥 Webinar</span>`;
+    } else if (evType && evType.toLowerCase() !== 'case review' && evType.toLowerCase() !== 'casereview') {
+      evBadgeHtml = `<span class="badge badge-event-case">${evType}</span>`;
     }
 
     return `
@@ -2320,8 +2316,7 @@ window.updateScientificResourcesCards = function() {
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
               <span class="badge badge-prod">${prodName}</span>
-              <span class="badge ${evBadgeClass}">${evIcon} ${evType}</span>
-              ${c.biomarker ? `<span class="badge badge-biomarker">${c.biomarker}</span>` : ''}
+              ${evBadgeHtml}
             </div>
           </div>
           <h3 style="font-size:15.5px; font-weight:700; margin-top:4px; line-height:1.4; color:var(--text-primary);">${c.title}</h3>
