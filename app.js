@@ -2213,7 +2213,6 @@ window.searchScientificResources = function(query) {
 
 window.clearScientificFilters = function() {
   scientificCancerFilter = 'all';
-  scientificBiomarkerFilter = 'all';
   scientificEventTypeFilter = 'all';
   scientificProductFilter = 'all';
   scientificSearchQuery = '';
@@ -2225,8 +2224,6 @@ window.clearScientificFilters = function() {
 
   const cancerSel = document.getElementById('scientificCancerSelect');
   if (cancerSel) cancerSel.value = 'all';
-  const bioSel = document.getElementById('scientificBiomarkerSelect');
-  if (bioSel) bioSel.value = 'all';
   const eventSel = document.getElementById('scientificEventTypeSelect');
   if (eventSel) eventSel.value = 'all';
   const prodSel = document.getElementById('scientificProductSelect');
@@ -2268,13 +2265,6 @@ window.updateScientificResourcesCards = function() {
       if (!isMatch) {
         return false;
       }
-    }
-
-    // 3. Biomarker Filter
-    if (scientificBiomarkerFilter !== 'all') {
-      const cBio = (c.biomarker || '').toLowerCase();
-      const targetBio = scientificBiomarkerFilter.toLowerCase();
-      if (!cBio.includes(targetBio)) return false;
     }
 
     // 4. Event Type Filter (MTB, RTM, Webinar, Case Review)
@@ -2475,23 +2465,6 @@ function renderCaseLibrary() {
             <option value="Gastrointestinal Cancer" ${scientificCancerFilter === 'Gastrointestinal Cancer' ? 'selected' : ''}>Gastrointestinal Cancer</option>
             <option value="Oral Cancer" ${scientificCancerFilter === 'Oral Cancer' ? 'selected' : ''}>Oral Cancer</option>
             <option value="Renal Cancer" ${scientificCancerFilter === 'Renal Cancer' ? 'selected' : ''}>Renal Cancer</option>
-          </select>
-        </div>
-
-        <!-- Biomarker Filter -->
-        <div class="scientific-select-group">
-          <label for="scientificBiomarkerSelect">Biomarker</label>
-          <select id="scientificBiomarkerSelect" onchange="window.setScientificFilter('biomarker', this.value)">
-            <option value="all" ${scientificBiomarkerFilter === 'all' ? 'selected' : ''}>All Biomarkers</option>
-            <option value="MSI" ${scientificBiomarkerFilter === 'MSI' ? 'selected' : ''}>MSI-High / dMMR</option>
-            <option value="HRD" ${scientificBiomarkerFilter === 'HRD' ? 'selected' : ''}>HRD | BRCA1/2</option>
-            <option value="ALK" ${scientificBiomarkerFilter === 'ALK' ? 'selected' : ''}>ALK / ROS1 / RET</option>
-            <option value="KRAS" ${scientificBiomarkerFilter === 'KRAS' ? 'selected' : ''}>KRAS / NRAS / BRAF</option>
-            <option value="PIK3CA" ${scientificBiomarkerFilter === 'PIK3CA' ? 'selected' : ''}>PIK3CA / PTEN</option>
-            <option value="ESR1" ${scientificBiomarkerFilter === 'ESR1' ? 'selected' : ''}>ESR1 / Endocrine</option>
-            <option value="TP53" ${scientificBiomarkerFilter === 'TP53' ? 'selected' : ''}>TP53 / DNA Repair</option>
-            <option value="CTC" ${scientificBiomarkerFilter === 'CTC' ? 'selected' : ''}>CTC / Single-Cell</option>
-            <option value="Multi-Omics" ${scientificBiomarkerFilter === 'Multi-Omics' ? 'selected' : ''}>Multi-Omics / CGP</option>
           </select>
         </div>
 
