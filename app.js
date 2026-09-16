@@ -71,6 +71,22 @@ function canAccessAnalytics() {
 }
 window.canAccessAnalytics = canAccessAnalytics;
 
+function isMarketingUser() {
+  const team = getCurrentUserTeam();
+  if (team === TEAMS.MARKETING || team === 'marketing') return true;
+  if (currentRole === 'marketing_admin') return true;
+  let authDept = null;
+  let authEmail = null;
+  try {
+    authDept = sessionStorage.getItem("authDept") || localStorage.getItem("1cell_auth_dept");
+    authEmail = sessionStorage.getItem("authEmail") || localStorage.getItem("1cell_auth_email");
+  } catch (e) {}
+  if (authDept && authDept.toLowerCase().trim() === 'marketing') return true;
+  if (authEmail && authorizedMarketingEmails.map(e => e.toLowerCase().trim()).includes(authEmail.toLowerCase().trim())) return true;
+  return false;
+}
+window.isMarketingUser = isMarketingUser;
+
 // Map a Supabase row to the format expected by the Content Hub frontend
 function mapSupabaseRowToCard(row) {
   if (!row) return null;
@@ -1219,6 +1235,7 @@ function renderDashboardProductDocs(productName) {
             </svg>
             Details
           </button>
+          ${isMarketingUser() ? `
           <button onclick="event.stopPropagation(); window.openEditAssetModal('${doc.id}')" style="color: var(--accent-color);" title="Edit File & Direct Link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -1231,6 +1248,7 @@ function renderDashboardProductDocs(productName) {
             </svg>
             Delete
           </button>
+          ` : ''}
         </div>
       </div>
     `;
@@ -1243,6 +1261,11 @@ function renderDashboardProductDocs(productName) {
 
 // Register New Asset Modal Trigger with Category Presets
 window.triggerRegisterAssetModal = function(routeName) {
+  if (!isMarketingUser()) {
+    showToast("Access restricted: Only Marketing team members have permissions to add, edit, or manage content. Other teams have view-only access.");
+    return;
+  }
+
   const uploadForm = document.getElementById('uploadForm');
   if (uploadForm) {
     uploadForm.reset();
@@ -1308,17 +1331,8 @@ window.triggerRegisterAssetModal = function(routeName) {
 
 // Category Header Generator with Register Asset Button
 window.renderCategoryHeader = function(title, subtitle, routeName) {
-  const authDept = sessionStorage.getItem("authDept");
-  let dept = authDept;
-  if (!dept) {
-    if (currentRole === 'marketing_admin') dept = 'Marketing';
-    else if (currentRole === 'sales') dept = 'Sales';
-    else if (currentRole === 'medical') dept = 'Genomic Scientist';
-    else if (currentRole === 'leadership') dept = 'Leadership';
-  }
-
   let actionsHtml = '';
-  if (dept === 'Marketing' || dept === 'Leadership') {
+  if (isMarketingUser()) {
     actionsHtml = `
       <button class="btn-primary" onclick="window.triggerRegisterAssetModal('${routeName}')">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;margin-right:8px;display:inline-block;vertical-align:middle;">
@@ -1345,18 +1359,8 @@ window.renderCategoryHeader = function(title, subtitle, routeName) {
 function renderDashboard() {
   let actionsHtml = '';
 
-  // Check logged in department
-  const authDept = sessionStorage.getItem("authDept");
-  let dept = authDept;
-  if (!dept) {
-    if (currentRole === 'marketing_admin') dept = 'Marketing';
-    else if (currentRole === 'sales') dept = 'Sales';
-    else if (currentRole === 'medical') dept = 'Genomic Scientist';
-    else if (currentRole === 'leadership') dept = 'Leadership';
-  }
-
-  // Conditionally render Admin uploads based on department: only Marketing and Leadership
-  if (dept === 'Marketing' || dept === 'Leadership') {
+  // Conditionally render Admin uploads based on Marketing team permission
+  if (isMarketingUser()) {
     actionsHtml = `
       <button class="btn-primary" id="dashUploadBtn" onclick="window.triggerRegisterAssetModal('dashboard')">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;">
@@ -1622,11 +1626,13 @@ function renderDocumentCard(doc, options = {}) {
           </svg>
         </button>
         <div style="display:flex; gap: 4px; align-items:center;">
+          ${isMarketingUser() ? `
           <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${doc.id}')" title="Edit File & Direct Link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
             </svg>
           </button>
+          ` : ''}
           <button class="card-action-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); window.toggleFavorite('${doc.id}')" title="Bookmark Asset">
             <svg xmlns="http://www.w3.org/2000/svg" fill="${isFav ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
@@ -1637,11 +1643,13 @@ function renderDocumentCard(doc, options = {}) {
               <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186l5.572 3.285m-5.572-3.285L12.79 6.94m0 0a2.25 2.25 0 103.504-1.408 2.25 2.25 0 00-3.504 1.408zm0 10.12l3.504 1.409a2.25 2.25 0 101.076-2.186l-4.58-1.833z" />
             </svg>
           </button>
+          ${isMarketingUser() ? `
           <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${doc.id}')" title="Remove Card from Hub (Leaves OneDrive file untouched)" style="color:#ef4444;">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
           </button>
+          ` : ''}
         </div>
       </div>
     </div>
@@ -1677,12 +1685,14 @@ function renderCompanyAssets() {
         <p class="welcome-subtitle">Central collaborative repository for all company-wide documentation, brand identity assets, corporate presentations, legal agreements, and general resources.</p>
       </div>
       <div class="welcome-banner-actions">
+        ${isMarketingUser() ? `
         <button class="btn-primary" onclick="window.triggerRegisterAssetModal('company-assets')" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:600; box-shadow: var(--shadow-sm);">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           <span>+ Add Company Asset</span>
         </button>
+        ` : ''}
       </div>
     </div>
 
@@ -1725,6 +1735,7 @@ function renderCompanyAssets() {
           <h2 class="section-headline" style="margin:0;">Corporate Materials & Company Documents</h2>
           <span class="badge badge-dept" style="font-size:12px; padding:4px 10px; font-weight:600;">${assets.length} Accessible</span>
         </div>
+        ${isMarketingUser() ? `
         <div style="display:flex; align-items:center; gap:8px;">
           <button class="btn-outline" onclick="window.triggerRegisterAssetModal('company-assets')" style="font-size:12px; padding:6px 14px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;">
@@ -1733,14 +1744,15 @@ function renderCompanyAssets() {
             <span>+ Add Asset</span>
           </button>
         </div>
+        ` : ''}
       </div>
       <div class="assets-grid">
         ${assets.length > 0 ? assets.map(d => renderDocumentCard(d, { isCompanyAssets: true })).join('') : `
           <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; background: var(--bg-secondary); border: 2px dashed var(--border-color); border-radius: var(--radius-md);">
             <div style="font-size: 38px; margin-bottom: 12px;">📁</div>
             <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">No Company Documents Found</h3>
-            <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 16px;">This tab holds all company-wide documents, corporate presentations, brand guidelines, and legal agreements. Click below to add the first asset.</p>
-            <button class="btn-primary" onclick="window.triggerRegisterAssetModal('company-assets')">+ Add First Company Asset</button>
+            <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 16px;">This tab holds all company-wide documents, corporate presentations, brand guidelines, and legal agreements.${isMarketingUser() ? ' Click below to add the first asset.' : ''}</p>
+            ${isMarketingUser() ? `<button class="btn-primary" onclick="window.triggerRegisterAssetModal('company-assets')">+ Add First Company Asset</button>` : ''}
           </div>
         `}
       </div>
@@ -1840,12 +1852,14 @@ window.openProductMicrosite = function(prodId, defaultTab = 'all') {
           </div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
+          ${isMarketingUser() ? `
           <button class="btn-primary" onclick="window.triggerRegisterProductAsset('${prodId}', '${currentMicrositeTab}')" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; font-weight:600; font-size:13px; box-shadow:var(--shadow-md);">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:15px;height:15px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             <span>Add New Asset</span>
           </button>
+          ` : ''}
         </div>
       </div>
 
@@ -1903,10 +1917,12 @@ function renderProductTabContent(prodId, tabName) {
     <div style="text-align:center; padding:48px 24px; background:var(--bg-secondary); border:1px dashed var(--border-color); border-radius:12px; width:100%; grid-column:1 / -1; margin:8px 0;">
       <div style="font-size:36px; margin-bottom:10px;">📁</div>
       <h3 style="font-size:16px; font-weight:700; margin-bottom:6px; color:var(--text-primary);">No ${catName} files registered for ${product.name}</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;">Add a new ${catName} card with its direct OneDrive / SharePoint link to make it accessible to your team.</p>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;">${isMarketingUser() ? `Add a new ${catName} card with its direct OneDrive / SharePoint link to make it accessible to your team.` : `No ${catName} documents currently indexed for this product workspace.`}</p>
+      ${isMarketingUser() ? `
       <button class="btn-primary" onclick="window.triggerRegisterProductAsset('${prodId}', '${tabName}')">
         + Add ${catName} Asset
       </button>
+      ` : ''}
     </div>
   `;
 
@@ -1973,8 +1989,10 @@ function renderProductTabContent(prodId, tabName) {
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
               <div style="display:flex; gap:6px;">
+                ${isMarketingUser() ? `
                 <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
                 <button class="btn-outline" style="padding:5px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
+                ` : ''}
                 <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
               </div>
             </div>
@@ -2003,6 +2021,7 @@ function renderProductTabContent(prodId, tabName) {
               <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:10px;">
                 <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
                 <div style="display:flex; gap:4px;">
+                  ${isMarketingUser() ? `
                   <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')" title="Edit Video">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -2013,6 +2032,7 @@ function renderProductTabContent(prodId, tabName) {
                       <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                     </svg>
                   </button>
+                  ` : ''}
                 </div>
               </div>
             </div>
@@ -2111,8 +2131,10 @@ function renderProductTabContent(prodId, tabName) {
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
               <div style="display:flex; gap:6px;">
+                ${isMarketingUser() ? `
                 <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
                 <button class="btn-outline" style="padding:5px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
+                ` : ''}
                 <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
               </div>
             </div>
@@ -2153,6 +2175,7 @@ function renderProductTabContent(prodId, tabName) {
               <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:10px;">
                 <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
                 <div style="display:flex; gap:4px;">
+                  ${isMarketingUser() ? `
                   <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')" title="Edit Video">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -2163,6 +2186,7 @@ function renderProductTabContent(prodId, tabName) {
                       <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                     </svg>
                   </button>
+                  ` : ''}
                 </div>
               </div>
             </div>
@@ -2193,7 +2217,6 @@ function renderProductTabContent(prodId, tabName) {
 
 // Switch category tabs inside Product Workspace
 window.switchProductTab = function(event, prodId, tabName) {
-  currentMicrositeId = prodId;
   currentMicrositeTab = tabName;
 
   const tabs = document.querySelectorAll('.product-tab-btn');
@@ -2212,6 +2235,11 @@ window.switchProductTab = function(event, prodId, tabName) {
 
 // Trigger Register Asset Modal pre-configured for a product and category tab
 window.triggerRegisterProductAsset = function(prodId, categoryTab) {
+  if (!isMarketingUser()) {
+    showToast("Access restricted: Only Marketing team members can add or register content. Other teams have view-only access.");
+    return;
+  }
+
   const uploadForm = document.getElementById('uploadForm');
   if (uploadForm) uploadForm.reset();
 
@@ -2393,7 +2421,7 @@ window.updateScientificResourcesCards = function() {
         <p style="font-size:13px; color:var(--text-secondary); max-width:480px; margin:0 auto 16px;">No cases, MTB discussions, RTM meetings, or webinars match your current filter combination. You can clear filters or register a new clinical case.</p>
         <div style="display:flex; justify-content:center; gap:10px;">
           <button class="btn-outline" onclick="window.clearScientificFilters()">Clear All Filters</button>
-          <button class="btn-primary" onclick="window.triggerRegisterAssetModal('case-library')">+ Add Scientific Resource</button>
+          ${isMarketingUser() ? `<button class="btn-primary" onclick="window.triggerRegisterAssetModal('case-library')">+ Add Scientific Resource</button>` : ''}
         </div>
       </div>
     `;
@@ -2448,12 +2476,14 @@ window.updateScientificResourcesCards = function() {
         <div class="card-actions-bar" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
           <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${c.id}')">View</button>
           <div style="display:flex; gap:6px; align-items:center;">
+            ${isMarketingUser() ? `
             <button class="btn-outline" style="padding:5px 10px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${c.id}')">Edit</button>
             <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${c.id}')" title="Delete Resource" style="color:#ef4444;">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
               </svg>
             </button>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -2494,12 +2524,14 @@ function renderCaseLibrary() {
 
         <div style="display:flex; align-items:center; gap:10px;">
           <span id="scientificCountBadge" class="badge badge-prod" style="font-size:12px; padding:6px 12px;">${totalCount} Resources Found</span>
+          ${isMarketingUser() ? `
           <button class="btn-primary" onclick="window.triggerRegisterAssetModal('case-library')" style="display:inline-flex; align-items:center; gap:6px; padding:7px 14px; font-size:12px; font-weight:600;">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             <span>+ Add Resource</span>
           </button>
+          ` : ''}
         </div>
       </div>
 
@@ -2677,17 +2709,21 @@ window.updateReportLibraryCards = function() {
 
         <div class="card-actions-bar" style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; gap:6px;">
           <div style="display:flex; gap:6px;">
+            ${isMarketingUser() ? `
             <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${r.id}')" title="Edit SharePoint link or report metadata">
               Edit Link
             </button>
+            ` : ''}
             <button class="btn-outline" style="padding:6px 10px; font-size:11px;" onclick="event.stopPropagation(); window.previewDocument('${r.id}')" title="Preview metadata">
               Preview
             </button>
+            ${isMarketingUser() ? `
             <button class="btn-outline" style="padding:6px 8px; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation(); window.deleteAsset('${r.id}')" title="Delete report">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px; height:13px;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
               </svg>
             </button>
+            ` : ''}
           </div>
           <button class="btn-primary" style="padding:6px 16px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${r.id}')" title="View in SharePoint">
             <span>View</span>
@@ -2711,12 +2747,14 @@ function renderReportLibrary() {
         <p class="welcome-subtitle">Search, view, and manage official 1Cell.Ai clinical NGS & liquid biopsy sample reports with verified SharePoint links.</p>
       </div>
       <div class="welcome-banner-actions">
+        ${isMarketingUser() ? `
         <button class="btn-primary" onclick="window.triggerAddSampleReportModal()" style="display:inline-flex; align-items:center; gap:8px;">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:16px;height:16px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           <span>+ Add Sample Report</span>
         </button>
+        ` : ''}
       </div>
     </div>
 
@@ -2779,6 +2817,11 @@ function renderReportLibrary() {
 
 // Function to trigger Add Sample Report Modal
 window.triggerAddSampleReportModal = function(defaultProduct, defaultCancer) {
+  if (!isMarketingUser()) {
+    showToast("Access restricted: Only Marketing team members can add sample reports. Other teams have view-only access.");
+    return;
+  }
+
   const form = document.getElementById('sampleReportForm');
   if (form) form.reset();
   
@@ -2807,6 +2850,11 @@ window.triggerAddSampleReportModal = function(defaultProduct, defaultCancer) {
 
 // Function to save new Sample Report
 window.saveNewSampleReport = function() {
+  if (!isMarketingUser()) {
+    showToast("Access restricted: Only Marketing team members can add sample reports.");
+    return;
+  }
+
   const title = document.getElementById('srTitle').value.trim();
   const product = document.getElementById('srProduct').value;
   const cancerType = document.getElementById('srCancerType').value || 'None';
@@ -2891,7 +2939,9 @@ ${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinic
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 12px;">
             <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
             <div style="display:flex; gap:8px;">
+              ${isMarketingUser() ? `
               <button class="btn-outline" style="padding:8px 14px; font-size:12px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit Link</button>
+              ` : ''}
               <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${pub.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : (db.documents[0] ? db.documents[0].id : 'doc-041'))">Preview Metadata</button>
               <button class="btn-primary" style="padding:8px 16px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">
                 <span>View</span>
@@ -3002,7 +3052,9 @@ ${window.renderCategoryHeader('1Cell.Ai Digital Video Library', 'Browse doctor i
               ${renderCardLastUpdatedRow(vid)}
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; border-top:1px solid var(--border-color); padding-top:8px;">
+              ${isMarketingUser() ? `
               <button class="btn-outline" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')">Edit Link</button>
+              ` : ''}
               <button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
             </div>
           </div>
@@ -4565,13 +4617,11 @@ async function handleMockUpload(e) {
     else if (currentRole === 'leadership') dept = 'Leadership';
   }
 
-  // Permission policy: ANY team member can add content inside Company Assets and Product Hub!
-  if (category !== 'company-assets' && category !== 'product-hub' && category !== 'case-library' && category !== 'report-library') {
-    if (dept !== 'Marketing' && dept !== 'Leadership' && dept !== 'Corporate') {
-      showToast("Access restricted: Only authorized team members may register content in this section.");
-      closeModal(uploadModal);
-      return;
-    }
+  // Permission policy: Only Marketing team members can add/register content across the hub!
+  if (!isMarketingUser()) {
+    showToast("Access restricted: Only Marketing team members can add or register content. Other teams have view-only access.");
+    closeModal(uploadModal);
+    return;
   }
 
   if (!title || !sharePointUrl) {
@@ -5117,6 +5167,10 @@ window.openSharePoint = function(id) {
 // Universal Delete Asset function
 window.deleteAsset = async function(id) {
   if (!id) return;
+  if (!isMarketingUser()) {
+    showToast("Access restricted: Only Marketing team members can delete or remove assets.");
+    return;
+  }
   
   let itemTitle = 'this content card';
   let isOneDrive = false;
@@ -5196,6 +5250,10 @@ window.deleteAsset = async function(id) {
 
 // Open Edit Asset Modal pre-populated with document/file data
 window.openEditAssetModal = function(id) {
+  if (!isMarketingUser()) {
+    showToast("Access restricted: Only Marketing team members have editing privileges. Other teams have view-only access.");
+    return;
+  }
   const editModal = document.getElementById('editAssetModal');
   if (!editModal) return;
 
@@ -5363,6 +5421,10 @@ window.openEditAssetModal = function(id) {
 // Save edited asset and SharePoint URL
 window.saveAssetEdit = async function() {
   try {
+    if (!isMarketingUser()) {
+      showToast("Access restricted: Only Marketing team members can save edits to content.");
+      return;
+    }
     const idEl = document.getElementById('editDocId');
     if (!idEl || !idEl.value) {
       showToast("Error: No card ID found to edit.");
