@@ -1750,32 +1750,6 @@ window.openProductMicrosite = function(prodId) {
             `).join('')}
           </div>
         ` : ''}
-        <div class="product-stats">
-          <div class="product-stat-box">
-            <div class="product-stat-num">${totalAllCount}</div>
-            <div class="product-stat-lbl">Total Assets</div>
-          </div>
-          <div class="product-stat-box">
-            <div class="product-stat-num">${aboutProductDocs.length}</div>
-            <div class="product-stat-lbl">About Product</div>
-          </div>
-          <div class="product-stat-box">
-            <div class="product-stat-num">${totalEvidenceCount}</div>
-            <div class="product-stat-lbl">Evidence</div>
-          </div>
-          <div class="product-stat-box">
-            <div class="product-stat-num">${totalScientificCount}</div>
-            <div class="product-stat-lbl">Scientific</div>
-          </div>
-          <div class="product-stat-box">
-            <div class="product-stat-num">${totalTrainingSalesCount}</div>
-            <div class="product-stat-lbl">Training & Sales</div>
-          </div>
-          <div class="product-stat-box">
-            <div class="product-stat-num">${totalOtherCount}</div>
-            <div class="product-stat-lbl">Other</div>
-          </div>
-        </div>
       </div>
 
       <div class="product-tabs-row">
