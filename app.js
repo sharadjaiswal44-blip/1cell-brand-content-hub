@@ -53,6 +53,24 @@ function getCurrentUserName() {
 }
 window.getCurrentUserName = getCurrentUserName;
 
+function canAccessAnalytics() {
+  const team = getCurrentUserTeam();
+  if (team === TEAMS.MARKETING || team === TEAMS.LEADERSHIP) return true;
+  if (currentRole === 'marketing_admin' || currentRole === 'leadership') return true;
+  let authDept = null;
+  try {
+    authDept = sessionStorage.getItem("authDept") || localStorage.getItem("1cell_auth_dept");
+  } catch (e) {}
+  if (authDept) {
+    const dLower = authDept.toLowerCase();
+    if (dLower.includes('marketing') || dLower.includes('leadership') || dLower.includes('executive') || dLower.includes('strategy')) {
+      return true;
+    }
+  }
+  return false;
+}
+window.canAccessAnalytics = canAccessAnalytics;
+
 // Map a Supabase row to the format expected by the Content Hub frontend
 function mapSupabaseRowToCard(row) {
   if (!row) return null;
@@ -979,6 +997,17 @@ function updateSidebarCategories() {
       roleSelectorWrapper.style.display = 'none';
     }
   }
+
+  // Dashboard Analytics visibility: strictly Marketing & Leadership only
+  const analyticsNavItem = document.querySelector('.sidebar .nav-item[data-route="analytics"]');
+  const systemNavGroup = analyticsNavItem ? analyticsNavItem.closest('.nav-group') : null;
+  const hasAnalyticsAccess = canAccessAnalytics();
+  if (analyticsNavItem) {
+    analyticsNavItem.style.display = hasAnalyticsAccess ? '' : 'none';
+  }
+  if (systemNavGroup) {
+    systemNavGroup.style.display = hasAnalyticsAccess ? '' : 'none';
+  }
 }
 
 // Toast notification helper
@@ -1043,6 +1072,20 @@ function renderRoute(route) {
     return;
   }
 
+  // Dashboard Analytics access guard: Marketing & Leadership only
+  if (route === 'analytics' && !canAccessAnalytics()) {
+    showToast("Access restricted: Dashboard Analytics is only accessible to Marketing and Leadership teams.");
+    sidebarItems.forEach(item => {
+      if (item.getAttribute('data-route') === 'dashboard') {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+    renderRoute('dashboard');
+    return;
+  }
+
   switch (route) {
     case 'dashboard':
       renderDashboard();
@@ -1078,6 +1121,28 @@ function renderRoute(route) {
       renderDashboard();
   }
 }
+
+// Helper to normalize and format content type label
+function formatContentTypeLabel(type) {
+  if (!type) return 'Brochure';
+  const t = String(type).trim();
+  const tLower = t.toLowerCase();
+  if (tLower === 'case studies' || tLower === 'case study' || tLower === 'case review') return 'Case Study';
+  if (tLower === 'whitepaper' || tLower === 'white paper') return 'WhitePaper';
+  if (tLower === 'brochure') return 'Brochure';
+  if (tLower === 'sample report' || tLower === 'sample reports') return 'Sample Report';
+  if (tLower === 'publication' || tLower === 'scientific publication') return 'Publication';
+  if (tLower === 'presentation' || tLower === 'sales deck') return 'Presentation';
+  if (tLower === 'video') return 'Video';
+  if (tLower === 'battlecard') return 'Battlecard';
+  if (tLower === 'playbook') return 'Playbook';
+  if (tLower === 'about product') return 'Brochure';
+  if (tLower === 'evidence') return 'Case Study';
+  if (tLower === 'scientific') return 'WhitePaper';
+  if (tLower === 'training & sales enablement' || tLower === 'training-sales') return 'Training & Sales';
+  return t;
+}
+window.formatContentTypeLabel = formatContentTypeLabel;
 
 // Dynamic render for product-wise SharePoint & OneDrive documents directory
 function renderDashboardProductDocs(productName) {
@@ -1123,7 +1188,8 @@ function renderDashboardProductDocs(productName) {
     else if (doc.contentType === 'Presentation' || doc.contentType === 'Sales Deck') icon = '📊';
     else if (doc.contentType === 'Sample Report') icon = '📋';
 
-    const biomarkerBadge = (doc.biomarker && doc.biomarker !== 'None') ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
+    const cTypeLabel = formatContentTypeLabel(doc.contentType || 'Brochure');
+    const contentTypeBadge = `<span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:10.5px; padding:2px 7px; border-radius:4px;">${cTypeLabel}</span>`;
 
     html += `
       <div class="folder-doc-card" id="folder-card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
@@ -1132,7 +1198,7 @@ function renderDashboardProductDocs(productName) {
           <div style="flex: 1;">
             <div class="folder-doc-title">${doc.title}</div>
             <div class="folder-doc-path" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px;">
-              ${biomarkerBadge}
+              ${contentTypeBadge}
               <span style="font-size:11px; color:var(--text-tertiary); margin-left:2px;">${doc.folderPath || 'Shared Documents'}</span>
             </div>
           </div>
@@ -1495,23 +1561,39 @@ window.renderCardLastUpdatedRow = renderCardLastUpdatedRow;
 // Render document card template
 function renderDocumentCard(doc, options = {}) {
   const isFav = userFavorites.has(doc.id);
-  const biomarkerBadge = (doc.biomarker && doc.biomarker !== 'None') ? `<span class="badge badge-biomarker">${doc.biomarker}</span>` : '';
   const hideProductTag = options && options.hideProductTag;
+  const isProductHubView = hideProductTag || options.isProductHub;
   
   let productTag = '';
-  if (!hideProductTag) {
+  let contentTypeBadge = '';
+  let biomarkerBadge = '';
+
+  if (isProductHubView) {
+    // In Product Hub: No biomarker tag, show Content Type tag instead
+    const cTypeLabel = formatContentTypeLabel(doc.contentType || doc.category);
+    contentTypeBadge = `<span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:11px; padding:2px 8px; border-radius:4px;">${cTypeLabel}</span>`;
+  } else {
     const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
     productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : `<span class="badge badge-prod" style="background:#e8edf5; color:#1a365d; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />Corporate</span>`);
+    
+    if (doc.contentType) {
+      const cTypeLabel = formatContentTypeLabel(doc.contentType);
+      contentTypeBadge = `<span class="badge badge-content-type" style="background:#f1f5f9; color:#475569; font-weight:600; border:1px solid #e2e8f0; font-size:11px; padding:2px 8px; border-radius:4px;">${cTypeLabel}</span>`;
+    }
+    if (doc.biomarker && doc.biomarker !== 'None' && options.showBiomarker) {
+      biomarkerBadge = `<span class="badge badge-biomarker">${doc.biomarker}</span>`;
+    }
   }
 
   return `
     <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
       <div class="card-header-bar">
         <div class="card-type-icon">
-          ${doc.contentType === 'Video' ? '🎥' : doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation' ? '📊' : doc.contentType === 'Sample Report' ? '📋' : '📄'}
+          ${doc.contentType === 'Video' ? '🎥' : doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation' ? '📊' : doc.contentType === 'Sample Report' ? '📋' : doc.contentType === 'Whitepaper' || doc.contentType === 'WhitePaper' ? '🧬' : '📄'}
         </div>
         <div class="card-tags">
           ${productTag}
+          ${contentTypeBadge}
           ${biomarkerBadge}
         </div>
       </div>
@@ -3118,16 +3200,158 @@ function renderFavorites() {
   `;
 }
 
-// 12. Dashboard Analytics Route
+// 12. Dashboard Analytics Route & Contributor Metrics
+function getTopContributorsData() {
+  const contributorMap = {};
+
+  const processItem = (item, defaultDept = 'General') => {
+    if (!item) return;
+    let name = getCardUpdatedByUser(item);
+    if (!name || name === '1Cell.Ai' || name === '1Cell') {
+      name = item.author || item.owner || item.uploadedBy || item.doctor || item.speaker || item.createdBy || 'Marketing Operations';
+    }
+    if (name === '1Cell.Ai' || name === '1Cell') name = 'Marketing Operations';
+    
+    const cleanName = String(name).trim();
+    if (!contributorMap[cleanName]) {
+      let dept = item.department || defaultDept;
+      if (cleanName.includes('Dr.') || cleanName.includes('Medical') || cleanName.includes('Genomic') || cleanName.includes('Pathology') || cleanName.includes('Diagnostics')) dept = 'Medical & Clinical';
+      else if (cleanName.includes('Translational') || cleanName.includes('R&D') || cleanName.includes('Science') || cleanName.includes('Laboratory') || cleanName.includes('Bioinformatics')) dept = 'Scientific & R&D';
+      else if (cleanName.includes('Commercial') || cleanName.includes('Sales')) dept = 'Commercial & Sales';
+      else if (cleanName.includes('Brand') || cleanName.includes('Marketing') || cleanName.includes('Sharad') || cleanName.includes('Vikas') || cleanName.includes('Parita') || cleanName.includes('Arjvee') || cleanName.includes('Tanisha') || cleanName.includes('Pranad') || cleanName.includes('Richa') || cleanName.includes('Ishita') || cleanName.includes('Sanskar') || cleanName.includes('Rohan') || cleanName.includes('Sarah')) dept = 'Marketing Operations';
+      else if (cleanName.includes('Corporate') || cleanName.includes('Devin') || cleanName.includes('Leadership') || cleanName.includes('Mohan')) dept = 'Executive & Leadership';
+
+      contributorMap[cleanName] = {
+        name: cleanName,
+        count: 0,
+        department: dept,
+        latestDate: item.updatedDate || item.date || item.createdDate || '2026-09-15'
+      };
+    }
+    contributorMap[cleanName].count++;
+    if (item.updatedDate && (!contributorMap[cleanName].latestDate || item.updatedDate > contributorMap[cleanName].latestDate)) {
+      contributorMap[cleanName].latestDate = item.updatedDate;
+    }
+  };
+
+  (db.documents || []).forEach(d => processItem(d, d.department || 'Marketing'));
+  (db.cases || []).forEach(c => processItem(c, 'Medical'));
+  (db.reports || []).forEach(r => processItem(r, 'Medical'));
+  (db.publications || []).forEach(p => processItem(p, 'Scientific'));
+  (db.videos || []).forEach(v => processItem(v, 'Marketing'));
+  (db.brandAssets || []).forEach(b => processItem(b, 'Corporate'));
+  (db.templates || []).forEach(t => processItem(t, 'Corporate'));
+  (db.speakers || []).forEach(s => processItem(s, 'Scientific'));
+
+  return Object.values(contributorMap);
+}
+window.getTopContributorsData = getTopContributorsData;
+
+let currentContributorSort = 'desc';
+let currentContributorQuery = '';
+
+function renderContributorsChartList(contributors, totalAssets) {
+  if (!contributors || contributors.length === 0) {
+    return `<div style="padding: 32px 16px; text-align: center; color: var(--text-tertiary); font-size: 13px;">No contributors match the current filter.</div>`;
+  }
+
+  const maxCount = Math.max(...contributors.map(c => c.count), 1);
+
+  return contributors.map((c, index) => {
+    let rankBadge = `<span class="contributor-rank-badge">#${index + 1}</span>`;
+    if (currentContributorSort === 'desc') {
+      if (index === 0) rankBadge = `<span class="contributor-rank-badge rank-gold" title="Top Contributor">🥇 #1</span>`;
+      else if (index === 1) rankBadge = `<span class="contributor-rank-badge rank-silver">🥈 #2</span>`;
+      else if (index === 2) rankBadge = `<span class="contributor-rank-badge rank-bronze">🥉 #3</span>`;
+    }
+
+    const percentage = Math.round((c.count / (totalAssets || 1)) * 100);
+    const barWidth = Math.max(Math.round((c.count / maxCount) * 100), 4);
+    const initials = getInitials(c.name);
+
+    return `
+      <div class="contributor-row">
+        <div class="contributor-rank-col">
+          ${rankBadge}
+        </div>
+        <div class="contributor-avatar-pill">${initials}</div>
+        <div class="contributor-info-col">
+          <div class="contributor-name-row">
+            <span class="contributor-name">${c.name}</span>
+            <span class="contributor-dept-tag">${c.department}</span>
+          </div>
+          <div class="contributor-bar-container">
+            <div class="contributor-bar-fill" style="width: ${barWidth}%;"></div>
+          </div>
+        </div>
+        <div class="contributor-stats-col">
+          <div class="contributor-count-badge">${c.count} assets</div>
+          <span class="contributor-pct">${percentage}% of total</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.filterContributors = function(query) {
+  currentContributorQuery = (query || '').toLowerCase().trim();
+  applyContributorFilters();
+};
+
+window.sortContributors = function(sortOrder) {
+  currentContributorSort = sortOrder;
+  applyContributorFilters();
+};
+
+function applyContributorFilters() {
+  const container = document.getElementById('contributorsChartContainer');
+  const countLabel = document.getElementById('contributorsFilteredCount');
+  if (!container) return;
+
+  let allContributors = getTopContributorsData();
+  const totalAssets = (db.documents || []).length + (db.cases || []).length + (db.reports || []).length + (db.publications || []).length;
+
+  if (currentContributorQuery) {
+    allContributors = allContributors.filter(c => 
+      c.name.toLowerCase().includes(currentContributorQuery) || 
+      c.department.toLowerCase().includes(currentContributorQuery)
+    );
+  }
+
+  if (currentContributorSort === 'desc') {
+    allContributors.sort((a, b) => b.count - a.count);
+  } else if (currentContributorSort === 'asc') {
+    allContributors.sort((a, b) => a.count - b.count);
+  } else if (currentContributorSort === 'alpha') {
+    allContributors.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  if (countLabel) {
+    countLabel.innerText = `${allContributors.length} active contributors`;
+  }
+
+  container.innerHTML = renderContributorsChartList(allContributors, totalAssets);
+}
+
 function renderAnalyticsDashboard() {
   const counts = db.analytics.assetsByDepartment;
   const prodCounts = db.analytics.assetsByProduct;
+  const rawContributors = getTopContributorsData();
+  const sortedContributors = [...rawContributors].sort((a, b) => b.count - a.count);
+  const totalAssetsCount = (db.documents || []).length + (db.cases || []).length + (db.reports || []).length + (db.publications || []).length;
+  const topContributor = sortedContributors.length > 0 ? sortedContributors[0] : null;
+
+  currentContributorSort = 'desc';
+  currentContributorQuery = '';
   
   workspaceViewport.innerHTML = `
     <div class="welcome-banner">
       <div>
-        <h1 class="welcome-title">Content Analytics Dashboard</h1>
-        <p class="welcome-subtitle">Usage metrics, top keyword queries, downloads telemetry, and active curators.</p>
+        <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(2,132,199,0.12); color:var(--accent-color); font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:12px; margin-bottom:6px; border:1px solid rgba(2,132,199,0.25);">
+          🔒 Marketing & Leadership Team Confidential
+        </div>
+        <h1 class="welcome-title">Content Analytics & Team Operations</h1>
+        <p class="welcome-subtitle">Usage metrics, content upload leaderboard by user name, search telemetry, and repository distribution.</p>
       </div>
     </div>
 
@@ -3164,6 +3388,56 @@ function renderAnalyticsDashboard() {
         </div>
         <div class="stat-number">${db.analytics.telemetry.downloads}</div>
         <div class="stat-subtext">Offline presentations/PDFs</div>
+      </div>
+    </div>
+
+    <!-- Top Content Contributors / Uploaders Chart Section -->
+    <div class="contributors-chart-card">
+      <div class="contributors-card-header">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <h3 class="chart-title" style="margin-bottom:0;">Top Content Contributors by Upload Volume</h3>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700; font-size:11px;" id="contributorsFilteredCount">${sortedContributors.length} active contributors</span>
+          </div>
+          <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 0 0;">Ranked by total documents, scientific resources, brochures, and clinical decks maintained in the Content Hub.</p>
+        </div>
+
+        <!-- Filter & Sort controls -->
+        <div class="contributors-controls-bar">
+          <div class="contributor-search-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-tertiary);">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input type="text" id="contributorSearchInput" placeholder="Filter by member name..." oninput="window.filterContributors(this.value)" class="contributor-search-input">
+          </div>
+
+          <select id="contributorSortSelect" onchange="window.sortContributors(this.value)" class="contributor-sort-select">
+            <option value="desc" selected>Sort: High to Low (Most Uploads)</option>
+            <option value="asc">Sort: Low to High (Least Uploads)</option>
+            <option value="alpha">Sort: Member Name (A-Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Summary Cards Row -->
+      <div class="contributors-summary-strip">
+        <div class="contrib-mini-stat">
+          <span class="contrib-mini-label">Top Contributor</span>
+          <span class="contrib-mini-val" style="color:var(--accent-color);">🏆 ${topContributor ? topContributor.name : 'N/A'} (${topContributor ? topContributor.count : 0} assets)</span>
+        </div>
+        <div class="contrib-mini-stat">
+          <span class="contrib-mini-label">Total Unique Contributors</span>
+          <span class="contrib-mini-val">${sortedContributors.length} Members & Teams</span>
+        </div>
+        <div class="contrib-mini-stat">
+          <span class="contrib-mini-label">Total Assets Catalogued</span>
+          <span class="contrib-mini-val">${totalAssetsCount} Items</span>
+        </div>
+      </div>
+
+      <!-- Chart List Container -->
+      <div id="contributorsChartContainer" class="contributors-chart-list">
+        ${renderContributorsChartList(sortedContributors, totalAssetsCount)}
       </div>
     </div>
 
@@ -4885,20 +5159,16 @@ window.openEditAssetModal = function(id) {
     document.getElementById('editDocFolderPath').value = doc.folderPath || '';
     document.getElementById('editDocProduct').value = doc.product || '';
     
-    // Normalize category to standard 5 or specific
-    let cat = doc.contentType || 'About Product';
+    // Normalize content type to standard options
+    let cat = formatContentTypeLabel(doc.contentType || 'Brochure');
     const sel = document.getElementById('editDocContentType');
     if (sel) {
-      const exists = Array.from(sel.options).some(o => o.value.toLowerCase() === cat.toLowerCase());
-      if (!exists) {
-        const stdCat = getProductAssetCategory(doc);
-        if (stdCat === 'about-product') cat = 'About Product';
-        else if (stdCat === 'evidence') cat = 'Evidence';
-        else if (stdCat === 'scientific') cat = 'Scientific';
-        else if (stdCat === 'training-sales') cat = 'Training & Sales Enablement';
-        else cat = 'Other';
+      const matchOpt = Array.from(sel.options).find(o => o.value.toLowerCase() === cat.toLowerCase() || o.value.toLowerCase().includes(cat.toLowerCase()));
+      if (matchOpt) {
+        sel.value = matchOpt.value;
+      } else {
+        sel.value = 'Brochure';
       }
-      sel.value = cat;
     }
 
     document.getElementById('editDocDept').value = doc.department || 'Marketing';
@@ -4920,7 +5190,8 @@ window.openEditAssetModal = function(id) {
       document.getElementById('editDocSpUrl').value = c.readMoreUrl || c.oneDriveUrl || '';
       document.getElementById('editDocFolderPath').value = `Clinical Cases/${c.cancerType || 'Solid Tumor'}`;
       document.getElementById('editDocProduct').value = c.relatedProduct || '';
-      document.getElementById('editDocContentType').value = 'Evidence';
+      const sel = document.getElementById('editDocContentType');
+      if (sel) sel.value = 'Case Study';
       document.getElementById('editDocDept').value = 'Medical';
       if (ownerEl) ownerEl.value = c.doctor || c.owner || '1Cell.Ai';
       document.getElementById('editDocVersion').value = 'v1.0';
@@ -4942,7 +5213,8 @@ window.openEditAssetModal = function(id) {
         document.getElementById('editDocSpUrl').value = pub.link || pub.oneDriveUrl || '';
         document.getElementById('editDocFolderPath').value = `Publications/${pub.journal || 'Peer-Reviewed'}`;
         document.getElementById('editDocProduct').value = pub.relatedProduct || '';
-        document.getElementById('editDocContentType').value = 'Scientific';
+        const sel = document.getElementById('editDocContentType');
+        if (sel) sel.value = 'WhitePaper';
         document.getElementById('editDocDept').value = 'Scientific';
         if (ownerEl) ownerEl.value = pub.authors || pub.owner || '1Cell.Ai';
         document.getElementById('editDocVersion').value = 'v1.0';
@@ -4962,7 +5234,8 @@ window.openEditAssetModal = function(id) {
           document.getElementById('editDocSpUrl').value = vid.videoUrl || vid.oneDriveUrl || '';
           document.getElementById('editDocFolderPath').value = 'Digital Videos';
           document.getElementById('editDocProduct').value = vid.product || '';
-          document.getElementById('editDocContentType').value = 'Training & Sales Enablement';
+          const sel = document.getElementById('editDocContentType');
+          if (sel) sel.value = 'Video';
           document.getElementById('editDocDept').value = 'Marketing';
           if (ownerEl) ownerEl.value = vid.speaker || vid.owner || '1Cell.Ai';
           document.getElementById('editDocVersion').value = 'v1.0';
@@ -4982,7 +5255,8 @@ window.openEditAssetModal = function(id) {
             document.getElementById('editDocSpUrl').value = rep.sharePointUrl || rep.oneDriveUrl || '';
             document.getElementById('editDocFolderPath').value = rep.folderPath || `Shared Documents/Report Library/${rep.cancerType || 'Clinical'}`;
             document.getElementById('editDocProduct').value = rep.product || '';
-            document.getElementById('editDocContentType').value = 'Evidence';
+            const sel = document.getElementById('editDocContentType');
+            if (sel) sel.value = 'Sample Report';
             const cancerEl = document.getElementById('editDocCancer');
             if (cancerEl) cancerEl.value = rep.cancerType || 'None';
             const biomarkerEl = document.getElementById('editDocBiomarker');
