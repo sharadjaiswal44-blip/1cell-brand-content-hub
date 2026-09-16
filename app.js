@@ -1011,7 +1011,20 @@ function closeModal(modalEl) {
 }
 
 // Route Navigation Controller
+window.navigateToDashboard = function() {
+  const items = document.querySelectorAll('.sidebar .nav-item');
+  items.forEach(i => {
+    if (i.getAttribute('data-route') === 'dashboard') {
+      i.classList.add('active');
+    } else {
+      i.classList.remove('active');
+    }
+  });
+  renderRoute('dashboard');
+};
+
 function renderRoute(route) {
+  window.renderRoute = renderRoute;
   // Clear main workspace
   workspaceViewport.innerHTML = '';
   suggestionsDropdown.style.display = 'none';

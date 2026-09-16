@@ -132,6 +132,12 @@ button, input, select, textarea {
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast);
+}
+
+.sidebar-header:hover {
+  opacity: 0.85;
 }
 
 .logo-container {
