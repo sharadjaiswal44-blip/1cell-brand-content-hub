@@ -3363,11 +3363,13 @@ function applyContributorFilters() {
     allContributors.sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  const top7Contributors = allContributors.slice(0, 7);
+
   if (countLabel) {
-    countLabel.innerText = `${allContributors.length} active members`;
+    countLabel.innerText = `Top ${top7Contributors.length} Contributors`;
   }
 
-  container.innerHTML = renderContributorsChartList(allContributors, totalAssets);
+  container.innerHTML = renderContributorsChartList(top7Contributors, totalAssets);
 }
 
 function renderAnalyticsDashboard() {
@@ -3375,8 +3377,9 @@ function renderAnalyticsDashboard() {
   const prodCounts = db.analytics.assetsByProduct;
   const rawContributors = getTopContributorsData();
   const sortedContributors = [...rawContributors].sort((a, b) => b.count - a.count);
-  const totalAssetsCount = sortedContributors.reduce((acc, c) => acc + c.count, 0);
-  const topContributor = sortedContributors.length > 0 ? sortedContributors[0] : null;
+  const top7Contributors = sortedContributors.slice(0, 7);
+  const totalAssetsCount = top7Contributors.reduce((acc, c) => acc + c.count, 0);
+  const topContributor = top7Contributors.length > 0 ? top7Contributors[0] : null;
 
   currentContributorSort = 'desc';
   currentContributorQuery = '';
@@ -3433,10 +3436,10 @@ function renderAnalyticsDashboard() {
       <div class="contributors-card-header">
         <div>
           <div style="display:flex; align-items:center; gap:8px;">
-            <h3 class="chart-title" style="margin-bottom:0;">Top Content Contributors by Upload Volume</h3>
-            <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700; font-size:11px;" id="contributorsFilteredCount">${sortedContributors.length} active members</span>
+            <h3 class="chart-title" style="margin-bottom:0;">Top 7 Content Contributors by Upload Volume</h3>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700; font-size:11px;" id="contributorsFilteredCount">Top ${top7Contributors.length} Contributors</span>
           </div>
-          <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 0 0;">Visual chart and breakdown of content uploaded and maintained across teams.</p>
+          <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 0 0;">Visual chart and breakdown of top 7 team members with highest content upload volume.</p>
         </div>
 
         <!-- Filter & Sort controls -->
@@ -3463,18 +3466,18 @@ function renderAnalyticsDashboard() {
           <span class="contrib-mini-val" style="color:var(--accent-color);">${topContributor ? topContributor.name : 'N/A'} (${topContributor ? topContributor.count : 0} assets)</span>
         </div>
         <div class="contrib-mini-stat">
-          <span class="contrib-mini-label">Active Team Members</span>
-          <span class="contrib-mini-val">${sortedContributors.length} Contributors</span>
+          <span class="contrib-mini-label">Top Displayed Members</span>
+          <span class="contrib-mini-val">Top ${top7Contributors.length} Contributors</span>
         </div>
         <div class="contrib-mini-stat">
-          <span class="contrib-mini-label">Total Assets Uploaded</span>
-          <span class="contrib-mini-val">${totalAssetsCount} Uploaded Assets</span>
+          <span class="contrib-mini-label">Top 7 Assets Uploaded</span>
+          <span class="contrib-mini-val">${totalAssetsCount} Assets</span>
         </div>
       </div>
 
       <!-- Chart List Container -->
       <div id="contributorsChartContainer" class="contributors-chart-list">
-        ${renderContributorsChartList(sortedContributors, totalAssetsCount)}
+        ${renderContributorsChartList(top7Contributors, totalAssetsCount)}
       </div>
     </div>
 
