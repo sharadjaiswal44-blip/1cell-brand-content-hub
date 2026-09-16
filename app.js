@@ -1124,7 +1124,7 @@ function renderRoute(route) {
 
 // Helper to normalize and format content type label
 function formatContentTypeLabel(type) {
-  if (!type) return 'Brochure';
+  if (!type) return 'Document';
   const t = String(type).trim();
   const tLower = t.toLowerCase();
   if (tLower === 'case studies' || tLower === 'case study' || tLower === 'case review') return 'Case Study';
@@ -1136,6 +1136,11 @@ function formatContentTypeLabel(type) {
   if (tLower === 'video') return 'Video';
   if (tLower === 'battlecard') return 'Battlecard';
   if (tLower === 'playbook') return 'Playbook';
+  if (tLower === 'newsletter' || tLower === 'newsletters') return 'Newsletter';
+  if (tLower === 'brand guidelines' || tLower === 'brand assets' || tLower === 'logos') return 'Brand Guidelines';
+  if (tLower === 'policy' || tLower === 'policies') return 'Policy';
+  if (tLower === 'template' || tLower === 'templates') return 'Template';
+  if (tLower === 'company-assets' || tLower === 'company assets') return 'Company Document';
   if (tLower === 'about product') return 'Brochure';
   if (tLower === 'evidence') return 'Case Study';
   if (tLower === 'scientific') return 'WhitePaper';
@@ -1562,7 +1567,8 @@ window.renderCardLastUpdatedRow = renderCardLastUpdatedRow;
 function renderDocumentCard(doc, options = {}) {
   const isFav = userFavorites.has(doc.id);
   const hideProductTag = options && options.hideProductTag;
-  const isProductHubView = hideProductTag || options.isProductHub;
+  const isProductHubView = hideProductTag || (options && options.isProductHub);
+  const isCompany = (options && options.isCompanyAssets) || isCompanyAsset(doc) || doc.category === 'company-assets' || !doc.product || doc.product === 'company' || doc.product === 'corporate' || doc.product === 'none';
   
   let productTag = '';
   let contentTypeBadge = '';
@@ -1572,15 +1578,19 @@ function renderDocumentCard(doc, options = {}) {
     // In Product Hub: No biomarker tag, show Content Type tag instead
     const cTypeLabel = formatContentTypeLabel(doc.contentType || doc.category);
     contentTypeBadge = `<span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:11px; padding:2px 8px; border-radius:4px;">${cTypeLabel}</span>`;
+  } else if (isCompany) {
+    // In Company Assets: Never show Corporate tag, show Content Type tag only
+    const cTypeLabel = formatContentTypeLabel(doc.contentType || doc.category || (doc.fileType === 'PPTX' ? 'Presentation' : doc.fileType === 'PDF' ? 'Brochure' : 'Document'));
+    contentTypeBadge = `<span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:11px; padding:2px 8px; border-radius:4px;">${cTypeLabel}</span>`;
   } else {
     const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
-    productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : `<span class="badge badge-prod" style="background:#e8edf5; color:#1a365d; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />Corporate</span>`);
+    productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product && doc.product !== 'none' && doc.product !== 'null' ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : '');
     
     if (doc.contentType) {
       const cTypeLabel = formatContentTypeLabel(doc.contentType);
       contentTypeBadge = `<span class="badge badge-content-type" style="background:#f1f5f9; color:#475569; font-weight:600; border:1px solid #e2e8f0; font-size:11px; padding:2px 8px; border-radius:4px;">${cTypeLabel}</span>`;
     }
-    if (doc.biomarker && doc.biomarker !== 'None' && options.showBiomarker) {
+    if (doc.biomarker && doc.biomarker !== 'None' && options && options.showBiomarker) {
       biomarkerBadge = `<span class="badge badge-biomarker">${doc.biomarker}</span>`;
     }
   }
@@ -1641,13 +1651,14 @@ function renderDocumentCard(doc, options = {}) {
 // Helper to determine if a document is purely a Company/Corporate asset (not a Product workspace asset)
 function isCompanyAsset(d) {
   if (!d) return false;
+  if (d.category === 'company-assets') return true;
   const prod = (d.product || '').toLowerCase().trim();
   // If document belongs to a specific product model, it is NEVER a company asset
   if (prod && prod !== 'company' && prod !== 'corporate' && prod !== 'none' && prod !== 'null') {
     return false;
   }
-  // Exclude case studies, sample reports, and publications
-  if (d.contentType === 'Case Study' || d.contentType === 'Sample Report' || d.contentType === 'Publication') {
+  // Exclude standalone scientific resources / cases / reports if category is different
+  if (d.category === 'case-library' || d.category === 'report-library' || d.category === 'scientific-resources' || d.category === 'publications') {
     return false;
   }
   return prod === 'company' || prod === 'corporate' || (!prod && (d.category === 'company-assets' || d.department === 'Corporate'));
@@ -1724,7 +1735,7 @@ function renderCompanyAssets() {
         </div>
       </div>
       <div class="assets-grid">
-        ${assets.length > 0 ? assets.map(d => renderDocumentCard(d)).join('') : `
+        ${assets.length > 0 ? assets.map(d => renderDocumentCard(d, { isCompanyAssets: true })).join('') : `
           <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; background: var(--bg-secondary); border: 2px dashed var(--border-color); border-radius: var(--radius-md);">
             <div style="font-size: 38px; margin-bottom: 12px;">📁</div>
             <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">No Company Documents Found</h3>
@@ -3107,7 +3118,7 @@ ${window.renderCategoryHeader('Corporate Brand Assets & Guidelines', 'Core logos
             <div class="card-type-icon" style="overflow:hidden; display:flex; align-items:center; justify-content:center; background:#ffffff; border:1px solid rgba(0,0,0,0.06); padding:3px; border-radius:6px; width:44px; height:44px;">
               ${asset.category === 'Logos' && asset.downloadUrl && asset.downloadUrl.endsWith('.png') ? `<img src="${asset.downloadUrl}" alt="${asset.title}" style="max-height:28px; max-width:40px; object-fit:contain;" onerror="this.onerror=null;this.parentElement.innerHTML='🎨';" />` : '🎨'}
             </div>
-            <span class="badge badge-dept">Corporate</span>
+            <span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:11px; padding:2px 8px; border-radius:4px;">${formatContentTypeLabel(asset.category || 'Brand Asset')}</span>
           </div>
           <div class="card-body">
             <h3 class="card-title">${asset.title}</h3>
