@@ -1882,6 +1882,29 @@ function renderCompanyAssets() {
   `;
 }
 
+// Helper to resolve Product Owner name
+function getProductOwner(productOrId) {
+  if (!productOrId) return '1Cell.Ai Product Team';
+  let product = typeof productOrId === 'object' ? productOrId : (db.products || []).find(p => p.id === productOrId);
+  if (product && product.owner) return product.owner;
+  const pid = (typeof productOrId === 'string' ? productOrId : (product ? product.id : '')).toLowerCase();
+  
+  if (pid === 'oncoindx' || pid === 'primeplus' || pid === 'oncoindxtbx' || pid === 'oncoindx360' || pid === 'oncotarget' || pid === 'oncohrd') {
+    return 'Vikas';
+  }
+  if (pid === 'oncoctc' || pid === 'oncorisk') {
+    return 'Sharad';
+  }
+  if (pid === 'oncoincytes' || pid === 'oncoalibrex' || pid === 'oncomonitor' || pid === 'icore' || pid === 'icare') {
+    return 'Dr. Pranad';
+  }
+  if (pid === 'oncopredikt') {
+    return 'Arjvee';
+  }
+  return '1Cell.Ai Product Team';
+}
+window.getProductOwner = getProductOwner;
+
 // 3. Product Hub View
 function renderProductHub() {
   const visibleProducts = db.products.filter(p => p.id !== 'icore' && p.id !== 'icare');
@@ -1901,6 +1924,7 @@ function renderProductHub() {
         const aboutCount = prodAssets.filter(d => getProductAssetCategory(d) === 'about-product').length;
         const evidenceCount = prodAssets.filter(d => getProductAssetCategory(d) === 'evidence').length;
         const sciCount = prodAssets.filter(d => getProductAssetCategory(d) === 'scientific').length;
+        const productOwner = getProductOwner(p);
         return `
           <div class="quick-tile-card" style="align-items: flex-start; text-align: left; padding: 24px;" onclick="window.openProductMicrosite('${p.id}')">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 16px;">
@@ -1912,6 +1936,7 @@ function renderProductHub() {
             <h3 style="font-size:18px; margin-bottom: 8px; font-weight:700;">${p.name}</h3>
             <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-bottom: 20px;">${p.description}</p>
             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; font-size:11px; font-weight:600; color:var(--text-tertiary);">
+              <span style="background-color:rgba(30, 58, 138, 0.08); color:var(--accent-color); padding:2px 8px; border-radius:4px; font-weight:700;">👤 Owner: ${productOwner}</span>
               <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${prodAssets.length} Total Assets</span>
               <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${evidenceCount} Evidence</span>
               <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${sciCount} Scientific</span>
@@ -1932,6 +1957,7 @@ window.openProductMicrosite = function(prodId, defaultTab = 'all') {
   const product = db.products.find(p => p.id === prodId);
   if (!product) return;
 
+  const productOwner = getProductOwner(product);
   const allAssets = getAllProductAssets(prodId);
   const aboutProductDocs = allAssets.filter(d => getProductAssetCategory(d) === 'about-product');
   const evidenceDocs = allAssets.filter(d => getProductAssetCategory(d) === 'evidence');
@@ -1958,8 +1984,16 @@ window.openProductMicrosite = function(prodId, defaultTab = 'all') {
             <img src="${product.logo}" alt="${product.name} Logo" class="product-header-brand-logo" onerror="this.onerror=null;this.src='assets/logos/logo_1cell.png';" />
           </div>
           <div>
-            <div class="product-tagline">1Cell.Ai Genomic Assays • Product Hub Workspace</div>
-            <h1 class="product-name" style="margin:2px 0 0 0;">${product.name}</h1>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px;">
+              <span class="product-tagline" style="margin:0;">1Cell.Ai Genomic Assays • Product Hub Workspace</span>
+              <span class="product-owner-badge" style="display:inline-flex; align-items:center; gap:5px; background:rgba(30, 58, 138, 0.08); color:var(--accent-color); border:1px solid rgba(30, 58, 138, 0.18); padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:13px; height:13px; color:var(--accent-color);">
+                  <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                </svg>
+                <span>Product Owner: <strong style="font-weight:700;">${productOwner}</strong></span>
+              </span>
+            </div>
+            <h1 class="product-name" style="margin:0;">${product.name}</h1>
           </div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
