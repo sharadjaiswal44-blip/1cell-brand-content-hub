@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260917-v44';
+import db from './db.js?v=20260917-v45';
 import { 
   normalizeTeam,
   canTeamViewVisibility,
@@ -1803,29 +1803,46 @@ function renderDocumentCard(doc, options = {}) {
   `;
 }
 
-// Helper to determine if a document is purely a Company/Corporate asset (not a Product workspace asset)
+const KNOWN_ASSAY_PRODUCTS = new Set([
+  'oncoindx', 'primeplus', 'oncoindxtbx', 'oncoindx360', 'oncotarget',
+  'oncohrd', 'oncorisk', 'oncomonitor', 'oncopredikt', 'oncoctc',
+  'oncoalibrex', 'oncoincytes', 'icore', 'icare'
+]);
+
+// Helper to determine if a document is purely a genuine Company/Corporate asset (not a Product workspace or dummy asset)
 function isCompanyAsset(d) {
   if (!d) return false;
-  if (DUMMY_COMPANY_DOC_IDS.has(d.id)) return false;
-  
-  const prod = (d.product || '').toLowerCase().trim();
-  // If document belongs to a specific product model, it is NEVER a company asset
-  if (prod && prod !== 'company' && prod !== 'corporate' && prod !== 'none' && prod !== 'null' && prod !== '') {
+  const docId = String(d.id || '').toLowerCase().trim();
+  if (DUMMY_COMPANY_DOC_IDS.has(d.id) || DUMMY_COMPANY_DOC_IDS.has(docId)) return false;
+  if (docId.startsWith('case-') || docId.startsWith('pub-') || docId.startsWith('vid-') || 
+      docId.startsWith('report-') || docId.startsWith('spk-') || docId.startsWith('brand-') || 
+      docId.startsWith('temp-') || docId.startsWith('news-')) {
     return false;
   }
   
-  // Exclude standalone scientific resources / cases / reports / publications / videos
+  const prod = (d.product || d.product_workspace || '').toLowerCase().trim();
+  if (KNOWN_ASSAY_PRODUCTS.has(prod)) {
+    return false;
+  }
+  if (prod && prod !== 'company' && prod !== 'corporate' && prod !== 'none' && prod !== 'null' && prod !== 'all' && prod !== '') {
+    return false;
+  }
+  
+  // Exclude standalone scientific resources / cases / reports / publications / videos / newsletters
   const cat = (d.category || '').toLowerCase().trim();
-  if (cat === 'case-library' || cat === 'cases' || cat === 'report-library' || cat === 'scientific-resources' || cat === 'publications' || cat === 'videos') {
+  if (cat === 'case-library' || cat === 'cases' || cat === 'report-library' || cat === 'scientific-resources' || 
+      cat === 'publications' || cat === 'videos' || cat === 'newsletters' || cat === 'speakers' || 
+      cat === 'brand-assets' || cat === 'templates') {
     return false;
   }
   
-  const cType = (d.contentType || '').toLowerCase().trim();
-  if (cType === 'case study' || cType === 'publication' || cType === 'sample report' || cType === 'video') {
+  const cType = (d.contentType || d.content_type || '').toLowerCase().trim();
+  if (cType === 'case study' || cType === 'publication' || cType === 'sample report' || cType === 'video' || cType === 'newsletter') {
     return false;
   }
   
-  return prod === 'company' || prod === 'corporate' || !prod || prod === 'none' || prod === 'null' || cat === 'company-assets' || d.department === 'Corporate';
+  const dept = (d.department || '').toLowerCase().trim();
+  return cat === 'company-assets' || dept === 'corporate' || prod === 'company' || prod === 'corporate' || (!prod && (cat === 'company-assets' || dept === 'corporate'));
 }
 window.isCompanyAsset = isCompanyAsset;
 
@@ -1852,39 +1869,6 @@ function renderCompanyAssets() {
       </div>
     </div>
 
-    <!-- Brand Story & Mission/Vision Section from Guidelines v3.0 -->
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 18px; margin-bottom: 24px; align-items: stretch;">
-      <!-- About Us -->
-      <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; justify-content: center; box-shadow: var(--shadow-xs);">
-        <h3 style="font-size: 15px; color: var(--accent-color); margin-bottom: 8px; font-weight: 700;">About 1Cell.Ai</h3>
-        <p style="font-size: 13px; line-height: 1.5; color: var(--text-secondary);">
-          1Cell.Ai is a Cupertino, USA-based precision oncology company specializing in innovations in liquid biopsy, single-cell multiomics and digital pathology, bringing Genomics data and AI to healthcare.
-        </p>
-      </div>
-      
-      <!-- Mission Card (Dark Pioneer Blue Theme) -->
-      <div style="background-color: #1A365D; border-radius: var(--radius-lg); padding: 20px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #1A365D; box-shadow: var(--shadow-xs);">
-        <div>
-          <h3 style="font-size: 15px; color: #DAA520; margin-bottom: 8px; font-weight: 700;">Mission</h3>
-          <p style="font-size: 13.5px; line-height: 1.45;">
-            Impacting lives of <span class="brand-highlight-2">one million cancer patients</span> by breakthrough innovations in science and AI technology.
-          </p>
-        </div>
-        <div style="font-size: 10.5px; opacity: 0.65; margin-top: 10px;">Guidelines v3.0 Core Value</div>
-      </div>
-
-      <!-- Vision Card (Light Theme) -->
-      <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-xs);">
-        <div>
-          <h3 style="font-size: 15px; color: #1A365D; margin-bottom: 8px; font-weight: 700;">Vision</h3>
-          <p style="font-size: 13.5px; line-height: 1.45; color: var(--text-secondary);">
-            Democratizing precision oncology, by making it <span class="brand-link" onclick="window.triggerSearchHub('')">actionable, accessible and affordable</span>.
-          </p>
-        </div>
-        <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 10px;">Guidelines v3.0 Core Value</div>
-      </div>
-    </div>
-
     <div class="dashboard-section">
       <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom: 16px;">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -1907,7 +1891,7 @@ function renderCompanyAssets() {
           <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; background: var(--bg-secondary); border: 2px dashed var(--border-color); border-radius: var(--radius-md);">
             <div style="font-size: 38px; margin-bottom: 12px;">📁</div>
             <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">No Company Documents Found</h3>
-            <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 16px;">This tab holds all company-wide documents, corporate presentations, brand guidelines, and legal agreements.${isMarketingUser() ? ' Click below to add the first asset.' : ''}</p>
+            <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 16px;">This repository holds all authentic company-wide documents, corporate presentations, brand guidelines, and legal agreements.${isMarketingUser() ? ' Click below to add the first asset.' : ''}</p>
             ${isMarketingUser() ? `<button class="btn-primary" onclick="window.triggerRegisterAssetModal('company-assets')">+ Add First Company Asset</button>` : ''}
           </div>
         `}
