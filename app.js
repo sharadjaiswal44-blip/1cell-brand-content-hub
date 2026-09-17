@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260915-v42';
+import db from './db.js?v=20260917-v43';
 import { 
   normalizeTeam,
   canTeamViewVisibility,
@@ -1806,17 +1806,26 @@ function renderDocumentCard(doc, options = {}) {
 // Helper to determine if a document is purely a Company/Corporate asset (not a Product workspace asset)
 function isCompanyAsset(d) {
   if (!d) return false;
-  if (d.category === 'company-assets') return true;
+  if (DUMMY_COMPANY_DOC_IDS.has(d.id)) return false;
+  
   const prod = (d.product || '').toLowerCase().trim();
   // If document belongs to a specific product model, it is NEVER a company asset
-  if (prod && prod !== 'company' && prod !== 'corporate' && prod !== 'none' && prod !== 'null') {
+  if (prod && prod !== 'company' && prod !== 'corporate' && prod !== 'none' && prod !== 'null' && prod !== '') {
     return false;
   }
-  // Exclude standalone scientific resources / cases / reports if category is different
-  if (d.category === 'case-library' || d.category === 'report-library' || d.category === 'scientific-resources' || d.category === 'publications') {
+  
+  // Exclude standalone scientific resources / cases / reports / publications / videos
+  const cat = (d.category || '').toLowerCase().trim();
+  if (cat === 'case-library' || cat === 'cases' || cat === 'report-library' || cat === 'scientific-resources' || cat === 'publications' || cat === 'videos') {
     return false;
   }
-  return prod === 'company' || prod === 'corporate' || (!prod && (d.category === 'company-assets' || d.department === 'Corporate'));
+  
+  const cType = (d.contentType || '').toLowerCase().trim();
+  if (cType === 'case study' || cType === 'publication' || cType === 'sample report' || cType === 'video') {
+    return false;
+  }
+  
+  return prod === 'company' || prod === 'corporate' || !prod || prod === 'none' || prod === 'null' || cat === 'company-assets' || d.department === 'Corporate';
 }
 window.isCompanyAsset = isCompanyAsset;
 
