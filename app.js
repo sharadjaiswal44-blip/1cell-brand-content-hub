@@ -513,73 +513,10 @@ function getAllProductAssets(prodId) {
 }
 window.getAllProductAssets = getAllProductAssets;
 
-// Render product asset card (handles standard docs, publications, and videos seamlessly)
+// Render product asset card as uniform standard card across all content types
 function renderProductAssetCard(asset) {
   if (!asset) return '';
-  if (asset.isPublication || asset.journal) {
-    return `
-      <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer; margin-bottom:0;" onclick="window.openSharePoint('${asset.id}')" title="Click to view publication in SharePoint">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
-          <div class="pub-journal">${asset.journal || 'Peer-Reviewed'} (${asset.publishedDate || '2025-2026'})</div>
-        </div>
-        <h3 style="font-size:16px; font-weight:700; margin:6px 0 8px 0; color:var(--text-primary);">${asset.title}</h3>
-        <div class="pub-authors" style="margin-bottom:10px;">${asset.authors || asset.author || '1Cell.Ai'}</div>
-        <div class="pub-abstract-box" style="margin-bottom:12px;"><strong>Abstract:</strong> ${asset.abstract || asset.description || ''}</div>
-        <div class="card-metadata" style="margin-bottom:12px;">
-          ${renderCardLastUpdatedRow(asset)}
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div class="pub-citation"><strong>Citation:</strong> ${asset.citation || '1Cell.Ai Research'}</div>
-          <div style="display:flex; gap:6px;">
-            ${isMarketingUser() ? `
-            <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${asset.id}')">Edit</button>
-            <button class="btn-outline" style="padding:5px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${asset.id}')">Delete</button>
-            ` : ''}
-            <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.previewDocument('${asset.id}')" title="Preview details">Preview</button>
-            <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${asset.id}')">View</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-  if (asset.isVideo || asset.duration) {
-    return `
-      <div class="doc-card" onclick="window.openSharePoint('${asset.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
-        <div class="video-card-thumbnail" onclick="window.openSharePoint('${asset.id}')" style="cursor:pointer;">
-          <div class="video-play-icon">▶</div>
-          <span class="video-duration">${asset.duration || 'Video'}</span>
-        </div>
-        <div class="card-body" style="padding:16px; display:flex; flex-direction:column; flex:1;">
-          <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${asset.title}</h3>
-          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
-            <span>Speaker: ${asset.speaker || asset.author || '1Cell.Ai'}</span>
-            <span>Type: ${asset.type || 'Video'}</span>
-          </div>
-          <div class="card-metadata" style="margin-top:auto; margin-bottom:10px;">
-            ${renderCardLastUpdatedRow(asset)}
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:10px;">
-            <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${asset.id}')">View</button>
-            <div style="display:flex; gap:4px;">
-              ${isMarketingUser() ? `
-              <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${asset.id}')" title="Edit Video">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                </svg>
-              </button>
-              <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${asset.id}')" title="Delete Video" style="color:#ef4444;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
-              </button>
-              ` : ''}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-  return renderDocumentCard(asset, { hideProductTag: true });
+  return renderDocumentCard(asset, { hideProductTag: true, isProductHub: true });
 }
 
 // Application State
@@ -1788,7 +1725,7 @@ function renderDocumentCard(doc, options = {}) {
     <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
       <div class="card-header-bar">
         <div class="card-type-icon">
-          ${doc.contentType === 'Video' ? '🎥' : doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation' ? '📊' : doc.contentType === 'Sample Report' ? '📋' : doc.contentType === 'Whitepaper' || doc.contentType === 'WhitePaper' ? '🧬' : '📄'}
+          ${doc.contentType === 'Video' ? '🎥' : (doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation') ? '📊' : (doc.contentType === 'Battlecard' || doc.contentType === 'Playbook') ? '⚔️' : doc.contentType === 'Sample Report' ? '📋' : (doc.contentType === 'Whitepaper' || doc.contentType === 'WhitePaper' || doc.contentType === 'Publication') ? '🧬' : (doc.contentType === 'Case Study' || doc.contentType === 'Case Review' || doc.contentType === 'Case Studies') ? '🔬' : doc.contentType === 'Brochure' ? '📖' : '📄'}
         </div>
         <div class="card-tags">
           ${productTag}
