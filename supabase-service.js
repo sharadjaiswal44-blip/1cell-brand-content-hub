@@ -16,6 +16,13 @@ class SupabaseService {
   }
 
   /**
+   * Checks if Supabase connection credentials are configured.
+   */
+  isConfigured() {
+    return isSupabaseConfigured();
+  }
+
+  /**
    * Dynamically loads and returns the Supabase client instance.
    */
   async getClient() {

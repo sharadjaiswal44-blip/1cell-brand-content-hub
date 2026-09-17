@@ -55,7 +55,10 @@ exception when others then
   null;
 end $$;
 
--- 4. Enable Row Level Security (RLS) & Define Access Policies
+-- 4. Enable Table Grants & Row Level Security (RLS)
+grant usage on schema public to anon, authenticated;
+grant all on table public.content_assets to anon, authenticated;
+
 alter table public.content_assets enable row level security;
 
 -- Clean up existing policies if re-running
@@ -64,21 +67,26 @@ drop policy if exists "Allow insert assets" on public.content_assets;
 drop policy if exists "Allow update assets" on public.content_assets;
 drop policy if exists "Allow delete assets" on public.content_assets;
 
--- Read policy: Anyone with the public/anon key can read non-deleted assets
+-- Read policy: Anyone with the public/anon or authenticated key can read non-deleted assets
 create policy "Allow read active assets" on public.content_assets 
-  for select using (is_deleted = false);
+  for select to anon, authenticated 
+  using (is_deleted = false);
 
 -- Insert policy: Authorized team members can register new content cards
 create policy "Allow insert assets" on public.content_assets 
-  for insert with check (title is not null and sharepoint_url is not null);
+  for insert to anon, authenticated 
+  with check (title is not null and sharepoint_url is not null);
 
 -- Update policy: Authorized team members can update metadata and soft-delete cards
 create policy "Allow update assets" on public.content_assets 
-  for update using (true);
+  for update to anon, authenticated 
+  using (true)
+  with check (true);
 
 -- Delete policy: Allows explicit deletion if needed (though soft-delete is preferred)
 create policy "Allow delete assets" on public.content_assets 
-  for delete using (true);
+  for delete to anon, authenticated 
+  using (true);
 
 -- ============================================================================
 -- 5. Seed Existing Content Hub Cards (31 Docs, 20 Cases, 21 Pubs, 6 Vids, 11 Reports)

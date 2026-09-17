@@ -2759,6 +2759,39 @@ window.saveNewSampleReport = function() {
   
   // Re-render report library view
   renderReportLibrary();
+
+  // Background sync to Supabase if configured
+  if (supabaseService && typeof supabaseService.isConfigured === 'function' && supabaseService.isConfigured()) {
+    supabaseService.createAsset({
+      id: newReport.id,
+      title: newReport.title,
+      description: newReport.summary,
+      category: 'report-library',
+      department: 'Medical',
+      product_workspace: product,
+      content_type: 'Sample Report',
+      region: 'Global',
+      cancer_type: cancerType,
+      biomarkers: biomarker || 'None',
+      owner_author: author,
+      version: version,
+      status: status,
+      target_team: 'medical',
+      collaboration_scope: 'all',
+      sharepoint_url: sharePointUrl,
+      sharepoint_folder_path: newReport.folderPath,
+      created_by: author,
+      created_by_email: 'team@1cell.ai',
+      is_deleted: false,
+      extra_metadata: {
+        specimen: specimen || 'FFPE Tumor Tissue',
+        size: newReport.size,
+        viewCount: 1
+      }
+    }).catch(err => {
+      console.warn('Background Supabase insert notice for sample report:', err);
+    });
+  }
 };
 
 
