@@ -172,7 +172,7 @@ const db = {
                   "Provides comprehensive clonal resolution for translational oncology and real-time therapeutic adaptation."
             ],
             "competitiveAdvantage": "While conventional ctDNA captures bulk apoptotic fragments and misses private sub-clones, OncoIncytes® integrates live single-cell multi-omics with matched ctDNA to uncover the complete genomic and transcriptomic landscape of therapy resistance.",
-            "logo": "assets/logos/logo_oncoincytes.png"
+            "logo": "assets/logos/logo_oncoincytes.png?v=20260917"
       },
       {
             "id": "icore",
