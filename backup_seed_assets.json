@@ -1,8 +1,8 @@
 [
   {
     "id": "doc-016",
-    "title": "OncoPredikt\u00ae BRS Product Brochure",
-    "description": "Official comprehensive product brochure for OncoPredikt\u00ae BRS detailing testing methodology, clinical indications, breast cancer risk scoring, and workflow specifications.",
+    "title": "OncoPredikt® BRS Product Brochure",
+    "description": "Official comprehensive product brochure for OncoPredikt® BRS detailing testing methodology, clinical indications, breast cancer risk scoring, and workflow specifications.",
     "category": "company-assets",
     "department": "Marketing",
     "product_workspace": "oncopredikt",
@@ -33,8 +33,8 @@
   },
   {
     "id": "doc-017",
-    "title": "OncoPredikt\u00ae BRS Comparative Study",
-    "description": "Clinical comparative study validating OncoPredikt\u00ae BRS analytical accuracy and concordant risk stratification against standard global genomic profiling benchmarks.",
+    "title": "OncoPredikt® BRS Comparative Study",
+    "description": "Clinical comparative study validating OncoPredikt® BRS analytical accuracy and concordant risk stratification against standard global genomic profiling benchmarks.",
     "category": "company-assets",
     "department": "Scientific",
     "product_workspace": "oncopredikt",
@@ -65,8 +65,8 @@
   },
   {
     "id": "doc-018",
-    "title": "OncoPredikt\u00ae BRS Retrospective Study",
-    "description": "Multi-cohort retrospective validation study of OncoPredikt\u00ae BRS assessing recurrence risk prediction, distant recurrence free interval (DRFI), and chemotherapy benefit guidance.",
+    "title": "OncoPredikt® BRS Retrospective Study",
+    "description": "Multi-cohort retrospective validation study of OncoPredikt® BRS assessing recurrence risk prediction, distant recurrence free interval (DRFI), and chemotherapy benefit guidance.",
     "category": "company-assets",
     "department": "Medical",
     "product_workspace": "oncopredikt",
@@ -97,8 +97,8 @@
   },
   {
     "id": "doc-019",
-    "title": "OncoPredikt\u00ae SABCS 2025 Scientific Poster",
-    "description": "Official scientific conference poster presentation presented at the San Antonio Breast Cancer Symposium (SABCS) detailing OncoPredikt\u00ae prospective multi-center trial data.",
+    "title": "OncoPredikt® SABCS 2025 Scientific Poster",
+    "description": "Official scientific conference poster presentation presented at the San Antonio Breast Cancer Symposium (SABCS) detailing OncoPredikt® prospective multi-center trial data.",
     "category": "company-assets",
     "department": "Scientific",
     "product_workspace": "oncopredikt",
@@ -129,7 +129,7 @@
   },
   {
     "id": "doc-031",
-    "title": "OncoIndx\u00ae Prime+ Clinical Case Study: Breast Cancer",
+    "title": "OncoIndx® Prime+ Clinical Case Study: Breast Cancer",
     "description": "Tissue-Liquid-Normal matching clinical case study evaluating whole transcriptomic profiling (25,000 genes) and somatic vs. germline variant distinction in advanced breast carcinoma.",
     "category": "company-assets",
     "department": "Medical",
@@ -161,7 +161,7 @@
   },
   {
     "id": "doc-032",
-    "title": "OncoIndx\u00ae Prime+ Clinical Case Study: Pancreatic Cancer",
+    "title": "OncoIndx® Prime+ Clinical Case Study: Pancreatic Cancer",
     "description": "Multi-specimen genomic and transcriptomic profiling resolving driver mutations, actionable somatic targets, and therapy resistance pathways in advanced pancreatic carcinoma.",
     "category": "company-assets",
     "department": "Medical",
@@ -193,7 +193,7 @@
   },
   {
     "id": "doc-033",
-    "title": "OncoIndx\u00ae Prime+ Clinical Case Study: Cancer of Unknown Primary (CUP)",
+    "title": "OncoIndx® Prime+ Clinical Case Study: Cancer of Unknown Primary (CUP)",
     "description": "RNA-based Whole Transcriptomic Sequencing (WTS) for tissue-of-origin resolution and actionable therapeutic target identification in metastatic cancer of unknown primary.",
     "category": "company-assets",
     "department": "Medical",
@@ -225,7 +225,7 @@
   },
   {
     "id": "doc-034",
-    "title": "OncoIndx\u00ae Prime+ Clinical Case Study: Dual Primary Bladder & Prostate",
+    "title": "OncoIndx® Prime+ Clinical Case Study: Dual Primary Bladder & Prostate",
     "description": "Simultaneous tissue and liquid biopsy profiling deconvoluting synchronous primary malignancies and clonal lineage distinction in complex multi-organ cancer presentation.",
     "category": "company-assets",
     "department": "Medical",
@@ -257,7 +257,7 @@
   },
   {
     "id": "doc-035",
-    "title": "OncoIndx\u00ae Prime+ Clinical Case Study: Dual Primary Lung & Bladder",
+    "title": "OncoIndx® Prime+ Clinical Case Study: Dual Primary Lung & Bladder",
     "description": "Deconvoluting synchronous pulmonary and urothelial carcinoma using matched blood, liquid biopsy, and tissue FFPE sequencing to guide sequential targeted therapies.",
     "category": "company-assets",
     "department": "Medical",
@@ -289,7 +289,7 @@
   },
   {
     "id": "doc-036",
-    "title": "OncoIndx\u00ae Prime+ Clinical Case Study: Mesothelioma",
+    "title": "OncoIndx® Prime+ Clinical Case Study: Mesothelioma",
     "description": "Comprehensive molecular and transcriptomic analysis in malignant pleural mesothelioma differentiating germline BAP1 variants from somatic loss to guide PARP and immunotherapy strategies.",
     "category": "company-assets",
     "department": "Medical",
@@ -321,7 +321,7 @@
   },
   {
     "id": "doc-037",
-    "title": "OncoIndx\u00ae Prime+ Clinical Case Study: Sarcomas",
+    "title": "OncoIndx® Prime+ Clinical Case Study: Sarcomas",
     "description": "Whole transcriptomic fusion detection and tissue-liquid concordance in rare soft tissue and bone sarcoma cases resolving diagnostic classification and kinase inhibitor eligibility.",
     "category": "company-assets",
     "department": "Medical",
@@ -353,7 +353,7 @@
   },
   {
     "id": "doc-038",
-    "title": "OncoIndx\u00ae Prime+ Clinical Case Study: Squamous Cell Carcinoma",
+    "title": "OncoIndx® Prime+ Clinical Case Study: Squamous Cell Carcinoma",
     "description": "Genomic driver mapping, PD-L1 expression, and pathway signature profiling in metastatic squamous cell carcinoma identifying synergistic immunotherapeutic combinations.",
     "category": "company-assets",
     "department": "Medical",
@@ -385,8 +385,8 @@
   },
   {
     "id": "doc-041",
-    "title": "OncoCTC\u00ae Product Brochure",
-    "description": "Official brochure detailing the OncoCTC\u00ae platform, circulating tumor cell enumeration, single-cell multi-omic profiling, and clinical indications.",
+    "title": "OncoCTC® Product Brochure",
+    "description": "Official brochure detailing the OncoCTC® platform, circulating tumor cell enumeration, single-cell multi-omic profiling, and clinical indications.",
     "category": "company-assets",
     "department": "Marketing",
     "product_workspace": "oncoctc",
@@ -417,7 +417,7 @@
   },
   {
     "id": "doc-042",
-    "title": "OncoCTC\u00ae Clinical Case Study: Early Resistance Detection",
+    "title": "OncoCTC® Clinical Case Study: Early Resistance Detection",
     "description": "Clinical case study demonstrating high-sensitivity identification of actionable DNA repair mutations and therapy resistance via live CTC genomics.",
     "category": "company-assets",
     "department": "Medical",
@@ -449,7 +449,7 @@
   },
   {
     "id": "doc-043",
-    "title": "OncoCTC\u00ae Technical Whitepaper: High-Purity Live CTC Capture",
+    "title": "OncoCTC® Technical Whitepaper: High-Purity Live CTC Capture",
     "description": "Scientific whitepaper detailing zero-leukocyte background microfluidic capture, analytical validation, and multi-omic concordance across 5,000+ patients.",
     "category": "company-assets",
     "department": "Scientific",
@@ -481,8 +481,8 @@
   },
   {
     "id": "doc-044",
-    "title": "OncoCTC\u00ae Competitor Battlecard vs. CellSearch & ctDNA",
-    "description": "Comprehensive sales battlecard highlighting OncoCTC advantages over CellSearch\u00ae, Parsortix\u00ae, and standard ctDNA fragmentomics assays.",
+    "title": "OncoCTC® Competitor Battlecard vs. CellSearch & ctDNA",
+    "description": "Comprehensive sales battlecard highlighting OncoCTC advantages over CellSearch®, Parsortix®, and standard ctDNA fragmentomics assays.",
     "category": "company-assets",
     "department": "Sales",
     "product_workspace": "oncoctc",
@@ -513,7 +513,7 @@
   },
   {
     "id": "doc-045",
-    "title": "OncoCTC\u00ae Product Details & Presentation",
+    "title": "OncoCTC® Product Details & Presentation",
     "description": "Comprehensive presentation deck detailing OncoCTC single-cell multi-omic methodology, clinical indications, and turnaround protocols.",
     "category": "company-assets",
     "department": "Marketing",
@@ -545,8 +545,8 @@
   },
   {
     "id": "doc-046",
-    "title": "OncoAlibrex\u00ae Product Brochure",
-    "description": "Official brochure detailing OncoAlibrex\u00ae real-time therapy monitoring, longitudinal molecular assessment, clinical indications, and antigen-independent monitoring.",
+    "title": "OncoAlibrex® Product Brochure",
+    "description": "Official brochure detailing OncoAlibrex® real-time therapy monitoring, longitudinal molecular assessment, clinical indications, and antigen-independent monitoring.",
     "category": "company-assets",
     "department": "Marketing",
     "product_workspace": "oncoalibrex",
@@ -577,8 +577,8 @@
   },
   {
     "id": "doc-047",
-    "title": "OncoAlibrex\u00ae Stage IV Colorectal Cancer Case Study",
-    "description": "Clinical case study demonstrating longitudinal molecular monitoring with OncoAlibrex\u00ae during FOLFOX therapy in a Stage IV colorectal cancer patient without CEA expression.",
+    "title": "OncoAlibrex® Stage IV Colorectal Cancer Case Study",
+    "description": "Clinical case study demonstrating longitudinal molecular monitoring with OncoAlibrex® during FOLFOX therapy in a Stage IV colorectal cancer patient without CEA expression.",
     "category": "company-assets",
     "department": "Medical",
     "product_workspace": "oncoalibrex",
@@ -609,7 +609,7 @@
   },
   {
     "id": "doc-048",
-    "title": "OncoAlibrex\u00ae Technical Whitepaper: Real-Time Therapy Monitoring",
+    "title": "OncoAlibrex® Technical Whitepaper: Real-Time Therapy Monitoring",
     "description": "Scientific whitepaper detailing the methodology, analytical sensitivity, and clinical escalation utility of longitudinal molecular tracking.",
     "category": "company-assets",
     "department": "Scientific",
@@ -641,8 +641,8 @@
   },
   {
     "id": "doc-051",
-    "title": "OncoIncytes\u00ae Product Brochure",
-    "description": "Official comprehensive brochure detailing OncoIncytes\u00ae dual single-cell CTC multi-omics paired with cell-free ctDNA from a single blood tube to uncover emergent therapy resistance and clonal heterogeneity.",
+    "title": "OncoIncytes® Product Brochure",
+    "description": "Official comprehensive brochure detailing OncoIncytes® dual single-cell CTC multi-omics paired with cell-free ctDNA from a single blood tube to uncover emergent therapy resistance and clonal heterogeneity.",
     "category": "company-assets",
     "department": "Marketing",
     "product_workspace": "oncoincytes",
@@ -673,7 +673,7 @@
   },
   {
     "id": "doc-052",
-    "title": "OncoIncytes\u00ae Technical Whitepaper: Multi-Omic Clonal Resolution",
+    "title": "OncoIncytes® Technical Whitepaper: Multi-Omic Clonal Resolution",
     "description": "Scientific whitepaper detailing technical validation, single-cell NGS concordance, and bypass pathway mutation discovery of the OncoIncytes multi-modal liquid biopsy platform.",
     "category": "company-assets",
     "department": "Scientific",
@@ -705,7 +705,7 @@
   },
   {
     "id": "doc-053",
-    "title": "OncoIncytes\u00ae Clinical Case Study (ASCO 2026)",
+    "title": "OncoIncytes® Clinical Case Study (ASCO 2026)",
     "description": "Landmark clinical case study presented at ASCO 2026 demonstrating how matched CTC + ctDNA profiling identified baseline EGFR bypass mutations predicting reduced progression-free survival in advanced NSCLC.",
     "category": "company-assets",
     "department": "Medical",
@@ -737,7 +737,7 @@
   },
   {
     "id": "doc-054",
-    "title": "OncoIncytes\u00ae Platform Video Overview",
+    "title": "OncoIncytes® Platform Video Overview",
     "description": "High-definition scientific and commercial walkthrough video explaining the microfluidic workflow, single-cell multi-omic profiling, and clinical benefits of the OncoIncytes platform.",
     "category": "company-assets",
     "department": "Sales",
@@ -881,7 +881,7 @@
   },
   {
     "id": "case-005",
-    "title": "Comprehensive Liquid Biopsy Profiling Reveals Dual PIK3CA and ESR1 Mutations in Hormone Receptor\u2013Positive Metastatic Breast Carcinoma",
+    "title": "Comprehensive Liquid Biopsy Profiling Reveals Dual PIK3CA and ESR1 Mutations in Hormone Receptor–Positive Metastatic Breast Carcinoma",
     "description": "73-year-old female patient with invasive ductal carcinoma (IDC) and endocrine therapy resistance markers.",
     "category": "case-library",
     "department": "Medical",
@@ -1217,7 +1217,7 @@
   },
   {
     "id": "case-017",
-    "title": "Concurrent Tissue\u2013Liquid\u2013Normal Matched Multi-Omics Analysis Enables Precision Targeting in Advanced Lung Cancer",
+    "title": "Concurrent Tissue–Liquid–Normal Matched Multi-Omics Analysis Enables Precision Targeting in Advanced Lung Cancer",
     "description": "Matching solid biopsy genomic alterations to cell-free DNA signals.",
     "category": "case-library",
     "department": "Medical",
@@ -1301,7 +1301,7 @@
   },
   {
     "id": "case-020",
-    "title": "Stage IV Colorectal Cancer \u2014 CEA-Negative Longitudinal Molecular Monitoring During FOLFOX",
+    "title": "Stage IV Colorectal Cancer — CEA-Negative Longitudinal Molecular Monitoring During FOLFOX",
     "description": "A 65-year-old male with Stage IV colorectal cancer and liver/lung metastases who did not express CEA. OncoAlibrex provided antigen-independent longitudinal molecular monitoring during FOLFOX chemotherapy with an established escalation pathway to add cetuximab on progression.",
     "category": "case-library",
     "department": "Medical",
@@ -2058,7 +2058,7 @@
   },
   {
     "id": "report-001",
-    "title": "OncoIndx\u00ae Comprehensive Genomic Profile - Non-Small Cell Lung Carcinoma (EGFR Exon 19 del)",
+    "title": "OncoIndx® Comprehensive Genomic Profile - Non-Small Cell Lung Carcinoma (EGFR Exon 19 del)",
     "description": "Lung Cancer Sample Report for ONCOINDX",
     "category": "report-library",
     "department": "Medical",
@@ -2083,7 +2083,7 @@
   },
   {
     "id": "report-002",
-    "title": "OncoIndx\u00ae Prime+ Whole Exome & Transcriptome - Triple Negative Breast Cancer",
+    "title": "OncoIndx® Prime+ Whole Exome & Transcriptome - Triple Negative Breast Cancer",
     "description": "Breast Cancer Sample Report for PRIMEPLUS",
     "category": "report-library",
     "department": "Medical",
@@ -2108,7 +2108,7 @@
   },
   {
     "id": "report-003",
-    "title": "OncoIndx\u00ae TBx cfDNA Liquid Biopsy - Metastatic Colorectal Carcinoma",
+    "title": "OncoIndx® TBx cfDNA Liquid Biopsy - Metastatic Colorectal Carcinoma",
     "description": "Colorectal Cancer Sample Report for ONCOINDXTBX",
     "category": "report-library",
     "department": "Medical",
@@ -2133,7 +2133,7 @@
   },
   {
     "id": "report-004",
-    "title": "OncoIndx\u00ae 360\u00b0 Endometrium Molecular Classification - Endometrioid Adenocarcinoma",
+    "title": "OncoIndx® 360° Endometrium Molecular Classification - Endometrioid Adenocarcinoma",
     "description": "Endometrial Cancer Sample Report for ONCOINDX360",
     "category": "report-library",
     "department": "Medical",
@@ -2158,7 +2158,7 @@
   },
   {
     "id": "report-005",
-    "title": "OncoHRD\u00ae Genomic Scarring & LOH Analysis - High-Grade Serous Ovarian Carcinoma",
+    "title": "OncoHRD® Genomic Scarring & LOH Analysis - High-Grade Serous Ovarian Carcinoma",
     "description": "Ovarian Cancer Sample Report for ONCOHRD",
     "category": "report-library",
     "department": "Medical",
@@ -2183,7 +2183,7 @@
   },
   {
     "id": "report-006",
-    "title": "OncoTarget\u00ae Actionable Oncology Panel - Lung Adenocarcinoma",
+    "title": "OncoTarget® Actionable Oncology Panel - Lung Adenocarcinoma",
     "description": "Lung Cancer Sample Report for ONCOTARGET",
     "category": "report-library",
     "department": "Medical",
@@ -2208,7 +2208,7 @@
   },
   {
     "id": "report-007",
-    "title": "OncoRisk\u00ae Hereditary Cancer Predisposition - Familial Breast & Ovarian Syndrome",
+    "title": "OncoRisk® Hereditary Cancer Predisposition - Familial Breast & Ovarian Syndrome",
     "description": "Breast Cancer Sample Report for ONCORISK",
     "category": "report-library",
     "department": "Medical",
@@ -2233,7 +2233,7 @@
   },
   {
     "id": "report-008",
-    "title": "OncoMonitor\u00ae Minimal Residual Disease & Recurrence Tracking - Colorectal Cancer",
+    "title": "OncoMonitor® Minimal Residual Disease & Recurrence Tracking - Colorectal Cancer",
     "description": "Colorectal Cancer Sample Report for ONCOMONITOR",
     "category": "report-library",
     "department": "Medical",
@@ -2258,7 +2258,7 @@
   },
   {
     "id": "report-009",
-    "title": "OncoCTC\u00ae Rare Cell Enumeration & AR-V7 Phenotypic Profiling - Metastatic Prostate Cancer",
+    "title": "OncoCTC® Rare Cell Enumeration & AR-V7 Phenotypic Profiling - Metastatic Prostate Cancer",
     "description": "Prostate Cancer Sample Report for ONCOCTC",
     "category": "report-library",
     "department": "Medical",
@@ -2283,7 +2283,7 @@
   },
   {
     "id": "report-010",
-    "title": "iCore\u00ae AI Genomic Intelligence & Variant Interpretation - Solid Tumor Pan-Cancer",
+    "title": "iCore® AI Genomic Intelligence & Variant Interpretation - Solid Tumor Pan-Cancer",
     "description": "Pan Cancer Sample Report for ICORE",
     "category": "report-library",
     "department": "Medical",
@@ -2308,7 +2308,7 @@
   },
   {
     "id": "report-011",
-    "title": "OncoAlibrex\u00ae Real-Time Therapy Monitoring - Stage IV Metastatic Colorectal Carcinoma",
+    "title": "OncoAlibrex® Real-Time Therapy Monitoring - Stage IV Metastatic Colorectal Carcinoma",
     "description": "Colorectal Cancer Sample Report for ONCOALIBREX",
     "category": "report-library",
     "department": "Medical",
@@ -2330,5 +2330,85 @@
     "updated_at": "2026-09-08T09:52:43.443Z",
     "is_deleted": false,
     "extra_metadata": {}
+  },
+  {
+    "id": "doc-049",
+    "title": "OncoAlibrex® Competitor Battlecard vs. Conventional CEA & ctDNA Assays",
+    "description": "Sales battlecard comparing OncoAlibrex antigen-independent molecular monitoring against traditional CEA/CA-19-9 markers and ctDNA fragmentomics.",
+    "category": "company-assets",
+    "department": "Marketing",
+    "product_workspace": "oncoalibrex",
+    "content_type": "Battlecard",
+    "region": "Global",
+    "cancer_type": "Colorectal Cancer",
+    "biomarkers": "Longitudinal Molecular Monitoring | Antigen-Independent",
+    "owner_author": "Commercial Enablement",
+    "version": "v1.0",
+    "status": "Approved",
+    "target_team": "marketing",
+    "collaboration_scope": "all",
+    "sharepoint_url": "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/1Cell.Ai%20Marketing/1Cell.Ai%20Content/OncoAlibrex/OncoAlibrex_Battlecard.pdf",
+    "sharepoint_folder_path": "Shared Documents/1Cell.Ai Marketing/1Cell.Ai Content/OncoAlibrex",
+    "is_active": true
+  },
+  {
+    "id": "doc-050",
+    "title": "OncoAlibrex® Product Presentation & Clinical Slide Deck",
+    "description": "Comprehensive slide kit detailing OncoAlibrex longitudinal therapy monitoring protocols, molecular escalation pathways, and case studies.",
+    "category": "company-assets",
+    "department": "Marketing",
+    "product_workspace": "oncoalibrex",
+    "content_type": "Presentation",
+    "region": "Global",
+    "cancer_type": "Colorectal Cancer",
+    "biomarkers": "Real-Time Therapy Response | FOLFOX Escalation",
+    "owner_author": "Product Marketing",
+    "version": "v1.0",
+    "status": "Approved",
+    "target_team": "marketing",
+    "collaboration_scope": "all",
+    "sharepoint_url": "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/1Cell.Ai%20Marketing/1Cell.Ai%20Content/OncoAlibrex/OncoAlibrex_Presentation_Deck.pdf",
+    "sharepoint_folder_path": "Shared Documents/1Cell.Ai Marketing/1Cell.Ai Content/OncoAlibrex",
+    "is_active": true
+  },
+  {
+    "id": "doc-050b",
+    "title": "OncoAlibrex® Clinical FAQ & Physician Ordering Guide",
+    "description": "Physician discussion guide and clinical FAQ addressing turnaround time, sample requirements, and therapy escalation criteria.",
+    "category": "company-assets",
+    "department": "Marketing",
+    "product_workspace": "oncoalibrex",
+    "content_type": "Brochure",
+    "region": "Global",
+    "cancer_type": "Colorectal Cancer",
+    "biomarkers": "Longitudinal Molecular Response",
+    "owner_author": "Medical Affairs",
+    "version": "v1.0",
+    "status": "Approved",
+    "target_team": "marketing",
+    "collaboration_scope": "all",
+    "sharepoint_url": "https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/1Cell.Ai%20Marketing/1Cell.Ai%20Content/OncoAlibrex/OncoAlibrex_Physician_FAQ_Guide.pdf",
+    "sharepoint_folder_path": "Shared Documents/1Cell.Ai Marketing/1Cell.Ai Content/OncoAlibrex",
+    "is_active": true
+  },
+  {
+    "id": "vid-007",
+    "title": "OncoAlibrex® Real-Time Therapy Monitoring Masterclass",
+    "description": "Dr. Richa Sharma breaks down longitudinal molecular response tracking in metastatic colorectal and solid tumors using OncoAlibrex.",
+    "category": "videos",
+    "department": "Marketing",
+    "product_workspace": "oncoalibrex",
+    "content_type": "Video",
+    "region": "Global",
+    "cancer_type": "Colorectal Cancer",
+    "biomarkers": "Longitudinal Therapy Response",
+    "owner_author": "Dr. Richa Sharma",
+    "version": "v1.0",
+    "status": "Approved",
+    "target_team": "marketing",
+    "collaboration_scope": "all",
+    "sharepoint_url": "https://www.youtube.com/@1CellAi",
+    "sharepoint_folder_path": "Digital Videos",
+    "is_active": true
   }
 ]
