@@ -396,6 +396,191 @@ function getProductAssetCategory(doc) {
   return 'other';
 }
 
+// Unified, deduplicated product asset aggregator across all collections and cloud sync
+function getAllProductAssets(prodId) {
+  if (!prodId) return [];
+  const userTeam = getCurrentUserTeam();
+  const map = new Map();
+
+  // 1. Documents matching product workspace
+  (db.documents || []).forEach(d => {
+    if (d.product === prodId && canTeamViewVisibility(userTeam, d.visibility || d.department)) {
+      map.set(String(d.id), { ...d });
+    }
+  });
+
+  // 2. Cases matching product
+  (db.cases || []).forEach(c => {
+    if ((c.relatedProduct === prodId || c.product === prodId) && canTeamViewVisibility(userTeam, c.visibility || c.department)) {
+      if (!map.has(String(c.id))) {
+        map.set(String(c.id), {
+          id: c.id,
+          title: c.title,
+          description: c.summary || c.description || '',
+          department: c.department || 'Medical',
+          product: prodId,
+          contentType: c.contentType || 'Case Study',
+          cancerType: c.cancerType || 'None',
+          biomarker: c.biomarker || 'None',
+          eventType: c.eventType || 'Case Review',
+          status: c.status || 'Approved',
+          version: c.version || 'v1.0',
+          author: c.doctor || c.author || c.owner || '1Cell.Ai',
+          owner: c.doctor || c.author || c.owner || '1Cell.Ai',
+          sharePointUrl: c.sharePointUrl || c.readMoreUrl || c.oneDriveUrl
+        });
+      }
+    }
+  });
+
+  // 3. Sample Reports matching product
+  (db.reports || []).forEach(r => {
+    if ((r.product === prodId || r.relatedProduct === prodId) && canTeamViewVisibility(userTeam, r.visibility || r.department)) {
+      if (!map.has(String(r.id))) {
+        map.set(String(r.id), {
+          id: r.id,
+          title: r.title,
+          description: r.summary || r.description || '',
+          department: r.department || 'Medical',
+          product: prodId,
+          contentType: r.contentType || 'Sample Report',
+          cancerType: r.cancerType || 'None',
+          biomarker: r.biomarker || 'None',
+          status: r.status || 'Approved',
+          version: r.version || 'v1.0',
+          author: r.author || r.owner || '1Cell.Ai',
+          owner: r.owner || r.author || '1Cell.Ai',
+          sharePointUrl: r.sharePointUrl || r.downloadUrl || r.oneDriveUrl
+        });
+      }
+    }
+  });
+
+  // 4. Publications matching product
+  (db.publications || []).forEach(p => {
+    if ((p.relatedProduct === prodId || p.product === prodId) && canTeamViewVisibility(userTeam, p.visibility || p.department)) {
+      if (!map.has(String(p.id))) {
+        map.set(String(p.id), {
+          id: p.id,
+          title: p.title,
+          description: p.abstract || p.description || '',
+          department: p.department || 'Scientific',
+          product: prodId,
+          contentType: p.contentType || 'Publication',
+          cancerType: p.cancerType || 'None',
+          journal: p.journal || 'Peer-Reviewed',
+          publishedDate: p.publishedDate || '2025-2026',
+          authors: p.authors || p.owner || '1Cell.Ai',
+          citation: p.citation || '1Cell.Ai Research',
+          abstract: p.abstract || p.description || '',
+          status: p.status || 'Approved',
+          version: p.version || 'v1.0',
+          author: p.authors || p.owner || '1Cell.Ai',
+          owner: p.authors || p.owner || '1Cell.Ai',
+          sharePointUrl: p.sharePointUrl || p.link || p.oneDriveUrl,
+          isPublication: true
+        });
+      }
+    }
+  });
+
+  // 5. Videos matching product
+  (db.videos || []).forEach(v => {
+    if ((v.product === prodId || v.relatedProduct === prodId) && canTeamViewVisibility(userTeam, v.visibility || v.department)) {
+      if (!map.has(String(v.id))) {
+        map.set(String(v.id), {
+          id: v.id,
+          title: v.title,
+          description: v.description || '',
+          department: v.department || 'Marketing',
+          product: prodId,
+          contentType: v.contentType || 'Video',
+          speaker: v.speaker || v.author || '1Cell.Ai',
+          duration: v.duration || 'Video',
+          type: v.type || 'Webinar',
+          status: v.status || 'Approved',
+          version: v.version || 'v1.0',
+          author: v.speaker || v.owner || '1Cell.Ai',
+          owner: v.speaker || v.owner || '1Cell.Ai',
+          sharePointUrl: v.sharePointUrl || v.videoUrl || v.oneDriveUrl,
+          isVideo: true
+        });
+      }
+    }
+  });
+
+  return Array.from(map.values());
+}
+window.getAllProductAssets = getAllProductAssets;
+
+// Render product asset card (handles standard docs, publications, and videos seamlessly)
+function renderProductAssetCard(asset) {
+  if (!asset) return '';
+  if (asset.isPublication || asset.journal) {
+    return `
+      <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer; margin-bottom:0;" onclick="window.openSharePoint('${asset.id}')" title="Click to view publication in SharePoint">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+          <div class="pub-journal">${asset.journal || 'Peer-Reviewed'} (${asset.publishedDate || '2025-2026'})</div>
+        </div>
+        <h3 style="font-size:16px; font-weight:700; margin:6px 0 8px 0; color:var(--text-primary);">${asset.title}</h3>
+        <div class="pub-authors" style="margin-bottom:10px;">${asset.authors || asset.author || '1Cell.Ai'}</div>
+        <div class="pub-abstract-box" style="margin-bottom:12px;"><strong>Abstract:</strong> ${asset.abstract || asset.description || ''}</div>
+        <div class="card-metadata" style="margin-bottom:12px;">
+          ${renderCardLastUpdatedRow(asset)}
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div class="pub-citation"><strong>Citation:</strong> ${asset.citation || '1Cell.Ai Research'}</div>
+          <div style="display:flex; gap:6px;">
+            ${isMarketingUser() ? `
+            <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${asset.id}')">Edit</button>
+            <button class="btn-outline" style="padding:5px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${asset.id}')">Delete</button>
+            ` : ''}
+            <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.previewDocument('${asset.id}')" title="Preview details">Preview</button>
+            <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${asset.id}')">View</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  if (asset.isVideo || asset.duration) {
+    return `
+      <div class="doc-card" onclick="window.openSharePoint('${asset.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
+        <div class="video-card-thumbnail" onclick="window.openSharePoint('${asset.id}')" style="cursor:pointer;">
+          <div class="video-play-icon">▶</div>
+          <span class="video-duration">${asset.duration || 'Video'}</span>
+        </div>
+        <div class="card-body" style="padding:16px; display:flex; flex-direction:column; flex:1;">
+          <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${asset.title}</h3>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
+            <span>Speaker: ${asset.speaker || asset.author || '1Cell.Ai'}</span>
+            <span>Type: ${asset.type || 'Video'}</span>
+          </div>
+          <div class="card-metadata" style="margin-top:auto; margin-bottom:10px;">
+            ${renderCardLastUpdatedRow(asset)}
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:10px;">
+            <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${asset.id}')">View</button>
+            <div style="display:flex; gap:4px;">
+              ${isMarketingUser() ? `
+              <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${asset.id}')" title="Edit Video">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+              </button>
+              <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${asset.id}')" title="Delete Video" style="color:#ef4444;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+              </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  return renderDocumentCard(asset, { hideProductTag: true });
+}
 
 // Application State
 let currentRole = 'marketing_admin';
@@ -1171,7 +1356,7 @@ function renderDashboardProductDocs(productName) {
   if (!container) return;
 
   const userTeam = getCurrentUserTeam();
-  const relatedDocs = db.documents.filter(d => d.product === productName && canTeamViewVisibility(userTeam, d.visibility || d.department));
+  const relatedDocs = getAllProductAssets(productName);
 
   const productObj = db.products.find(p => p.id === productName);
   
@@ -1775,9 +1960,10 @@ function renderProductHub() {
 
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 24px;">
       ${visibleProducts.map(p => {
-        const docCount = db.documents.filter(d => d.product === p.id).length;
-        const caseCount = db.cases.filter(c => c.relatedProduct === p.id).length;
-        const pubCount = db.publications.filter(pub => pub.relatedProduct === p.id).length;
+        const prodAssets = getAllProductAssets(p.id);
+        const aboutCount = prodAssets.filter(d => getProductAssetCategory(d) === 'about-product').length;
+        const evidenceCount = prodAssets.filter(d => getProductAssetCategory(d) === 'evidence').length;
+        const sciCount = prodAssets.filter(d => getProductAssetCategory(d) === 'scientific').length;
         return `
           <div class="quick-tile-card" style="align-items: flex-start; text-align: left; padding: 24px;" onclick="window.openProductMicrosite('${p.id}')">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 16px;">
@@ -1789,9 +1975,9 @@ function renderProductHub() {
             <h3 style="font-size:18px; margin-bottom: 8px; font-weight:700;">${p.name}</h3>
             <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-bottom: 20px;">${p.description}</p>
             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; font-size:11px; font-weight:600; color:var(--text-tertiary);">
-              <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${docCount} Documents</span>
-              <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${caseCount} Cases</span>
-              <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${pubCount} Scientific Pubs</span>
+              <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${prodAssets.length} Total Assets</span>
+              <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${evidenceCount} Evidence</span>
+              <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${sciCount} Scientific</span>
             </div>
           </div>
         `;
@@ -1809,24 +1995,12 @@ window.openProductMicrosite = function(prodId, defaultTab = 'all') {
   const product = db.products.find(p => p.id === prodId);
   if (!product) return;
 
-  const userTeam = getCurrentUserTeam();
-  const allDocs = db.documents.filter(d => d.product === prodId && canTeamViewVisibility(userTeam, d.visibility || d.department));
-  const aboutProductDocs = allDocs.filter(d => getProductAssetCategory(d) === 'about-product');
-  const evidenceDocs = allDocs.filter(d => getProductAssetCategory(d) === 'evidence');
-  const scientificDocs = allDocs.filter(d => getProductAssetCategory(d) === 'scientific');
-  const trainingSalesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'training-sales');
-  const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'other');
-
-  const relatedCases = db.cases.filter(c => c.relatedProduct === prodId);
-  const relatedReports = (db.reports || []).filter(r => r.product === prodId);
-  const relatedPubs = db.publications.filter(p => p.relatedProduct === prodId);
-  const relatedVideos = db.videos.filter(v => v.product === prodId);
-
-  const totalEvidenceCount = evidenceDocs.length + relatedCases.length + relatedReports.length;
-  const totalScientificCount = scientificDocs.length + relatedPubs.length;
-  const totalTrainingSalesCount = trainingSalesDocs.length + relatedVideos.length;
-  const totalOtherCount = otherDocs.length;
-  const totalAllCount = allDocs.length + relatedCases.length + relatedReports.length + relatedPubs.length + relatedVideos.length;
+  const allAssets = getAllProductAssets(prodId);
+  const aboutProductDocs = allAssets.filter(d => getProductAssetCategory(d) === 'about-product');
+  const evidenceDocs = allAssets.filter(d => getProductAssetCategory(d) === 'evidence');
+  const scientificDocs = allAssets.filter(d => getProductAssetCategory(d) === 'scientific');
+  const trainingSalesDocs = allAssets.filter(d => getProductAssetCategory(d) === 'training-sales');
+  const otherDocs = allAssets.filter(d => getProductAssetCategory(d) === 'other');
 
   workspaceViewport.innerHTML = `
     <div class="breadcrumb-bar">
@@ -1878,12 +2052,12 @@ window.openProductMicrosite = function(prodId, defaultTab = 'all') {
       </div>
 
       <div class="product-tabs-row">
-        <button class="product-tab-btn ${currentMicrositeTab === 'all' ? 'active' : ''}" data-tab="all" onclick="window.switchProductTab(event, '${prodId}', 'all')">All Assets (${totalAllCount})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'all' ? 'active' : ''}" data-tab="all" onclick="window.switchProductTab(event, '${prodId}', 'all')">All Assets (${allAssets.length})</button>
         <button class="product-tab-btn ${currentMicrositeTab === 'about-product' ? 'active' : ''}" data-tab="about-product" onclick="window.switchProductTab(event, '${prodId}', 'about-product')">About Product (${aboutProductDocs.length})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'evidence' ? 'active' : ''}" data-tab="evidence" onclick="window.switchProductTab(event, '${prodId}', 'evidence')">Evidence (${totalEvidenceCount})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'scientific' ? 'active' : ''}" data-tab="scientific" onclick="window.switchProductTab(event, '${prodId}', 'scientific')">Scientific (${totalScientificCount})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'training-sales' ? 'active' : ''}" data-tab="training-sales" onclick="window.switchProductTab(event, '${prodId}', 'training-sales')">Training & Sales Enablement (${totalTrainingSalesCount})</button>
-        <button class="product-tab-btn ${currentMicrositeTab === 'other' ? 'active' : ''}" data-tab="other" onclick="window.switchProductTab(event, '${prodId}', 'other')">Other (${totalOtherCount})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'evidence' ? 'active' : ''}" data-tab="evidence" onclick="window.switchProductTab(event, '${prodId}', 'evidence')">Evidence (${evidenceDocs.length})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'scientific' ? 'active' : ''}" data-tab="scientific" onclick="window.switchProductTab(event, '${prodId}', 'scientific')">Scientific (${scientificDocs.length})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'training-sales' ? 'active' : ''}" data-tab="training-sales" onclick="window.switchProductTab(event, '${prodId}', 'training-sales')">Training & Sales Enablement (${trainingSalesDocs.length})</button>
+        <button class="product-tab-btn ${currentMicrositeTab === 'other' ? 'active' : ''}" data-tab="other" onclick="window.switchProductTab(event, '${prodId}', 'other')">Other (${otherDocs.length})</button>
       </div>
     </div>
 
@@ -1898,20 +2072,33 @@ function renderProductTabContent(prodId, tabName) {
   const container = document.getElementById('productTabContent');
   if (!container) return;
 
-  const userTeam = getCurrentUserTeam();
   const product = db.products.find(p => p.id === prodId);
-  const allDocs = db.documents.filter(d => d.product === prodId && canTeamViewVisibility(userTeam, d.visibility || d.department));
+  if (!product) return;
 
-  const aboutProductDocs = allDocs.filter(d => getProductAssetCategory(d) === 'about-product');
-  const evidenceDocs = allDocs.filter(d => getProductAssetCategory(d) === 'evidence');
-  const scientificDocs = allDocs.filter(d => getProductAssetCategory(d) === 'scientific');
-  const trainingSalesDocs = allDocs.filter(d => getProductAssetCategory(d) === 'training-sales');
-  const otherDocs = allDocs.filter(d => getProductAssetCategory(d) === 'other');
+  const allAssets = getAllProductAssets(prodId);
 
-  const relatedCases = db.cases.filter(c => c.relatedProduct === prodId);
-  const relatedReports = (db.reports || []).filter(r => r.product === prodId);
-  const relatedPubs = db.publications.filter(p => p.relatedProduct === prodId);
-  const relatedVideos = db.videos.filter(v => v.product === prodId);
+  let targetAssets = [];
+  let tabDisplayName = 'All Assets';
+
+  if (tabName === 'all') {
+    targetAssets = allAssets;
+    tabDisplayName = 'All Assets';
+  } else if (tabName === 'about-product') {
+    targetAssets = allAssets.filter(d => getProductAssetCategory(d) === 'about-product');
+    tabDisplayName = 'About Product';
+  } else if (tabName === 'evidence') {
+    targetAssets = allAssets.filter(d => getProductAssetCategory(d) === 'evidence');
+    tabDisplayName = 'Evidence';
+  } else if (tabName === 'scientific') {
+    targetAssets = allAssets.filter(d => getProductAssetCategory(d) === 'scientific');
+    tabDisplayName = 'Scientific';
+  } else if (tabName === 'training-sales') {
+    targetAssets = allAssets.filter(d => getProductAssetCategory(d) === 'training-sales');
+    tabDisplayName = 'Training & Sales Enablement';
+  } else if (tabName === 'other') {
+    targetAssets = allAssets.filter(d => getProductAssetCategory(d) === 'other');
+    tabDisplayName = 'Other';
+  }
 
   const emptyState = (catName) => `
     <div style="text-align:center; padding:48px 24px; background:var(--bg-secondary); border:1px dashed var(--border-color); border-radius:12px; width:100%; grid-column:1 / -1; margin:8px 0;">
@@ -1926,292 +2113,14 @@ function renderProductTabContent(prodId, tabName) {
     </div>
   `;
 
-  if (tabName === 'all') {
-    let html = '<div class="assets-grid">';
-    let renderedCount = 0;
-    if (allDocs.length > 0) {
-      html += allDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('');
-      renderedCount += allDocs.length;
-    }
-    const docIds = new Set(allDocs.map(d => d.id));
-    if (relatedCases.length > 0) {
-      relatedCases.filter(c => !docIds.has(c.id)).forEach(c => {
-        html += renderDocumentCard({
-          id: c.id,
-          title: c.title,
-          description: c.summary,
-          department: 'Medical',
-          product: c.relatedProduct,
-          contentType: 'Case Studies',
-          cancerType: c.cancerType,
-          status: 'Approved',
-          version: 'v1.0',
-          author: c.doctor || '1Cell.Ai',
-          owner: c.doctor || '1Cell.Ai',
-          sharePointUrl: c.readMoreUrl || c.oneDriveUrl
-        }, { hideProductTag: true });
-        renderedCount++;
-      });
-    }
-    if (relatedReports.length > 0) {
-      relatedReports.filter(r => !docIds.has(r.id)).forEach(r => {
-        html += renderDocumentCard({
-          id: r.id,
-          title: r.title,
-          description: r.summary,
-          department: 'Medical',
-          product: r.product,
-          contentType: 'Sample Report',
-          cancerType: r.cancerType,
-          biomarker: r.biomarker,
-          status: r.status || 'Approved',
-          version: r.version || 'v1.0',
-          author: r.author || '1Cell.Ai',
-          owner: r.owner || '1Cell.Ai',
-          sharePointUrl: r.sharePointUrl
-        }, { hideProductTag: true });
-        renderedCount++;
-      });
-    }
-    if (relatedPubs.length > 0) {
-      relatedPubs.filter(p => !docIds.has(p.id)).forEach(pub => {
-        html += `
-          <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer; margin-bottom:0;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
-              <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
-            </div>
-            <h3 style="font-size:16px; font-weight:700; margin:6px 0 8px 0; color:var(--text-primary);">${pub.title}</h3>
-            <div class="pub-authors" style="margin-bottom:10px;">${pub.authors}</div>
-            <div class="pub-abstract-box" style="margin-bottom:12px;"><strong>Abstract:</strong> ${pub.abstract}</div>
-            <div class="card-metadata" style="margin-bottom:12px;">
-              ${renderCardLastUpdatedRow(pub)}
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
-              <div style="display:flex; gap:6px;">
-                ${isMarketingUser() ? `
-                <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
-                <button class="btn-outline" style="padding:5px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
-                ` : ''}
-                <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
-              </div>
-            </div>
-          </div>
-        `;
-        renderedCount++;
-      });
-    }
-    if (relatedVideos.length > 0) {
-      relatedVideos.filter(v => !docIds.has(v.id)).forEach(vid => {
-        html += `
-          <div class="doc-card" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
-            <div class="video-card-thumbnail" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;">
-              <div class="video-play-icon">▶</div>
-              <span class="video-duration">${vid.duration}</span>
-            </div>
-            <div class="card-body" style="padding:16px; display:flex; flex-direction:column; flex:1;">
-              <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
-              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
-                <span>Speaker: ${vid.speaker}</span>
-                <span>Type: ${vid.type}</span>
-              </div>
-              <div class="card-metadata" style="margin-top:auto; margin-bottom:10px;">
-                ${renderCardLastUpdatedRow(vid)}
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:10px;">
-                <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
-                <div style="display:flex; gap:4px;">
-                  ${isMarketingUser() ? `
-                  <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')" title="Edit Video">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                    </svg>
-                  </button>
-                  <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${vid.id}')" title="Delete Video" style="color:#ef4444;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                    </svg>
-                  </button>
-                  ` : ''}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        renderedCount++;
-      });
-    }
-    html += '</div>';
-    if (renderedCount === 0) {
-      container.innerHTML = emptyState('All Assets');
-    } else {
-      container.innerHTML = html;
-    }
-  } else if (tabName === 'about-product') {
-    if (aboutProductDocs.length === 0) {
-      container.innerHTML = emptyState('About Product');
-    } else {
-      container.innerHTML = `
-        <div class="assets-grid">
-          ${aboutProductDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('')}
-        </div>
-      `;
-    }
-  } else if (tabName === 'evidence') {
-    const totalCount = evidenceDocs.length + relatedCases.length + relatedReports.length;
-    if (totalCount === 0) {
-      container.innerHTML = emptyState('Evidence');
-    } else {
-      let html = '<div class="assets-grid">';
-      if (evidenceDocs.length > 0) {
-        html += evidenceDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('');
-      }
-      const docIds = new Set(evidenceDocs.map(d => d.id));
-      if (relatedCases.length > 0) {
-        relatedCases.filter(c => !docIds.has(c.id)).forEach(c => {
-          html += renderDocumentCard({
-            id: c.id,
-            title: c.title,
-            description: c.summary,
-            department: 'Medical',
-            product: c.relatedProduct,
-            contentType: 'Case Studies',
-            cancerType: c.cancerType,
-            status: 'Approved',
-            version: 'v1.0',
-            author: c.doctor || '1Cell.Ai',
-            owner: c.doctor || '1Cell.Ai',
-            sharePointUrl: c.readMoreUrl || c.oneDriveUrl
-          }, { hideProductTag: true });
-        });
-      }
-      if (relatedReports.length > 0) {
-        relatedReports.filter(r => !docIds.has(r.id)).forEach(r => {
-          html += renderDocumentCard({
-            id: r.id,
-            title: r.title,
-            description: r.summary,
-            department: 'Medical',
-            product: r.product,
-            contentType: 'Sample Report',
-            cancerType: r.cancerType,
-            biomarker: r.biomarker,
-            status: r.status || 'Approved',
-            version: r.version || 'v1.0',
-            author: r.author || '1Cell.Ai',
-            owner: r.owner || '1Cell.Ai',
-            sharePointUrl: r.sharePointUrl
-          }, { hideProductTag: true });
-        });
-      }
-      html += '</div>';
-      container.innerHTML = html;
-    }
-  } else if (tabName === 'scientific') {
-    const totalCount = scientificDocs.length + relatedPubs.length;
-    if (totalCount === 0) {
-      container.innerHTML = emptyState('Scientific');
-    } else {
-      let html = '<div class="assets-grid">';
-      if (scientificDocs.length > 0) {
-        html += scientificDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('');
-      }
-      if (relatedPubs.length > 0) {
-        html += relatedPubs.map(pub => `
-          <div class="pub-item" style="grid-column: 1 / -1; cursor:pointer; margin-bottom:0;" onclick="window.openSharePoint('${pub.id}')" title="Click to view publication in SharePoint">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
-              <div class="pub-journal">${pub.journal} (${pub.publishedDate})</div>
-            </div>
-            <h3 style="font-size:16px; font-weight:700; margin:6px 0 8px 0; color:var(--text-primary);">${pub.title}</h3>
-            <div class="pub-authors" style="margin-bottom:10px;">${pub.authors}</div>
-            <div class="pub-abstract-box" style="margin-bottom:12px;"><strong>Abstract:</strong> ${pub.abstract}</div>
-            <div class="card-metadata" style="margin-bottom:12px;">
-              ${renderCardLastUpdatedRow(pub)}
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
-              <div style="display:flex; gap:6px;">
-                ${isMarketingUser() ? `
-                <button class="btn-outline" style="padding:5px 12px; font-size:11.5px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit</button>
-                <button class="btn-outline" style="padding:5px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); window.deleteAsset('${pub.id}')">Delete</button>
-                ` : ''}
-                <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">View</button>
-              </div>
-            </div>
-          </div>
-        `).join('');
-      }
-      html += '</div>';
-      container.innerHTML = html;
-    }
-  } else if (tabName === 'training-sales') {
-    const totalCount = trainingSalesDocs.length + relatedVideos.length;
-    if (totalCount === 0) {
-      container.innerHTML = emptyState('Training & Sales Enablement');
-    } else {
-      let html = '<div class="assets-grid">';
-      let renderedCount = 0;
-      if (trainingSalesDocs.length > 0) {
-        html += trainingSalesDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('');
-        renderedCount += trainingSalesDocs.length;
-      }
-      if (relatedVideos.length > 0) {
-        relatedVideos.forEach(vid => {
-          html += `
-          <div class="doc-card" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;" title="Click to view video in SharePoint">
-            <div class="video-card-thumbnail" onclick="window.openSharePoint('${vid.id}')" style="cursor:pointer;">
-              <div class="video-play-icon">▶</div>
-              <span class="video-duration">${vid.duration}</span>
-            </div>
-            <div class="card-body" style="padding:16px; display:flex; flex-direction:column; flex:1;">
-              <h3 style="font-size:13.5px; font-weight:700; margin-bottom:6px;">${vid.title}</h3>
-              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-bottom:8px;">
-                <span>Speaker: ${vid.speaker}</span>
-                <span>Type: ${vid.type}</span>
-              </div>
-              <div class="card-metadata" style="margin-top:auto; margin-bottom:10px;">
-                ${renderCardLastUpdatedRow(vid)}
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border-color); padding-top:10px;">
-                <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600;" onclick="event.stopPropagation(); window.openSharePoint('${vid.id}')">View</button>
-                <div style="display:flex; gap:4px;">
-                  ${isMarketingUser() ? `
-                  <button class="card-action-btn" onclick="event.stopPropagation(); window.openEditAssetModal('${vid.id}')" title="Edit Video">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                    </svg>
-                  </button>
-                  <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteAsset('${vid.id}')" title="Delete Video" style="color:#ef4444;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                    </svg>
-                  </button>
-                  ` : ''}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-          renderedCount++;
-        });
-      }
-      html += '</div>';
-      if (renderedCount === 0) {
-        container.innerHTML = emptyState('Training & Sales Enablement');
-      } else {
-        container.innerHTML = html;
-      }
-    }
-  } else if (tabName === 'other') {
-    if (otherDocs.length === 0) {
-      container.innerHTML = emptyState('Other');
-    } else {
-      container.innerHTML = `
-        <div class="assets-grid">
-          ${otherDocs.map(d => renderDocumentCard(d, { hideProductTag: true })).join('')}
-        </div>
-      `;
-    }
+  if (targetAssets.length === 0) {
+    container.innerHTML = emptyState(tabDisplayName);
+  } else {
+    container.innerHTML = `
+      <div class="assets-grid">
+        ${targetAssets.map(asset => renderProductAssetCard(asset)).join('')}
+      </div>
+    `;
   }
 }
 
