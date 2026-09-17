@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20260917-v43';
+import db from './db.js?v=20260917-v44';
 import { 
   normalizeTeam,
   canTeamViewVisibility,
