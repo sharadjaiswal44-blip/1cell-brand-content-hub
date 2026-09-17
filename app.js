@@ -958,6 +958,29 @@ function init() {
   if (sampleReportModalCancel) sampleReportModalCancel.addEventListener('click', () => closeModal(sampleReportModal));
   if (sampleReportModalSave) sampleReportModalSave.addEventListener('click', window.saveNewSampleReport);
 
+  // Auto-sync Owner/Author when product dropdown changes in modals
+  const formProductSelect = document.getElementById('formProduct');
+  if (formProductSelect) {
+    formProductSelect.addEventListener('change', () => {
+      const authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+      const formAuthor = document.getElementById('formAuthor');
+      if (formAuthor && !authName) {
+        formAuthor.value = formProductSelect.value ? getProductOwner(formProductSelect.value) : getCurrentUserName();
+      }
+    });
+  }
+
+  const srProductSelect = document.getElementById('srProduct');
+  if (srProductSelect) {
+    srProductSelect.addEventListener('change', () => {
+      const authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+      const srAuthor = document.getElementById('srAuthor');
+      if (srAuthor && !authName) {
+        srAuthor.value = srProductSelect.value ? getProductOwner(srProductSelect.value) : getCurrentUserName();
+      }
+    });
+  }
+
 
   // Authentication Global Event Handlers
   window.handleLoginPortalSubmit = function(e) {
@@ -1431,7 +1454,7 @@ window.triggerRegisterAssetModal = function(routeName) {
     }
   }
 
-  // Ensure default Cancer Type is None, Biomarker is None, and Owner is 1Cell.Ai
+  // Ensure default Cancer Type is None, Biomarker is None, and Owner is dynamically set to user or product owner
   const cancerSelect = document.getElementById('formCancer');
   if (cancerSelect) {
     cancerSelect.value = 'None';
@@ -1442,7 +1465,9 @@ window.triggerRegisterAssetModal = function(routeName) {
   }
   const authorInput = document.getElementById('formAuthor');
   if (authorInput) {
-    authorInput.value = '1Cell.Ai';
+    const authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+    const currentProd = document.getElementById('formProduct') ? document.getElementById('formProduct').value : null;
+    authorInput.value = authName || (currentProd ? getProductOwner(currentProd) : getCurrentUserName());
   }
 
   const uploadModal = document.getElementById('uploadModal');
@@ -2156,7 +2181,7 @@ window.triggerRegisterProductAsset = function(prodId, categoryTab) {
     formSpUrl.value = `https://ocdipl.sharepoint.com/sites/1Cell.AiMarketingSite/Shared%20Documents/${prodFolder}/`;
   }
 
-  // Ensure default Cancer Type is None, Biomarker is None, and Owner is 1Cell.Ai
+  // Ensure default Cancer Type is None, Biomarker is None, and Owner is dynamically set to user or product owner
   const formCancer = document.getElementById('formCancer');
   if (formCancer) {
     formCancer.value = 'None';
@@ -2167,7 +2192,8 @@ window.triggerRegisterProductAsset = function(prodId, categoryTab) {
   }
   const formAuthor = document.getElementById('formAuthor');
   if (formAuthor) {
-    formAuthor.value = '1Cell.Ai';
+    const authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+    formAuthor.value = authName || getProductOwner(prodId) || getCurrentUserName();
   }
 
   const uploadModal = document.getElementById('uploadModal');
@@ -2721,7 +2747,9 @@ window.triggerAddSampleReportModal = function(defaultProduct, defaultCancer) {
 
   const authorEl = document.getElementById('srAuthor');
   if (authorEl) {
-    authorEl.value = '1Cell.Ai';
+    const authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
+    const prod = defaultProduct || (document.getElementById('srProduct') ? document.getElementById('srProduct').value : 'oncoindx');
+    authorEl.value = authName || getProductOwner(prod) || getCurrentUserName();
   }
 
   const modal = document.getElementById('sampleReportModal');
