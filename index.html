@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="assets/logos/favicon.png?v=20260917-v45">
   <link rel="shortcut icon" href="favicon.ico?v=20260917-v45">
   <link rel="apple-touch-icon" href="assets/logos/favicon.png?v=20260917-v45">
-  <link rel="stylesheet" href="styles.css?v=20261005-v47">
+  <link rel="stylesheet" href="styles.css?v=20261005-v48">
 </head>
 <body>
   <div class="app-container">
@@ -63,6 +63,14 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.247 2.118H6.622A2.25 2.25 0 014.375 18V6.75c0-.621.504-1.125 1.125-1.125h11.25c.621 0 1.125.504 1.125 1.125V9M15 9h3M9 6.75V3" />
                 </svg>
                 <span class="nav-item-text">Scientific Resources</span>
+              </a>
+            </li>
+            <li class="nav-item" data-route="competitive-intelligence">
+              <a>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.25 2.25L17.25 6" />
+                </svg>
+                <span class="nav-item-text">Competitive Intelligence</span>
               </a>
             </li>
           </ul>
@@ -935,6 +943,118 @@
     </div>
   </div>
 
+  <!-- Modal: Add / Edit Competitor -->
+  <div id="competitorModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="competitorModalTitle">New Competitor</h3>
+        <button class="modal-close-btn" type="button" onclick="window.closeCompetitorModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="competitorForm" class="form-grid" onsubmit="event.preventDefault(); window.saveCompetitor();">
+          <input type="hidden" id="competitorFormId">
+          <div class="form-group full-width">
+            <label for="compName">Competitor Name *</label>
+            <input type="text" id="compName" required placeholder="e.g. 4baseCare, Strand Life Sciences, MedGenome">
+          </div>
+          <div class="form-group">
+            <label for="compHq">Headquarters / Location *</label>
+            <input type="text" id="compHq" required placeholder="e.g. Bengaluru, Karnataka">
+          </div>
+          <div class="form-group">
+            <label for="compWebsite">Website URL</label>
+            <input type="url" id="compWebsite" placeholder="https://example.com">
+          </div>
+          <div class="form-group full-width">
+            <label for="compFocus">Key Focus Areas / Assays *</label>
+            <input type="text" id="compFocus" required placeholder="e.g. Comprehensive NGS, Solid Tumors, Liquid Biopsy, CTCs">
+          </div>
+          <div class="form-group full-width">
+            <label for="compTagline">Tagline / Positioning *</label>
+            <input type="text" id="compTagline" required placeholder="e.g. Indian precision oncology genomics provider">
+          </div>
+          <div class="form-group full-width">
+            <label for="compDetails">Strategic Intelligence Notes / Company Overview</label>
+            <textarea id="compDetails" rows="4" placeholder="Enter market presence, sales network, competitive advantages or limitations..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-outline" type="button" onclick="window.closeCompetitorModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="window.saveCompetitor()">Save Competitor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Competitor Marketing Collateral -->
+  <div id="competitorCollateralModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="competitorCollateralModalTitle">New Marketing Collateral</h3>
+        <button class="modal-close-btn" type="button" onclick="window.closeCompetitorCollateralModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="competitorCollateralForm" class="form-grid" onsubmit="event.preventDefault(); window.saveCompetitorCollateral();">
+          <input type="hidden" id="collatFormId">
+          <div class="form-group full-width">
+            <label for="collatTitle">Collateral Title *</label>
+            <input type="text" id="collatTitle" required placeholder="e.g. TarGT Indx Comprehensive Panel Brochure">
+          </div>
+          <div class="form-group">
+            <label for="collatCompetitorSelect">Competitor *</label>
+            <select id="collatCompetitorSelect" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="collatTypeSelect">Collateral Type *</label>
+            <select id="collatTypeSelect" required>
+              <option value="Brochure">Brochure</option>
+              <option value="Presentation">Presentation / Pitch Deck</option>
+              <option value="Case Study">Case Study</option>
+              <option value="Whitepaper">Whitepaper</option>
+              <option value="Sample Report">Sample Report</option>
+              <option value="Battlecard">Battlecard / Pricing</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="collatUrl">Document / SharePoint / Drive URL *</label>
+            <input type="url" id="collatUrl" required placeholder="https://...">
+          </div>
+          <div class="form-group full-width">
+            <label for="collatDesc">Description &amp; Key Messaging Takeaways *</label>
+            <textarea id="collatDesc" rows="3" required placeholder="Summarize key messaging claims, pricing points, target indications, and competitive comparison points..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="collatCancerType">Cancer Type / Clinical Focus</label>
+            <input type="text" id="collatCancerType" placeholder="e.g. Pan-Cancer, Lung, Breast, Solid Tumors" value="Pan-Cancer">
+          </div>
+          <div class="form-group">
+            <label for="collatDate">Date / Year</label>
+            <input type="date" id="collatDate">
+          </div>
+          <div class="form-group full-width">
+            <label for="collatAuthor">Added By / Analyst</label>
+            <input type="text" id="collatAuthor" placeholder="Your name">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-outline" type="button" onclick="window.closeCompetitorCollateralModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="window.saveCompetitorCollateral()">Save Collateral</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Premium Login Portal -->
   <div id="loginOverlay" class="login-overlay">
     <div class="login-card animate-slide-up">
@@ -1115,6 +1235,6 @@
   </script>
 
   <!-- Main Application Script -->
-  <script type="module" src="app.js?v=20261005-v47"></script>
+  <script type="module" src="app.js?v=20261005-v48"></script>
 </body>
 </html>

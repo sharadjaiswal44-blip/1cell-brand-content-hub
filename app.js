@@ -1225,16 +1225,20 @@ function closeModal(modalEl) {
 }
 
 // Route Navigation Controller
-window.navigateToDashboard = function() {
+window.navigateToRoute = function(route) {
   const items = document.querySelectorAll('.sidebar .nav-item');
   items.forEach(i => {
-    if (i.getAttribute('data-route') === 'dashboard') {
+    if (i.getAttribute('data-route') === route) {
       i.classList.add('active');
     } else {
       i.classList.remove('active');
     }
   });
-  renderRoute('dashboard');
+  renderRoute(route);
+};
+
+window.navigateToDashboard = function() {
+  window.navigateToRoute('dashboard');
 };
 
 function renderRoute(route) {
@@ -1283,6 +1287,9 @@ function renderRoute(route) {
       break;
     case 'cases':
       renderCaseLibrary();
+      break;
+    case 'competitive-intelligence':
+      renderCompetitiveIntelligence();
       break;
     case 'report-library':
       renderReportLibrary();
@@ -2874,6 +2881,568 @@ window.updateReportLibraryCards = function() {
       </div>
     `;
   }).join('');
+};
+
+// ==========================================================
+// Competitive Intelligence (Competitor Folders & Marketing Collaterals)
+// ==========================================================
+const COMPETITORS_STORAGE_KEY = '1cell_competitors';
+const COMPETITOR_ASSETS_STORAGE_KEY = '1cell_competitor_collaterals';
+
+let currentCompetitorFolderId = null;
+let currentCompetitorTab = 'all';
+let competitorSearchQuery = '';
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+window.escapeHtml = escapeHtml;
+
+function getCompetitors() {
+  let list = null;
+  try {
+    const raw = localStorage.getItem(COMPETITORS_STORAGE_KEY);
+    if (raw) list = JSON.parse(raw);
+  } catch (e) {}
+  if (!Array.isArray(list) || list.length === 0) {
+    list = (db.competitors || []).map(c => ({ ...c }));
+    saveCompetitors(list);
+  }
+  return list;
+}
+window.getCompetitors = getCompetitors;
+
+function saveCompetitors(list) {
+  try {
+    localStorage.setItem(COMPETITORS_STORAGE_KEY, JSON.stringify(list));
+    db.competitors = list;
+  } catch (e) {}
+}
+
+function getCompetitorAssets(competitorId = null) {
+  let list = null;
+  try {
+    const raw = localStorage.getItem(COMPETITOR_ASSETS_STORAGE_KEY);
+    if (raw) list = JSON.parse(raw);
+  } catch (e) {}
+  if (!Array.isArray(list) || list.length === 0) {
+    list = (db.competitorAssets || []).map(a => ({ ...a }));
+    saveCompetitorAssets(list);
+  }
+  if (competitorId) {
+    return list.filter(a => a.competitorId === competitorId);
+  }
+  return list;
+}
+window.getCompetitorAssets = getCompetitorAssets;
+
+function saveCompetitorAssets(list) {
+  try {
+    localStorage.setItem(COMPETITOR_ASSETS_STORAGE_KEY, JSON.stringify(list));
+    db.competitorAssets = list;
+  } catch (e) {}
+}
+
+window.searchCompetitors = function(q) {
+  competitorSearchQuery = (q || '').trim();
+  renderCompetitiveIntelligenceList();
+};
+
+window.openCollateralUrl = function(url) {
+  if (!url || url === '#' || url === 'undefined') {
+    showToast("No direct URL attached to this collateral.");
+    return;
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+// 1. Root View: Competitive Intelligence Overview & Competitor Directory Folders
+function renderCompetitiveIntelligence() {
+  currentCompetitorFolderId = null;
+
+  workspaceViewport.innerHTML = `
+    <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+      <div>
+        <h1 class="welcome-title">Competitive Intelligence</h1>
+        <p class="welcome-subtitle">Strategic repository of Indian oncology genomics competitors and intelligence directory for market collaterals.</p>
+      </div>
+      <div class="welcome-banner-actions" style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-primary" onclick="window.openCompetitorModal()" style="display:inline-flex; align-items:center; gap:6px; padding:9px 16px; font-weight:600; font-size:12.5px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:15px;height:15px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>+ Add Competitor</span>
+        </button>
+        <button class="btn-outline" onclick="window.openCompetitorCollateralModal()" style="font-size:12.5px; padding:8px 14px; font-weight:600;">
+          + Add Collateral
+        </button>
+      </div>
+    </div>
+
+    <!-- Search & Statistics Bar -->
+    <div class="scientific-filter-container" style="margin-bottom:20px; padding:12px 18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; width:100%;">
+        <div class="scientific-search-box" style="flex:1; max-width:480px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input type="text" id="competitorSearchInput" placeholder="Search competitors by name, city, assays, or keywords..." oninput="window.searchCompetitors(this.value)" value="${escapeHtml(competitorSearchQuery)}" style="border:none;background:transparent;outline:none;width:100%;font-size:13px;color:var(--text-primary);">
+        </div>
+        <div id="competitorCountBadgeWrapper"></div>
+      </div>
+    </div>
+
+    <!-- Competitors Folders Grid -->
+    <div id="competitorsGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;"></div>
+  `;
+
+  renderCompetitiveIntelligenceList();
+}
+window.renderCompetitiveIntelligence = renderCompetitiveIntelligence;
+
+function renderCompetitiveIntelligenceList() {
+  const container = document.getElementById('competitorsGridContainer');
+  const countWrapper = document.getElementById('competitorCountBadgeWrapper');
+  if (!container) return;
+
+  const allCompetitors = getCompetitors();
+  const q = competitorSearchQuery.toLowerCase().trim();
+
+  const filtered = allCompetitors.filter(c => {
+    if (!q) return true;
+    return (c.name && c.name.toLowerCase().includes(q)) ||
+           (c.headquarters && c.headquarters.toLowerCase().includes(q)) ||
+           (c.focus && c.focus.toLowerCase().includes(q)) ||
+           (c.tagline && c.tagline.toLowerCase().includes(q)) ||
+           (c.details && c.details.toLowerCase().includes(q));
+  });
+
+  if (countWrapper) {
+    countWrapper.innerHTML = `
+      <span class="badge badge-prod" style="font-size:12px; padding:6px 12px; font-weight:600;">
+        ${filtered.length} Competitor Folder${filtered.length === 1 ? '' : 's'}
+      </span>
+    `;
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state-box">
+        <h3>No Competitor Folders Found</h3>
+        <p>No competitors matching "${escapeHtml(competitorSearchQuery)}". Click below to register a new competitor profile.</p>
+        <button class="btn-primary" onclick="window.openCompetitorModal()" style="margin-top:12px;">+ Add New Competitor</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(c => {
+    const assets = getCompetitorAssets(c.id);
+    return `
+      <div class="competitor-tile-card" onclick="window.openCompetitorFolder('${c.id}')" title="Open ${escapeHtml(c.name)} Folder">
+        <div class="competitor-header-row">
+          <span class="badge badge-dept" style="font-size:11px; padding:3px 8px; font-weight:600;">${escapeHtml(c.headquarters || 'India')}</span>
+          <span style="font-size: 11px; font-weight: 700; color: var(--accent-color); background: var(--accent-light); padding: 4px 10px; border-radius: 6px;">Explore Folder →</span>
+        </div>
+        <h3 class="competitor-title">${escapeHtml(c.name)}</h3>
+        <p class="competitor-tagline">${escapeHtml(c.tagline || '')}</p>
+        <div class="competitor-focus-pill">${escapeHtml(c.focus || 'Oncology Genomics')}</div>
+        <div class="competitor-footer-row">
+          <span style="font-weight:600; color:var(--text-primary);">${assets.length} Marketing Collateral${assets.length === 1 ? '' : 's'}</span>
+          <div style="display:flex; gap:6px; align-items:center;" onclick="event.stopPropagation()">
+            ${c.website ? `<a href="${escapeHtml(c.website)}" target="_blank" rel="noopener noreferrer" class="btn-outline" style="padding:4px 8px; font-size:11px; text-decoration:none;" title="Open official website">Website ↗</a>` : ''}
+            <button class="btn-outline" style="padding:4px 8px; font-size:11px;" onclick="window.openCompetitorModal('${c.id}')" title="Edit Competitor Info">Edit</button>
+            <button class="btn-outline" style="padding:4px 8px; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="window.deleteCompetitor('${c.id}')" title="Delete Competitor">Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 2. Folder Detail View: Competitor Workspace & Collaterals (Works like Product Hub!)
+window.openCompetitorFolder = function(competitorId, defaultTab = 'all') {
+  currentCompetitorFolderId = competitorId;
+  currentCompetitorTab = defaultTab || 'all';
+
+  const competitor = getCompetitors().find(c => c.id === competitorId);
+  if (!competitor) {
+    showToast("Competitor folder not found");
+    renderCompetitiveIntelligence();
+    return;
+  }
+
+  const allAssets = getCompetitorAssets(competitorId);
+  const brochures = allAssets.filter(a => a.contentType === 'Brochure');
+  const presentations = allAssets.filter(a => a.contentType === 'Presentation');
+  const caseStudies = allAssets.filter(a => a.contentType === 'Case Study');
+  const whitepapers = allAssets.filter(a => a.contentType === 'Whitepaper');
+  const sampleReports = allAssets.filter(a => a.contentType === 'Sample Report');
+  const battlecards = allAssets.filter(a => a.contentType === 'Battlecard' || a.contentType === 'Other');
+
+  workspaceViewport.innerHTML = `
+    <div class="breadcrumb-bar">
+      <button class="breadcrumb-back-btn" onclick="window.renderRoute('competitive-intelligence')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px; height:13px;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        <span>Back to Competitive Intelligence</span>
+      </button>
+      <span style="color:var(--text-tertiary); font-size:12px;">/</span>
+      <span style="color:var(--text-secondary); font-size:12.5px; font-weight:600;">${escapeHtml(competitor.name)} Folder</span>
+    </div>
+
+    <div class="product-workspace-header">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
+        <div>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+            <span class="product-tagline" style="margin:0;">Competitive Intelligence • Indian Competitor Folder</span>
+            <span class="badge badge-dept" style="font-size:11.5px; padding:3px 9px; font-weight:600;">${escapeHtml(competitor.headquarters || 'India')}</span>
+            ${competitor.website ? `
+              <a href="${escapeHtml(competitor.website)}" target="_blank" rel="noopener noreferrer" style="font-size:11.5px; color:var(--accent-color); font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:3px;">
+                <span>${escapeHtml(competitor.website.replace('https://', '').replace('http://', '').replace(/\/$/, ''))} ↗</span>
+              </a>
+            ` : ''}
+          </div>
+          <h1 class="product-name" style="margin:0 0 6px 0;">${escapeHtml(competitor.name)}</h1>
+          <p style="font-size:13.5px; color:var(--text-secondary); margin:0 0 8px 0; font-weight:500;">${escapeHtml(competitor.tagline || '')}</p>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button class="btn-primary" onclick="window.openCompetitorCollateralModal(null, '${competitor.id}')" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; font-weight:600; font-size:12.5px; box-shadow:var(--shadow-sm);">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>+ Add Marketing Collateral</span>
+          </button>
+          <button class="btn-outline" onclick="window.openCompetitorModal('${competitor.id}')" style="font-size:12px; padding:7px 12px; font-weight:600;">
+            Edit Competitor
+          </button>
+          <button class="btn-outline" style="font-size:12px; padding:7px 12px; font-weight:600; color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="window.deleteCompetitor('${competitor.id}')">
+            Delete
+          </button>
+        </div>
+      </div>
+
+      ${competitor.details ? `
+        <div style="background:var(--bg-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:12px 16px; margin-bottom:18px;">
+          <div style="font-size:11px; text-transform:uppercase; font-weight:700; color:var(--text-tertiary); letter-spacing:0.5px; margin-bottom:4px;">Market Overview &amp; Intelligence Notes</div>
+          <div style="font-size:13px; color:var(--text-secondary); line-height:1.55;">${escapeHtml(competitor.details)}</div>
+        </div>
+      ` : ''}
+
+      <!-- Collateral Category Filter Tabs -->
+      <div class="product-tabs-row" style="margin-top:16px;">
+        <button class="product-tab-btn ${currentCompetitorTab === 'all' ? 'active' : ''}" data-tab="all" onclick="window.switchCompetitorTab(event, '${competitor.id}', 'all')">All Collaterals (${allAssets.length})</button>
+        <button class="product-tab-btn ${currentCompetitorTab === 'Brochure' ? 'active' : ''}" data-tab="Brochure" onclick="window.switchCompetitorTab(event, '${competitor.id}', 'Brochure')">Brochures (${brochures.length})</button>
+        <button class="product-tab-btn ${currentCompetitorTab === 'Presentation' ? 'active' : ''}" data-tab="Presentation" onclick="window.switchCompetitorTab(event, '${competitor.id}', 'Presentation')">Presentations (${presentations.length})</button>
+        <button class="product-tab-btn ${currentCompetitorTab === 'Case Study' ? 'active' : ''}" data-tab="Case Study" onclick="window.switchCompetitorTab(event, '${competitor.id}', 'Case Study')">Case Studies (${caseStudies.length})</button>
+        <button class="product-tab-btn ${currentCompetitorTab === 'Whitepaper' ? 'active' : ''}" data-tab="Whitepaper" onclick="window.switchCompetitorTab(event, '${competitor.id}', 'Whitepaper')">Whitepapers (${whitepapers.length})</button>
+        <button class="product-tab-btn ${currentCompetitorTab === 'Sample Report' ? 'active' : ''}" data-tab="Sample Report" onclick="window.switchCompetitorTab(event, '${competitor.id}', 'Sample Report')">Sample Reports (${sampleReports.length})</button>
+        <button class="product-tab-btn ${currentCompetitorTab === 'Battlecard' ? 'active' : ''}" data-tab="Battlecard" onclick="window.switchCompetitorTab(event, '${competitor.id}', 'Battlecard')">Battlecards &amp; Other (${battlecards.length})</button>
+      </div>
+    </div>
+
+    <!-- Collaterals Content Grid Container -->
+    <div id="competitorFolderContent" class="product-workspace-content"></div>
+  `;
+
+  renderCompetitorFolderContent(competitor.id, currentCompetitorTab);
+};
+
+window.switchCompetitorTab = function(e, competitorId, tabName) {
+  if (e && e.target) {
+    const parent = e.target.closest('.product-tabs-row');
+    if (parent) {
+      parent.querySelectorAll('.product-tab-btn').forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+    }
+  }
+  currentCompetitorTab = tabName;
+  renderCompetitorFolderContent(competitorId, tabName);
+};
+
+function renderCompetitorFolderContent(competitorId, tabName = 'all') {
+  const container = document.getElementById('competitorFolderContent');
+  if (!container) return;
+
+  const competitor = getCompetitors().find(c => c.id === competitorId);
+  const allAssets = getCompetitorAssets(competitorId);
+
+  let targetAssets = [];
+  if (tabName === 'all') {
+    targetAssets = allAssets;
+  } else if (tabName === 'Battlecard') {
+    targetAssets = allAssets.filter(a => a.contentType === 'Battlecard' || a.contentType === 'Other');
+  } else {
+    targetAssets = allAssets.filter(a => a.contentType === tabName);
+  }
+
+  if (targetAssets.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state-box">
+        <h3>No ${escapeHtml(tabName === 'all' ? '' : tabName)} Marketing Collaterals Found</h3>
+        <p>No marketing collaterals currently uploaded under this category for ${escapeHtml(competitor ? competitor.name : 'this competitor')}.</p>
+        <button class="btn-primary" onclick="window.openCompetitorCollateralModal(null, '${competitorId}')" style="margin-top:12px;">+ Add Marketing Collateral</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="assets-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+      ${targetAssets.map(doc => {
+        const cTypeLabel = formatContentTypeLabel(doc.contentType || 'Brochure');
+        const formattedDate = formatCardDateDDMMYYYY(doc.date || '2026-09-15');
+        const authorName = doc.updatedBy || 'Marketing Team';
+
+        return `
+          <div class="doc-card" id="card-${doc.id}" onclick="window.openCollateralUrl('${escapeHtml(doc.sharePointUrl)}')" style="cursor:pointer;" title="Click to view file">
+            <div class="card-header-bar">
+              <div class="card-tags">
+                <span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:11px; padding:2px 8px; border-radius:4px;">${cTypeLabel}</span>
+                ${doc.cancerType ? `<span class="badge badge-dept" style="font-size:11px; padding:2px 8px; font-weight:600;">${escapeHtml(doc.cancerType)}</span>` : ''}
+              </div>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">${escapeHtml(doc.title)}</h3>
+              <p class="card-description">${escapeHtml(doc.description || '')}</p>
+              <div class="card-metadata">
+                <div class="card-last-updated-row" title="Last Updated: ${formattedDate} by ${authorName}">
+                  <span class="last-updated-text">Date: <strong class="last-updated-date">${formattedDate}</strong> • Analyst: <strong class="last-updated-user">${escapeHtml(authorName)}</strong></span>
+                </div>
+              </div>
+            </div>
+            <div class="card-actions-bar" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <button class="btn-primary" style="padding:5px 16px; font-size:11.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openCollateralUrl('${escapeHtml(doc.sharePointUrl)}')" title="View Collateral">
+                <span>View</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
+              </button>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button class="btn-outline" style="padding:5px 10px; font-size:11.5px;" onclick="event.stopPropagation(); window.openCompetitorCollateralModal('${doc.id}', '${competitorId}')" title="Edit Collateral Details">Edit</button>
+                <button class="card-action-btn" onclick="event.stopPropagation(); window.deleteCompetitorCollateral('${doc.id}')" title="Delete Collateral Card" style="color:#ef4444;">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+// 3. Competitor Management Modal (Add, Edit, Delete)
+window.openCompetitorModal = function(competitorId = null) {
+  const modal = document.getElementById('competitorModal');
+  if (!modal) return;
+
+  const existing = competitorId ? getCompetitors().find(c => c.id === competitorId) : null;
+
+  document.getElementById('competitorModalTitle').innerText = existing ? 'Edit Competitor' : 'New Competitor Profile';
+  document.getElementById('competitorFormId').value = existing ? existing.id : '';
+  document.getElementById('compName').value = existing ? existing.name : '';
+  document.getElementById('compHq').value = existing ? existing.headquarters : '';
+  document.getElementById('compWebsite').value = existing ? (existing.website || '') : '';
+  document.getElementById('compFocus').value = existing ? (existing.focus || '') : '';
+  document.getElementById('compTagline').value = existing ? (existing.tagline || '') : '';
+  document.getElementById('compDetails').value = existing ? (existing.details || '') : '';
+
+  openModal(modal);
+};
+
+window.closeCompetitorModal = function() {
+  const modal = document.getElementById('competitorModal');
+  if (modal) closeModal(modal);
+};
+
+window.saveCompetitor = function() {
+  const idInput = document.getElementById('competitorFormId').value;
+  const name = document.getElementById('compName').value.trim();
+  const hq = document.getElementById('compHq').value.trim();
+  const website = document.getElementById('compWebsite').value.trim();
+  const focus = document.getElementById('compFocus').value.trim();
+  const tagline = document.getElementById('compTagline').value.trim();
+  const details = document.getElementById('compDetails').value.trim();
+
+  if (!name || !hq || !tagline) {
+    showToast("Please fill in all required competitor fields (*)");
+    return;
+  }
+
+  const list = getCompetitors();
+  let compId = idInput;
+  if (!compId) {
+    compId = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || ('comp-' + Date.now());
+    // Ensure uniqueness
+    if (list.some(c => c.id === compId)) {
+      compId = compId + '-' + Date.now().toString().slice(-4);
+    }
+  }
+
+  const entry = {
+    id: compId,
+    name,
+    headquarters: hq,
+    website,
+    focus: focus || 'Genomics & Oncology',
+    tagline,
+    details
+  };
+
+  const idx = list.findIndex(c => c.id === compId);
+  if (idx >= 0) {
+    list[idx] = entry;
+  } else {
+    list.push(entry);
+  }
+
+  saveCompetitors(list);
+  window.closeCompetitorModal();
+  showToast(idx >= 0 ? `Updated competitor: ${name}` : `Registered competitor: ${name}`);
+
+  if (currentCompetitorFolderId === compId) {
+    window.openCompetitorFolder(compId, currentCompetitorTab);
+  } else {
+    renderCompetitiveIntelligenceList();
+  }
+};
+
+window.deleteCompetitor = function(competitorId) {
+  const list = getCompetitors();
+  const target = list.find(c => c.id === competitorId);
+  if (!target) return;
+
+  const assets = getCompetitorAssets(competitorId);
+  const promptMsg = assets.length > 0 
+    ? `Delete competitor "${target.name}" and all ${assets.length} marketing collateral(s) in this folder?`
+    : `Delete competitor "${target.name}"?`;
+
+  if (!confirm(promptMsg)) return;
+
+  // Remove competitor
+  saveCompetitors(list.filter(c => c.id !== competitorId));
+
+  // Remove competitor collaterals
+  const allAssets = getCompetitorAssets();
+  saveCompetitorAssets(allAssets.filter(a => a.competitorId !== competitorId));
+
+  showToast(`Deleted competitor "${target.name}"`);
+  renderCompetitiveIntelligence();
+};
+
+// 4. Competitor Marketing Collaterals Management Modal (Add, Edit, Delete)
+window.openCompetitorCollateralModal = function(collateralId = null, defaultCompetitorId = null) {
+  const modal = document.getElementById('competitorCollateralModal');
+  if (!modal) return;
+
+  const competitors = getCompetitors();
+  if (competitors.length === 0) {
+    showToast("Please register at least one competitor first");
+    window.openCompetitorModal();
+    return;
+  }
+
+  // Populate competitor dropdown
+  const compSelect = document.getElementById('collatCompetitorSelect');
+  compSelect.innerHTML = competitors.map(c => `
+    <option value="${c.id}">${escapeHtml(c.name)} (${escapeHtml(c.headquarters || 'India')})</option>
+  `).join('');
+
+  const allAssets = getCompetitorAssets();
+  const existing = collateralId ? allAssets.find(a => a.id === collateralId) : null;
+  const today = new Date().toISOString().split('T')[0];
+
+  document.getElementById('competitorCollateralModalTitle').innerText = existing ? 'Edit Marketing Collateral' : 'New Marketing Collateral';
+  document.getElementById('collatFormId').value = existing ? existing.id : '';
+  document.getElementById('collatTitle').value = existing ? existing.title : '';
+  document.getElementById('collatCompetitorSelect').value = existing ? existing.competitorId : (defaultCompetitorId || competitors[0].id);
+  document.getElementById('collatTypeSelect').value = existing ? existing.contentType : 'Brochure';
+  document.getElementById('collatUrl').value = existing ? (existing.sharePointUrl || '') : '';
+  document.getElementById('collatDesc').value = existing ? (existing.description || '') : '';
+  document.getElementById('collatCancerType').value = existing ? (existing.cancerType || 'Pan-Cancer') : 'Pan-Cancer';
+  document.getElementById('collatDate').value = existing ? (existing.date || today) : today;
+  document.getElementById('collatAuthor').value = existing ? (existing.updatedBy || '') : (getCurrentUserName() || 'Marketing Team');
+
+  openModal(modal);
+};
+
+window.closeCompetitorCollateralModal = function() {
+  const modal = document.getElementById('competitorCollateralModal');
+  if (modal) closeModal(modal);
+};
+
+window.saveCompetitorCollateral = function() {
+  const idInput = document.getElementById('collatFormId').value;
+  const title = document.getElementById('collatTitle').value.trim();
+  const competitorId = document.getElementById('collatCompetitorSelect').value;
+  const contentType = document.getElementById('collatTypeSelect').value;
+  const sharePointUrl = document.getElementById('collatUrl').value.trim();
+  const description = document.getElementById('collatDesc').value.trim();
+  const cancerType = document.getElementById('collatCancerType').value.trim() || 'Pan-Cancer';
+  const date = document.getElementById('collatDate').value || new Date().toISOString().split('T')[0];
+  const author = document.getElementById('collatAuthor').value.trim() || getCurrentUserName() || 'Marketing Team';
+
+  if (!title || !competitorId || !sharePointUrl || !description) {
+    showToast("Please fill in all required collateral fields (*)");
+    return;
+  }
+
+  const list = getCompetitorAssets();
+  const collatId = idInput || ('comp-collat-' + Date.now());
+
+  const entry = {
+    id: collatId,
+    competitorId,
+    title,
+    contentType,
+    description,
+    sharePointUrl,
+    cancerType,
+    fileType: sharePointUrl.toLowerCase().endsWith('.pptx') ? 'PPTX' : 'PDF',
+    date,
+    updatedBy: author
+  };
+
+  const idx = list.findIndex(a => a.id === collatId);
+  if (idx >= 0) {
+    list[idx] = entry;
+  } else {
+    list.unshift(entry);
+  }
+
+  saveCompetitorAssets(list);
+  window.closeCompetitorCollateralModal();
+  showToast(idx >= 0 ? `Updated collateral: ${title}` : `Added collateral: ${title}`);
+
+  if (currentCompetitorFolderId) {
+    renderCompetitorFolderContent(currentCompetitorFolderId, currentCompetitorTab);
+  } else {
+    renderCompetitiveIntelligenceList();
+  }
+};
+
+window.deleteCompetitorCollateral = function(collateralId) {
+  const list = getCompetitorAssets();
+  const target = list.find(a => a.id === collateralId);
+  if (!target) return;
+
+  if (!confirm(`Delete marketing collateral "${target.title}"?`)) return;
+
+  saveCompetitorAssets(list.filter(a => a.id !== collateralId));
+  showToast(`Deleted collateral: ${target.title}`);
+
+  if (currentCompetitorFolderId) {
+    renderCompetitorFolderContent(currentCompetitorFolderId, currentCompetitorTab);
+  } else {
+    renderCompetitiveIntelligenceList();
+  }
 };
 
 function renderReportLibrary() {

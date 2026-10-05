@@ -2091,6 +2091,292 @@ const db = {
       ],
       mostSearchedKeywords: ["Company Deck", "Brand Guidelines", "OncoCTC", "OncoIncytes", "OncoAlibrex", "Prime+", "Quality Manual"]
     }
-  }
+  },
+  competitors: [
+    {
+      id: "4basecare",
+      name: "4baseCare",
+      headquarters: "Bengaluru, Karnataka",
+      website: "https://4basecare.com",
+      focus: "TarGT Panels, Precision Oncology, INDAM Database, WES + WTS",
+      tagline: "Genomics for oncology backed by the INDAM Indian patient cohort database",
+      details: "Indian precision oncology genomics company developing AI-driven multi-gene NGS assays tailored to Asian-Indian cancer populations. Flagship assays include TarGT Indx (solid tumor profiling), TarGT Absolute (WES + WTS), and hereditary cancer risk panels."
+    },
+    {
+      id: "strand-life-sciences",
+      name: "Strand Life Sciences",
+      headquarters: "Bengaluru, Karnataka",
+      website: "https://strandls.com",
+      focus: "StrandAdvantage 500-Gene Panels, Liquid Biopsy, Somatic & Germline NGS",
+      tagline: "Pioneering Indian clinical genomics and diagnostic bioinformatics powerhouse",
+      details: "Established Indian bioinformatics and clinical genomics company providing comprehensive cancer genomic profiling (StrandAdvantage 500+ genes), hereditary cancer testing, and liquid biopsy with pan-India clinical oncology networks."
+    },
+    {
+      id: "medgenome",
+      name: "MedGenome Labs",
+      headquarters: "Bengaluru, Karnataka",
+      website: "https://medgenome.com",
+      focus: "OncoTrack Liquid Biopsy, Comprehensive Panels, Immuno-oncology, High-Throughput NGS",
+      tagline: "India's largest genomics sequencing and clinical diagnostic testing network",
+      details: "Major CAP-accredited genomics laboratory in India offering OncoTrack (blood-based liquid biopsy for solid tumors), OncoPept immuno-oncology profiling, and comprehensive tumor tissue NGS panels with extensive commercial reach."
+    },
+    {
+      id: "datar-cancer-genetics",
+      name: "Datar Cancer Genetics",
+      headquarters: "Nashik & Mumbai, Maharashtra",
+      website: "https://datarpgx.com",
+      focus: "Circulating Tumor Cells (CTC), Trublood, Exacta Chemosensitivity, Early Detection",
+      tagline: "Leader in non-invasive blood-based CTC detection and functional chemosensitivity",
+      details: "Specialized molecular oncology lab focusing on circulating tumor cell (CTC) enrichment, non-invasive liquid biopsies (Trublood), and multi-analyte chemo-resistance assays (Exacta) combining genomic sequencing with ex-vivo drug sensitivity tests."
+    },
+    {
+      id: "neuberg-diagnostics",
+      name: "Neuberg Diagnostics (NCGM)",
+      headquarters: "Chennai & Ahmedabad",
+      website: "https://neubergdiagnostics.com",
+      focus: "OncoGenomix, Solid Tumor NGS, Liquid Biopsy ctDNA, Molecular Pathology",
+      tagline: "Multi-national laboratory alliance with specialized Center for Genomic Medicine",
+      details: "Pan-Indian pathology and genomic diagnostic chain offering OncoGenomix targeted NGS gene panels, BRCA1/2 germline analysis, and targeted solid tumor assays across key oncology centers in South and West India."
+    },
+    {
+      id: "positive-bioscience",
+      name: "Positive Bioscience",
+      headquarters: "Mumbai, Maharashtra",
+      website: "https://positivebioscience.com",
+      focus: "PositiveOnco, Clinical NGS, Lung & Breast Genomic Panels",
+      tagline: "AI-enabled genomics and targeted clinical testing for hospital networks",
+      details: "Mumbai-based clinical genomics provider focusing on PositiveOnco NGS tests for targeted therapies, molecular profiling for breast and lung carcinomas, and genomic interpretation for hospital clinical oncologists."
+    }
+  ],
+  competitorAssets: [
+    {
+      id: "comp-collat-001",
+      competitorId: "4basecare",
+      title: "4baseCare TarGT Indx Comprehensive Panel Brochure",
+      contentType: "Brochure",
+      description: "Overview of 4baseCare's flagship TarGT Indx solid tumor panel covering actionable alterations and reporting turn-around-time across Indian cancer centers.",
+      sharePointUrl: "https://4basecare.com/targt-indx-brochure.pdf",
+      cancerType: "Solid Tumors",
+      fileType: "PDF",
+      date: "2026-08-15",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-002",
+      competitorId: "4basecare",
+      title: "TarGT Absolute WES + WTS Clinical Sales Deck",
+      contentType: "Presentation",
+      description: "Pitch deck presenting clinical rationale for paired DNA exome + RNA transcriptome sequencing against standard targeted NGS panels.",
+      sharePointUrl: "https://4basecare.com/targt-absolute-presentation.pptx",
+      cancerType: "Pan-Cancer",
+      fileType: "PPTX",
+      date: "2026-07-20",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-003",
+      competitorId: "4basecare",
+      title: "INDAM Cohort Actionability in Indian Cancer Patients",
+      contentType: "Whitepaper",
+      description: "Scientific whitepaper detailing somatic mutation frequencies and germline polymorphisms observed in the proprietary INDAM patient cohort.",
+      sharePointUrl: "https://4basecare.com/indam-whitepaper.pdf",
+      cancerType: "Pan-Cancer",
+      fileType: "PDF",
+      date: "2026-06-10",
+      updatedBy: "Vikas"
+    },
+    {
+      id: "comp-collat-004",
+      competitorId: "4basecare",
+      title: "4baseCare Somatic NGS Clinical Sample Report",
+      contentType: "Sample Report",
+      description: "Sample patient report showcasing tiering of variant classifications (Tier I to IV) and therapy recommendations.",
+      sharePointUrl: "https://4basecare.com/sample-report-targt.pdf",
+      cancerType: "Non-Small Cell Lung Cancer",
+      fileType: "PDF",
+      date: "2026-05-18",
+      updatedBy: "Sharad"
+    },
+    {
+      id: "comp-collat-005",
+      competitorId: "strand-life-sciences",
+      title: "StrandAdvantage 500-Gene Pan-Cancer Master Presentation",
+      contentType: "Presentation",
+      description: "Comprehensive sales deck on the StrandAdvantage panel highlighting coverage of 500+ somatic genes, MSI, and TMB calculation methodology.",
+      sharePointUrl: "https://strandls.com/strandadvantage-500.pptx",
+      cancerType: "Solid Tumors",
+      fileType: "PPTX",
+      date: "2026-08-28",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-006",
+      competitorId: "strand-life-sciences",
+      title: "Strand Somatic & Germline Oncology Product Brochure",
+      contentType: "Brochure",
+      description: "Brochure for oncologists summarizing paired tumor-normal sequencing capabilities and hereditary cancer panel combinations.",
+      sharePointUrl: "https://strandls.com/oncology-brochure.pdf",
+      cancerType: "Hereditary & Solid Tumors",
+      fileType: "PDF",
+      date: "2026-07-12",
+      updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "comp-collat-007",
+      competitorId: "strand-life-sciences",
+      title: "Strand Liquid Biopsy ctDNA Monitoring Case Series",
+      contentType: "Case Study",
+      description: "Clinical case study demonstrating longitudinal ctDNA monitoring in metastatic colorectal cancer patients undergoing targeted chemotherapy.",
+      sharePointUrl: "https://strandls.com/ctdna-case-study.pdf",
+      cancerType: "Colorectal Cancer",
+      fileType: "PDF",
+      date: "2026-06-25",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-008",
+      competitorId: "strand-life-sciences",
+      title: "Strand Genomic Interpretation & Clinical Utility Whitepaper",
+      contentType: "Whitepaper",
+      description: "Whitepaper on automated variant curation algorithms, clinical trial matching accuracy, and ACMG guideline concordance.",
+      sharePointUrl: "https://strandls.com/interpretation-whitepaper.pdf",
+      cancerType: "Pan-Cancer",
+      fileType: "PDF",
+      date: "2026-05-30",
+      updatedBy: "Vikas"
+    },
+    {
+      id: "comp-collat-009",
+      competitorId: "medgenome",
+      title: "MedGenome OncoTrack Liquid Biopsy Assay Brochure",
+      contentType: "Brochure",
+      description: "Promotional brochure highlighting cell-free DNA (cfDNA) extraction, sensitivity limits (0.1% VAF), and monitoring applications in lung and colon cancers.",
+      sharePointUrl: "https://medgenome.com/oncotrack-brochure.pdf",
+      cancerType: "Lung & Colorectal",
+      fileType: "PDF",
+      date: "2026-08-05",
+      updatedBy: "Sharad"
+    },
+    {
+      id: "comp-collat-010",
+      competitorId: "medgenome",
+      title: "MedGenome Comprehensive Oncology Solutions Pitch Deck",
+      contentType: "Presentation",
+      description: "Hospital pitch deck detailing turnaround times, pan-India logistics, pricing brackets, and genomic counselor support infrastructure.",
+      sharePointUrl: "https://medgenome.com/oncology-deck.pptx",
+      cancerType: "Pan-Cancer",
+      fileType: "PPTX",
+      date: "2026-07-15",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-011",
+      competitorId: "medgenome",
+      title: "OncoPept Immune Checkpoint Biomarker Whitepaper",
+      contentType: "Whitepaper",
+      description: "Research whitepaper discussing neoantigen prediction, HLA binding affinity scoring, and immunotherapy response stratification.",
+      sharePointUrl: "https://medgenome.com/oncopept-whitepaper.pdf",
+      cancerType: "Immuno-Oncology",
+      fileType: "PDF",
+      date: "2026-06-18",
+      updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "comp-collat-012",
+      competitorId: "medgenome",
+      title: "OncoTrack ctDNA EGFR T790M Resistance Case Review",
+      contentType: "Case Study",
+      description: "Case report demonstrating detection of acquired EGFR T790M and C797S resistance mutations in NSCLC without repeat tissue biopsy.",
+      sharePointUrl: "https://medgenome.com/egfr-case-review.pdf",
+      cancerType: "Non-Small Cell Lung Cancer",
+      fileType: "PDF",
+      date: "2026-04-22",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-013",
+      competitorId: "datar-cancer-genetics",
+      title: "Datar Trublood Non-Invasive Multianalyte Brochure",
+      contentType: "Brochure",
+      description: "Brochure describing multi-analyte blood evaluation incorporating circulating tumor cells, cell-free DNA, and exosomal RNA for solid tumor management.",
+      sharePointUrl: "https://datarpgx.com/trublood-brochure.pdf",
+      cancerType: "Solid Tumors",
+      fileType: "PDF",
+      date: "2026-08-10",
+      updatedBy: "Sharad"
+    },
+    {
+      id: "comp-collat-014",
+      competitorId: "datar-cancer-genetics",
+      title: "Exacta Functional Tumor Profiling Clinical Presentation",
+      contentType: "Presentation",
+      description: "Clinical deck detailing chemo-resistance evaluation on patient-derived organoids combined with high-depth whole exome sequencing.",
+      sharePointUrl: "https://datarpgx.com/exacta-presentation.pptx",
+      cancerType: "Refractory / Advanced Cancers",
+      fileType: "PPTX",
+      date: "2026-07-02",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-015",
+      competitorId: "datar-cancer-genetics",
+      title: "Circulating Tumor Cell Clusters in Metastatic Cancer Whitepaper",
+      contentType: "Whitepaper",
+      description: "Clinical evidence and validation studies demonstrating the prognostic relevance of viable CTC clusters isolated using negative enrichment protocols.",
+      sharePointUrl: "https://datarpgx.com/ctc-clusters-whitepaper.pdf",
+      cancerType: "Breast & Prostate Cancers",
+      fileType: "PDF",
+      date: "2026-05-14",
+      updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "comp-collat-016",
+      competitorId: "neuberg-diagnostics",
+      title: "Neuberg OncoGenomix Comprehensive Panel Brochure",
+      contentType: "Brochure",
+      description: "Overview of OncoGenomix NGS gene panels, coverage specifications, clinical sensitivity, and sample requirement guidelines for oncologists.",
+      sharePointUrl: "https://neubergdiagnostics.com/oncogenomix-brochure.pdf",
+      cancerType: "Solid Tumors",
+      fileType: "PDF",
+      date: "2026-07-28",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-017",
+      competitorId: "neuberg-diagnostics",
+      title: "NCGM Molecular Oncology & Targeted Panels Presentation",
+      contentType: "Presentation",
+      description: "Overview deck of the Neuberg Center for Genomic Medicine NGS laboratory capabilities and regional hospital partnerships across India.",
+      sharePointUrl: "https://neubergdiagnostics.com/ncgm-presentation.pptx",
+      cancerType: "Pan-Cancer",
+      fileType: "PPTX",
+      date: "2026-06-08",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-018",
+      competitorId: "positive-bioscience",
+      title: "PositiveOnco Precision Oncology Product Brochure",
+      contentType: "Brochure",
+      description: "Clinical product collateral describing PositiveOnco NGS profiling panels for targeted oncology drugs and genomic counseling support.",
+      sharePointUrl: "https://positivebioscience.com/positiveonco-brochure.pdf",
+      cancerType: "Breast & Lung Cancers",
+      fileType: "PDF",
+      date: "2026-08-01",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "comp-collat-019",
+      competitorId: "positive-bioscience",
+      title: "Positive Bioscience Cancer Genomics Commercial Battlecard",
+      contentType: "Battlecard",
+      description: "Internal competitive analysis comparing PositiveOnco turnaround time, panel gene counts, and pricing benchmarks against OncoIndx.",
+      sharePointUrl: "https://positivebioscience.com/competitive-battlecard.pdf",
+      cancerType: "Pan-Cancer",
+      fileType: "PDF",
+      date: "2026-07-19",
+      updatedBy: "Vikas"
+    }
+  ]
 };
 export default db;
