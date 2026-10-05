@@ -1555,25 +1555,6 @@ function renderDashboard() {
       </div>
     </div>
 
-    <!-- Quick Product Assets -->
-    <div class="dashboard-section">
-      <div class="section-title-row" style="margin-bottom: 12px;">
-        <h2 class="section-headline">Quick Product Assets</h2>
-      </div>
-      
-      <!-- Product Tabs Container -->
-      <div class="product-tabs-container">
-        ${db.products.filter(p => p.id !== 'icore' && p.id !== 'icare').map((p, idx) => `
-          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
-        `).join('')}
-      </div>
-      
-      <!-- Folders Directory Content View -->
-      <div id="dashboardProductDocsContainer" class="product-docs-folder-view">
-        <!-- Rendered dynamically -->
-      </div>
-    </div>
-
     <!-- Company Announcements -->
     <div class="dashboard-section">
       <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
@@ -1630,28 +1611,6 @@ function renderDashboard() {
     dashUploadBtn.addEventListener('click', () => {
       window.triggerRegisterAssetModal('dashboard');
     });
-  }
-
-  // Set up product tabs click handlers
-  const tabs = workspaceViewport.querySelectorAll('.product-tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const selectedProduct = tab.getAttribute('data-product');
-      renderDashboardProductDocs(selectedProduct);
-    });
-  });
-
-  // Initial render: check URL hash or default to oncoindx
-  const initialHash = (window.location.hash || '').replace('#', '').toLowerCase();
-  const matchedTab = initialHash && workspaceViewport.querySelector(`.product-tab[data-product="${initialHash}"]`);
-  if (matchedTab) {
-    tabs.forEach(t => t.classList.remove('active'));
-    matchedTab.classList.add('active');
-    renderDashboardProductDocs(initialHash);
-  } else {
-    renderDashboardProductDocs('oncoindx');
   }
 }
 
@@ -6420,19 +6379,7 @@ window.refreshCurrentView = function() {
   const route = activeNav ? activeNav.getAttribute('data-route') : 'dashboard';
   
   if (route === 'dashboard') {
-    const activeTab = document.querySelector('.product-tab.active');
-    const selectedProd = activeTab ? activeTab.getAttribute('data-product') : 'oncoindx';
     renderDashboard();
-    // Preserve active product folder tab
-    const tabs = workspaceViewport.querySelectorAll('.product-tab');
-    tabs.forEach(t => {
-      if (t.getAttribute('data-product') === selectedProd) {
-        t.classList.add('active');
-      } else {
-        t.classList.remove('active');
-      }
-    });
-    renderDashboardProductDocs(selectedProd);
   } else {
     renderRoute(route);
   }
