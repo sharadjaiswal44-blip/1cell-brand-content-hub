@@ -381,6 +381,8 @@ function getProductAssetCategory(doc) {
     ct === 'sales enablement' ||
     ct === 'training' ||
     ct === 'sales deck' ||
+    ct === 'slide deck' ||
+    ct === 'slide decks' ||
     ct === 'presentation' ||
     ct === 'battlecard' ||
     ct === 'playbook' ||
@@ -1324,6 +1326,7 @@ function formatContentTypeLabel(type) {
   if (tLower === 'brochure') return 'Brochure';
   if (tLower === 'sample report' || tLower === 'sample reports') return 'Sample Report';
   if (tLower === 'publication' || tLower === 'scientific publication') return 'Publication';
+  if (tLower === 'slide deck' || tLower === 'slide decks' || tLower === 'slidedeck') return 'Slide Deck';
   if (tLower === 'presentation' || tLower === 'sales deck') return 'Presentation';
   if (tLower === 'video') return 'Video';
   if (tLower === 'battlecard') return 'Battlecard';
@@ -3037,7 +3040,7 @@ window.openCompetitorFolder = function(competitorId, defaultTab = 'all') {
 
   const allAssets = getCompetitorAssets(competitorId);
   const brochures = allAssets.filter(a => a.contentType === 'Brochure');
-  const presentations = allAssets.filter(a => a.contentType === 'Presentation');
+  const presentations = allAssets.filter(a => a.contentType === 'Presentation' || a.contentType === 'Slide Deck');
   const caseStudies = allAssets.filter(a => a.contentType === 'Case Study');
   const whitepapers = allAssets.filter(a => a.contentType === 'Whitepaper');
   const sampleReports = allAssets.filter(a => a.contentType === 'Sample Report');
@@ -3136,6 +3139,8 @@ function renderCompetitorFolderContent(competitorId, tabName = 'all') {
     targetAssets = allAssets;
   } else if (tabName === 'Battlecard') {
     targetAssets = allAssets.filter(a => a.contentType === 'Battlecard' || a.contentType === 'Other');
+  } else if (tabName === 'Presentation') {
+    targetAssets = allAssets.filter(a => a.contentType === 'Presentation' || a.contentType === 'Slide Deck');
   } else {
     targetAssets = allAssets.filter(a => a.contentType === tabName);
   }
@@ -3362,7 +3367,7 @@ window.saveCompetitorCollateral = function() {
     description,
     sharePointUrl,
     cancerType,
-    fileType: sharePointUrl.toLowerCase().endsWith('.pptx') ? 'PPTX' : 'PDF',
+    fileType: (sharePointUrl.toLowerCase().endsWith('.pptx') || contentType === 'Slide Deck' || contentType === 'Presentation') ? 'PPTX' : 'PDF',
     date,
     updatedBy: author
   };
@@ -4832,7 +4837,7 @@ window.updateFilterState = function() {
         if (f === 'About Product' && (docCat === 'about-product' || doc.contentType === 'Brochure' || doc.contentType === 'About Product' || doc.contentType === 'One Pager')) return true;
         if (f === 'Evidence' && (docCat === 'evidence' || doc.contentType === 'Case Studies' || doc.contentType === 'Case Study' || doc.contentType === 'Sample Report' || doc.contentType === 'Clinical Evidence')) return true;
         if (f === 'Scientific' && (docCat === 'scientific' || doc.contentType === 'WhitePaper' || doc.contentType === 'Whitepaper' || doc.contentType === 'Publication')) return true;
-        if (f === 'Training & Sales Enablement' && (docCat === 'training-sales' || doc.contentType === 'Sales Enablement' || doc.contentType === 'Presentation' || doc.contentType === 'Sales Deck' || doc.contentType === 'Battlecard' || doc.contentType === 'Playbook' || doc.contentType === 'Video')) return true;
+        if (f === 'Training & Sales Enablement' && (docCat === 'training-sales' || doc.contentType === 'Sales Enablement' || doc.contentType === 'Presentation' || doc.contentType === 'Slide Deck' || doc.contentType === 'Sales Deck' || doc.contentType === 'Battlecard' || doc.contentType === 'Playbook' || doc.contentType === 'Video')) return true;
         if (f === 'Other' && docCat === 'other') return true;
         return doc.contentType === f || cardLabel === f;
       });
@@ -5113,7 +5118,7 @@ window.previewDocument = function(docId) {
         <p class="mock-pdf-paragraph" style="font-style:italic; font-size:10px; border-top:1px solid #cbd5e1; padding-top:8px;">Document path: 1cellai.sharepoint.com/${doc.folderPath}/${doc.title}</p>
       </div>
     `;
-  } else if (doc.contentType === 'Presentation' || doc.contentType === 'Sales Deck') {
+  } else if (doc.contentType === 'Presentation' || doc.contentType === 'Sales Deck' || doc.contentType === 'Slide Deck') {
     // Mock PowerPoint slides carousel
     previewContentDisplay.innerHTML = `
       <div style="width:100%; max-width:600px; display:flex; flex-direction:column; gap:16px;">
