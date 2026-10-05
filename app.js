@@ -522,7 +522,31 @@ function renderProductAssetCard(asset) {
 // Application State
 let currentRole = 'marketing_admin';
 let currentTheme = 'light';
-let userFavorites = new Set(['doc-041', 'doc-046', 'doc-051']); // Default mock favorites (OncoCTC, OncoAlibrex, OncoIncytes)
+const FAVORITES_STORAGE_KEY = '1cell_user_favorites';
+let userFavorites = (function loadFavorites() {
+  try {
+    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return new Set(arr);
+    }
+  } catch (e) {}
+  return new Set(['doc-041', 'doc-046', 'doc-051']); // Default favorites (OncoCTC, OncoAlibrex, OncoIncytes)
+})();
+function persistFavorites() {
+  try { localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(userFavorites))); } catch (e) {}
+}
+// Resolve all favourited items that can be rendered as standard document cards
+function getAllFavoriteItems() {
+  const pool = [].concat(db.documents || [], db.newsletters || []);
+  const seen = new Set();
+  return pool.filter(d => {
+    if (!d || !userFavorites.has(d.id) || seen.has(d.id)) return false;
+    seen.add(d.id);
+    return true;
+  });
+}
+window.getAllFavoriteItems = getAllFavoriteItems;
 let recentAssets = ['doc-041', 'doc-046', 'doc-051'];
 let activeSearchQuery = '';
 let activeQuizTab = 'quiz';
@@ -1346,21 +1370,12 @@ function renderDashboardProductDocs(productName) {
   }
 
   relatedDocs.forEach(doc => {
-    let icon = '📄';
-    if (doc.contentType === 'Brochure') icon = '📖';
-    else if (doc.contentType === 'Whitepaper' || doc.contentType === 'WhitePaper') icon = '🧬';
-    else if (doc.contentType === 'Case Study' || doc.contentType === 'Case Studies') icon = '🔬';
-    else if (doc.contentType === 'Battlecard') icon = '⚔️';
-    else if (doc.contentType === 'Presentation' || doc.contentType === 'Sales Deck') icon = '📊';
-    else if (doc.contentType === 'Sample Report') icon = '📋';
-
     const cTypeLabel = formatContentTypeLabel(doc.contentType || 'Brochure');
     const contentTypeBadge = `<span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:10.5px; padding:2px 7px; border-radius:4px;">${cTypeLabel}</span>`;
 
     html += `
       <div class="folder-doc-card" id="folder-card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
         <div class="folder-doc-header">
-          <span class="folder-doc-icon">${icon}</span>
           <div style="flex: 1;">
             <div class="folder-doc-title">${doc.title}</div>
             <div class="folder-doc-path" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px;">
@@ -1518,6 +1533,10 @@ function renderDashboard() {
     `;
   }
 
+  const announcements = getAnnouncements();
+  const canManage = isMarketingUser();
+  const favs = getAllFavoriteItems();
+
   workspaceViewport.innerHTML = `
     <div class="welcome-banner">
       <div>
@@ -1529,66 +1548,43 @@ function renderDashboard() {
       </div>
     </div>
 
-    <!-- Product-wise SharePoint Folder Directory Tabs -->
+    <!-- Company Announcements -->
     <div class="dashboard-section">
-      <div class="section-title-row" style="margin-bottom: 12px;">
-        <h2 class="section-headline">Quick Product Assets (SharePoint Directory)</h2>
+      <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h2 class="section-headline" style="margin:0;">Announcements</h2>
+          <span class="badge badge-dept" style="font-size:11.5px; padding:3px 9px; font-weight:600;">${announcements.length}</span>
+        </div>
+        ${canManage ? `<button class="btn-primary" style="padding:7px 16px; font-size:12px; font-weight:600;" onclick="window.openAnnouncementModal()">+ New Announcement</button>` : ''}
       </div>
-      
-      <!-- Product Tabs Container -->
-      <div class="product-tabs-container">
-        ${db.products.filter(p => p.id !== 'icore' && p.id !== 'icare').map((p, idx) => `
-          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
-        `).join('')}
-      </div>
-      
-      <!-- Folders Directory Content View -->
-      <div id="dashboardProductDocsContainer" class="product-docs-folder-view">
-        <!-- Rendered dynamically -->
+      <div class="announcements-list">
+        ${announcements.length > 0 ? announcements.map(a => renderAnnouncementCard(a, canManage)).join('') : `
+          <div class="empty-state-box">
+            <h3>No announcements yet</h3>
+            <p>${canManage ? 'Click "+ New Announcement" to publish a company-wide update.' : 'Company-wide updates from the Marketing team will appear here.'}</p>
+          </div>
+        `}
       </div>
     </div>
 
-    <!-- Dynamic sections columns -->
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
-      <!-- Left side: Recently Added & Pinned -->
-      <div>
-        <div class="dashboard-section">
-          <div class="section-title-row">
-            <h2 class="section-headline">Recommended & Pinned Resources</h2>
-          </div>
-          <div class="assets-grid" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
-            ${db.documents.filter(d => d.isPinned).map(d => renderDocumentCard(d)).join('')}
-          </div>
-        </div>
-
-        <div class="dashboard-section">
-          <div class="section-title-row">
-            <h2 class="section-headline">Recently Added / Updated</h2>
-          </div>
-          <div class="assets-grid" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
-            ${db.documents.slice(0, 4).map(d => renderDocumentCard(d)).join('')}
-          </div>
+    <!-- Favourites -->
+    <div class="dashboard-section">
+      <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h2 class="section-headline" style="margin:0;">Favourites</h2>
+          <span class="badge badge-dept" style="font-size:11.5px; padding:3px 9px; font-weight:600;">${favs.length}</span>
         </div>
       </div>
-
-      <!-- Right side: Trending and Telemetry -->
-      <div>
-        <div class="dashboard-section">
-          <div class="section-title-row">
-            <h2 class="section-headline">Trending Content</h2>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            ${db.documents.filter(d => d.isTrending).map(d => `
-              <div class="quick-tile-card" style="flex-direction: row; text-align: left; padding: 14px; gap:12px; align-items:center;" onclick="window.previewDocument('${d.id}')">
-                <div class="tile-icon-wrapper" style="margin: 0; width: 36px; height: 36px; font-size:16px;">🔥</div>
-                <div style="flex:1;">
-                  <h4 style="font-size:13px; font-weight:600; margin-bottom: 2px;">${d.title}</h4>
-                  <span style="font-size:11px; color:var(--text-tertiary);">${d.views || d.viewCount || 0} views • ${d.department}</span>
-                </div>
-              </div>
-            `).join('')}
+      ${favs.length > 0 ? `
+        <div class="assets-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+          ${favs.map(d => renderDocumentCard(d)).join('')}
         </div>
-      </div>
+      ` : `
+        <div class="empty-state-box">
+          <h3>No favourites yet</h3>
+          <p>Click the bookmark button on any asset card across the hub to add it to your Favourites.</p>
+        </div>
+      `}
     </div>
   `;
 
@@ -1599,29 +1595,229 @@ function renderDashboard() {
       window.triggerRegisterAssetModal('dashboard');
     });
   }
-
-  // Set up product tabs click handlers
-  const tabs = workspaceViewport.querySelectorAll('.product-tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const selectedProduct = tab.getAttribute('data-product');
-      renderDashboardProductDocs(selectedProduct);
-    });
-  });
-
-  // Initial render: check URL hash or default to oncoindx
-  const initialHash = (window.location.hash || '').replace('#', '').toLowerCase();
-  const matchedTab = initialHash && workspaceViewport.querySelector(`.product-tab[data-product="${initialHash}"]`);
-  if (matchedTab) {
-    tabs.forEach(t => t.classList.remove('active'));
-    matchedTab.classList.add('active');
-    renderDashboardProductDocs(initialHash);
-  } else {
-    renderDashboardProductDocs('oncoindx');
-  }
 }
+
+// ==========================================================
+// Company Announcements (managed by Marketing team)
+// ==========================================================
+const ANNOUNCEMENTS_STORAGE_KEY = '1cell_announcements';
+const DEFAULT_ANNOUNCEMENTS = [
+  {
+    id: 'ann-001',
+    title: "1Cell.Ai named 'Best Healthtech Startup 2026'",
+    message: "We are proud to announce that 1Cell.Ai has been recognised as the 'Best Healthtech Startup 2026'. This award celebrates our team's commitment to advancing precision oncology through AI-driven genomics. Thank you to every team member, partner, and clinician who made this possible.",
+    category: 'Award',
+    postedBy: 'Marketing Team',
+    date: '2026-10-01',
+    pinned: true
+  },
+  {
+    id: 'ann-002',
+    title: 'Quarterly Town Hall - Q3 Business Review',
+    message: 'Join leadership for the Q3 Town Hall covering product milestones, commercial performance, and roadmap priorities for the upcoming quarter. Calendar invites have been shared with all teams.',
+    category: 'Event',
+    postedBy: 'Marketing Team',
+    date: '2026-09-28',
+    pinned: false
+  },
+  {
+    id: 'ann-003',
+    title: 'Updated Brand Guidelines Now Live',
+    message: 'The refreshed 1Cell.Ai brand guidelines, including updated product logos and colour palette, are now available in Company Assets. Please use the latest versions for all external communication.',
+    category: 'Update',
+    postedBy: 'Marketing Team',
+    date: '2026-09-20',
+    pinned: false
+  }
+];
+
+function saveAnnouncements(list) {
+  try {
+    localStorage.setItem(ANNOUNCEMENTS_STORAGE_KEY, JSON.stringify(list));
+  } catch (e) {}
+}
+
+function getAnnouncements() {
+  let list = null;
+  try {
+    const raw = localStorage.getItem(ANNOUNCEMENTS_STORAGE_KEY);
+    if (raw) list = JSON.parse(raw);
+  } catch (e) {}
+  if (!Array.isArray(list)) {
+    list = DEFAULT_ANNOUNCEMENTS.map(a => ({ ...a }));
+    saveAnnouncements(list);
+  }
+  // Pinned first, then newest first
+  return list.slice().sort((a, b) => {
+    if (!!b.pinned !== !!a.pinned) return b.pinned ? 1 : -1;
+    return String(b.date || '').localeCompare(String(a.date || ''));
+  });
+}
+window.getAnnouncements = getAnnouncements;
+
+function escapeAnnText(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function renderAnnouncementCard(a, canManage) {
+  const cat = a.category || 'General';
+  const catClass = 'ann-cat-' + cat.toLowerCase().replace(/[^a-z]/g, '');
+  return `
+    <div class="announcement-card ${a.pinned ? 'is-pinned' : ''}" id="ann-${escapeAnnText(a.id)}">
+      <div class="announcement-top">
+        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+          <span class="announcement-cat ${catClass}">${escapeAnnText(cat)}</span>
+          ${a.pinned ? '<span class="announcement-pin">Pinned</span>' : ''}
+        </div>
+        <span class="announcement-date">${formatCardDateDDMMYYYY(a.date)}</span>
+      </div>
+      <h3 class="announcement-title">${escapeAnnText(a.title)}</h3>
+      <p class="announcement-message">${escapeAnnText(a.message)}</p>
+      <div class="announcement-footer">
+        <span class="announcement-author">Posted by <strong>${escapeAnnText(a.postedBy || 'Marketing Team')}</strong></span>
+        ${canManage ? `
+          <div style="display:flex; gap:6px;">
+            <button class="btn-outline" style="padding:4px 12px; font-size:11.5px;" onclick="window.openAnnouncementModal('${escapeAnnText(a.id)}')">Edit</button>
+            <button class="btn-outline" style="padding:4px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="window.deleteAnnouncement('${escapeAnnText(a.id)}')">Delete</button>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function ensureAnnouncementModal() {
+  let modal = document.getElementById('announcementModal');
+  if (modal) return modal;
+  modal = document.createElement('div');
+  modal.id = 'announcementModal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="annModalTitle">New Announcement</h3>
+        <button class="modal-close-btn" type="button" onclick="window.closeAnnouncementModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="announcementForm" class="form-grid" onsubmit="event.preventDefault(); window.saveAnnouncement();">
+          <input type="hidden" id="annId">
+          <div class="form-group full-width">
+            <label for="annTitle">Title *</label>
+            <input type="text" id="annTitle" required placeholder="e.g. 1Cell.Ai wins industry award">
+          </div>
+          <div class="form-group full-width">
+            <label for="annMessage">Message *</label>
+            <textarea id="annMessage" rows="5" required placeholder="Write the announcement details..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="annCategory">Category</label>
+            <select id="annCategory">
+              <option value="General">General</option>
+              <option value="Award">Award</option>
+              <option value="Event">Event</option>
+              <option value="Update">Update</option>
+              <option value="Product Launch">Product Launch</option>
+              <option value="HR">HR</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="annDate">Date</label>
+            <input type="date" id="annDate">
+          </div>
+          <div class="form-group">
+            <label for="annPostedBy">Posted By</label>
+            <input type="text" id="annPostedBy" placeholder="Your name">
+          </div>
+          <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px; padding-top:22px;">
+            <input type="checkbox" id="annPinned" style="width:auto;">
+            <label for="annPinned" style="margin:0;">Pin to top</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-outline" type="button" onclick="window.closeAnnouncementModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="window.saveAnnouncement()">Save Announcement</button>
+      </div>
+    </div>
+  `;
+  modal.addEventListener('click', (e) => { if (e.target === modal) window.closeAnnouncementModal(); });
+  document.body.appendChild(modal);
+  return modal;
+}
+
+window.openAnnouncementModal = function(annId) {
+  if (!isMarketingUser()) {
+    showToast('Only the Marketing team can manage announcements');
+    return;
+  }
+  const modal = ensureAnnouncementModal();
+  const existing = annId ? getAnnouncements().find(a => a.id === annId) : null;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('annModalTitle').innerText = existing ? 'Edit Announcement' : 'New Announcement';
+  document.getElementById('annId').value = existing ? existing.id : '';
+  document.getElementById('annTitle').value = existing ? existing.title : '';
+  document.getElementById('annMessage').value = existing ? existing.message : '';
+  document.getElementById('annCategory').value = existing ? (existing.category || 'General') : 'General';
+  document.getElementById('annDate').value = existing ? (existing.date || today) : today;
+  document.getElementById('annPostedBy').value = existing ? (existing.postedBy || '') : (getCurrentUserName() || 'Marketing Team');
+  document.getElementById('annPinned').checked = existing ? !!existing.pinned : false;
+  openModal(modal);
+};
+
+window.closeAnnouncementModal = function() {
+  const modal = document.getElementById('announcementModal');
+  if (modal) closeModal(modal);
+};
+
+window.saveAnnouncement = function() {
+  if (!isMarketingUser()) {
+    showToast('Only the Marketing team can manage announcements');
+    return;
+  }
+  const id = document.getElementById('annId').value;
+  const title = document.getElementById('annTitle').value.trim();
+  const message = document.getElementById('annMessage').value.trim();
+  if (!title || !message) {
+    showToast('Please enter a title and message');
+    return;
+  }
+  const entry = {
+    id: id || ('ann-' + Date.now()),
+    title,
+    message,
+    category: document.getElementById('annCategory').value || 'General',
+    date: document.getElementById('annDate').value || new Date().toISOString().split('T')[0],
+    postedBy: document.getElementById('annPostedBy').value.trim() || getCurrentUserName() || 'Marketing Team',
+    pinned: document.getElementById('annPinned').checked
+  };
+  const list = getAnnouncements();
+  const idx = list.findIndex(a => a.id === entry.id);
+  if (idx >= 0) list[idx] = entry; else list.push(entry);
+  saveAnnouncements(list);
+  window.closeAnnouncementModal();
+  showToast(idx >= 0 ? 'Announcement updated' : 'Announcement published');
+  renderRoute('dashboard');
+};
+
+window.deleteAnnouncement = function(annId) {
+  if (!isMarketingUser()) {
+    showToast('Only the Marketing team can manage announcements');
+    return;
+  }
+  const list = getAnnouncements();
+  const target = list.find(a => a.id === annId);
+  if (!target) return;
+  if (!confirm(`Delete announcement "${target.title}"?`)) return;
+  saveAnnouncements(list.filter(a => a.id !== annId));
+  showToast('Announcement deleted');
+  renderRoute('dashboard');
+};
 
 // Helper to derive clean standard content category name for cards
 // Helper to derive clean standard content category name for cards
@@ -1735,7 +1931,7 @@ function renderDocumentCard(doc, options = {}) {
     contentTypeBadge = `<span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:11px; padding:2px 8px; border-radius:4px;">${cTypeLabel}</span>`;
   } else {
     const productObj = doc.product ? db.products.find(p => p.id === doc.product) : null;
-    productTag = productObj ? `<span class="badge badge-prod" style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logos/sphere_icon.png" alt="" style="width:11px; height:11px; object-fit:contain; vertical-align:middle;" />${productObj.name}</span>` : (doc.product && doc.product !== 'none' && doc.product !== 'null' ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : '');
+    productTag = productObj ? `<span class="badge badge-prod">${productObj.name}</span>` : (doc.product && doc.product !== 'none' && doc.product !== 'null' ? `<span class="badge badge-prod">${doc.product.toUpperCase()}</span>` : '');
     
     if (doc.contentType) {
       const cTypeLabel = formatContentTypeLabel(doc.contentType);
@@ -1749,9 +1945,6 @@ function renderDocumentCard(doc, options = {}) {
   return `
     <div class="doc-card" id="card-${doc.id}" onclick="window.openSharePoint('${doc.id}')" style="cursor:pointer;" title="Click to view file in OneDrive/SharePoint">
       <div class="card-header-bar">
-        <div class="card-type-icon">
-          ${doc.contentType === 'Video' ? '🎥' : (doc.contentType === 'Sales Deck' || doc.contentType === 'Presentation') ? '📊' : (doc.contentType === 'Battlecard' || doc.contentType === 'Playbook') ? '⚔️' : doc.contentType === 'Sample Report' ? '📋' : (doc.contentType === 'Whitepaper' || doc.contentType === 'WhitePaper' || doc.contentType === 'Publication') ? '🧬' : (doc.contentType === 'Case Study' || doc.contentType === 'Case Review' || doc.contentType === 'Case Studies') ? '🔬' : doc.contentType === 'Brochure' ? '📖' : '📄'}
-        </div>
         <div class="card-tags">
           ${productTag}
           ${contentTypeBadge}
@@ -1889,7 +2082,6 @@ function renderCompanyAssets() {
       <div class="assets-grid">
         ${assets.length > 0 ? assets.map(d => renderDocumentCard(d, { isCompanyAssets: true })).join('') : `
           <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; background: var(--bg-secondary); border: 2px dashed var(--border-color); border-radius: var(--radius-md);">
-            <div style="font-size: 38px; margin-bottom: 12px;">📁</div>
             <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">No Company Documents Found</h3>
             <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 16px;">This repository holds all authentic company-wide documents, corporate presentations, brand guidelines, and legal agreements.${isMarketingUser() ? ' Click below to add the first asset.' : ''}</p>
             ${isMarketingUser() ? `<button class="btn-primary" onclick="window.triggerRegisterAssetModal('company-assets')">+ Add First Company Asset</button>` : ''}
@@ -1954,7 +2146,7 @@ function renderProductHub() {
             <h3 style="font-size:18px; margin-bottom: 8px; font-weight:700;">${p.name}</h3>
             <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-bottom: 20px;">${p.description}</p>
             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; font-size:11px; font-weight:600; color:var(--text-tertiary);">
-              <span style="background-color:rgba(30, 58, 138, 0.08); color:var(--accent-color); padding:2px 8px; border-radius:4px; font-weight:700;">👤 Owner: ${productOwner}</span>
+              <span style="background-color:rgba(30, 58, 138, 0.08); color:var(--accent-color); padding:2px 8px; border-radius:4px; font-weight:700;">Owner: ${productOwner}</span>
               <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${prodAssets.length} Total Assets</span>
               <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${evidenceCount} Evidence</span>
               <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${sciCount} Scientific</span>
@@ -2091,7 +2283,6 @@ function renderProductTabContent(prodId, tabName) {
 
   const emptyState = (catName) => `
     <div style="text-align:center; padding:48px 24px; background:var(--bg-secondary); border:1px dashed var(--border-color); border-radius:12px; width:100%; grid-column:1 / -1; margin:8px 0;">
-      <div style="font-size:36px; margin-bottom:10px;">📁</div>
       <h3 style="font-size:16px; font-weight:700; margin-bottom:6px; color:var(--text-primary);">No ${catName} files registered for ${product.name}</h3>
       <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;">${isMarketingUser() ? `Add a new ${catName} card with its direct OneDrive / SharePoint link to make it accessible to your team.` : `No ${catName} documents currently indexed for this product workspace.`}</p>
       ${isMarketingUser() ? `
@@ -2315,7 +2506,6 @@ window.updateScientificResourcesCards = function() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1 / -1; text-align:center; padding: 48px 24px; background:var(--bg-secondary); border-radius:var(--radius-lg); border:1px dashed var(--border-color); width:100%;">
-        <div style="font-size:36px; margin-bottom:12px;">🔬</div>
         <h3 style="font-size:16px; font-weight:700; margin-bottom:6px; color:var(--text-primary);">No Scientific Resources Matched</h3>
         <p style="font-size:13px; color:var(--text-secondary); max-width:480px; margin:0 auto 16px;">No cases, MTB discussions, RTM meetings, or webinars match your current filter combination. You can clear filters or register a new clinical case.</p>
         <div style="display:flex; justify-content:center; gap:10px;">
@@ -2333,11 +2523,11 @@ window.updateScientificResourcesCards = function() {
     const evType = c.eventType || '';
     let evBadgeHtml = '';
     if (evType === 'MTB') {
-      evBadgeHtml = `<span class="badge badge-event-mtb">🧬 MTB</span>`;
+      evBadgeHtml = `<span class="badge badge-event-mtb">MTB</span>`;
     } else if (evType === 'RTM') {
-      evBadgeHtml = `<span class="badge badge-event-rtm">🤝 RTM</span>`;
+      evBadgeHtml = `<span class="badge badge-event-rtm">RTM</span>`;
     } else if (evType === 'Webinar') {
-      evBadgeHtml = `<span class="badge badge-event-webinar">🎥 Webinar</span>`;
+      evBadgeHtml = `<span class="badge badge-event-webinar">Webinar</span>`;
     } else if (evType && evType.toLowerCase() !== 'case review' && evType.toLowerCase() !== 'casereview') {
       evBadgeHtml = `<span class="badge badge-event-case">${evType}</span>`;
     }
@@ -2562,7 +2752,6 @@ window.updateReportLibraryCards = function() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1/-1; text-align:center; padding: 48px 24px; background:var(--bg-secondary); border-radius:var(--radius-lg); border:1px dashed var(--border-color);">
-        <div style="font-size:36px; margin-bottom:12px;">📋</div>
         <h3 style="font-size:16px; font-weight:700; margin-bottom:6px;">No Sample Reports Matched</h3>
         <p style="font-size:13px; color:var(--text-secondary); max-width:450px; margin:0 auto 16px;">No sample reports match your search criteria. You can clear filters or register a new clinical report.</p>
         <div style="display:flex; justify-content:center; gap:10px;">
@@ -3053,7 +3242,6 @@ ${window.renderCategoryHeader('Speaker Profiles & Key Opinion Leaders', 'Academi
                 const link = typeof p === 'object' ? p.link : '';
                 return `
                   <div class="relation-item">
-                    <span style="font-size:12px;">📄</span>
                     <a href="${link || '#'}" target="_blank" rel="noopener noreferrer" class="relation-link" title="Read Article on 1Cell.Ai">
                       ${title} ↗
                     </a>
@@ -3066,7 +3254,6 @@ ${window.renderCategoryHeader('Speaker Profiles & Key Opinion Leaders', 'Academi
                 const link = typeof p === 'object' ? p.link : '';
                 return `
                   <div class="relation-item" style="margin-top:6px;">
-                    <span style="font-size:12px;">📊</span>
                     <a href="${link || '#'}" target="_blank" rel="noopener noreferrer" class="relation-link" style="color:var(--accent-color);" title="View Clinical Resource">
                       ${title} ↗
                     </a>
@@ -3101,9 +3288,6 @@ ${window.renderCategoryHeader('Corporate Brand Assets & Guidelines', 'Core logos
       ${db.brandAssets.map(asset => `
         <div class="doc-card" onclick="window.openSharePoint('${asset.id}')" style="cursor:pointer;" title="Click to view brand asset in SharePoint">
           <div class="card-header-bar">
-            <div class="card-type-icon" style="overflow:hidden; display:flex; align-items:center; justify-content:center; background:#ffffff; border:1px solid rgba(0,0,0,0.06); padding:3px; border-radius:6px; width:44px; height:44px;">
-              ${asset.category === 'Logos' && asset.downloadUrl && asset.downloadUrl.endsWith('.png') ? `<img src="${asset.downloadUrl}" alt="${asset.title}" style="max-height:28px; max-width:40px; object-fit:contain;" onerror="this.onerror=null;this.parentElement.innerHTML='🎨';" />` : '🎨'}
-            </div>
             <span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:11px; padding:2px 8px; border-radius:4px;">${formatContentTypeLabel(asset.category || 'Brand Asset')}</span>
           </div>
           <div class="card-body">
@@ -3146,7 +3330,6 @@ ${window.renderCategoryHeader('Document Templates & Outlines', 'Pre-approved lay
       ${db.templates.map(temp => `
         <div class="doc-card" onclick="window.openSharePoint('${temp.id}')" style="cursor:pointer;" title="Click to view template in SharePoint">
           <div class="card-header-bar">
-            <div class="card-type-icon">📄</div>
             <span class="badge badge-dept">Marketing</span>
           </div>
           <div class="card-body">
@@ -3171,7 +3354,7 @@ ${window.renderCategoryHeader('Document Templates & Outlines', 'Pre-approved lay
 
 // 11. Favorites Route
 function renderFavorites() {
-  const favs = db.documents.filter(d => userFavorites.has(d.id));
+  const favs = getAllFavoriteItems();
   if (favs.length === 0) {
     workspaceViewport.innerHTML = `
       <div class="welcome-banner">
@@ -3397,7 +3580,6 @@ function renderAnalyticsDashboard() {
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-title">Total Indexed Assets</span>
-          <span class="stat-icon">📄</span>
         </div>
         <div class="stat-number">${db.documents.length}</div>
         <div class="stat-subtext">Active files in SharePoint</div>
@@ -3405,7 +3587,6 @@ function renderAnalyticsDashboard() {
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-title">Added This Month</span>
-          <span class="stat-icon">📈</span>
         </div>
         <div class="stat-number">+${db.analytics.assetsAddedThisMonth}</div>
         <div class="stat-subtext">Marketing & Medical Uploads</div>
@@ -3413,7 +3594,6 @@ function renderAnalyticsDashboard() {
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-title">Total Views</span>
-          <span class="stat-icon">👁</span>
         </div>
         <div class="stat-number">${db.analytics.telemetry.views}</div>
         <div class="stat-subtext">Across all sales divisions</div>
@@ -3421,7 +3601,6 @@ function renderAnalyticsDashboard() {
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-title">Downloads Telemetry</span>
-          <span class="stat-icon">↓</span>
         </div>
         <div class="stat-number">${db.analytics.telemetry.downloads}</div>
         <div class="stat-subtext">Offline presentations/PDFs</div>
@@ -4494,6 +4673,7 @@ window.toggleFavorite = function(docId) {
     userFavorites.add(docId);
     showToast("Added to bookmarks");
   }
+  persistFavorites();
   
   // Re-draw current active route in view
   const activeRoute = document.querySelector('.sidebar .nav-item.active').getAttribute('data-route');
