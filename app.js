@@ -628,9 +628,11 @@ const authorizedMarketingEmails = [
   "tanisha.tolani@1cell.ai",
   "pranad.kshirsagar@1cell.ai",
   "richa@1cell.ai",
+  "richa.jhaveri@1cell.ai",
   "ishita.dhaddha@1cell.ai",
   "sanskar.haldankar@1cell.ai",
-  "rohan.arora@1cell.ai"
+  "rohan.arora@1cell.ai",
+  "shruti.dere@1cell.ai"
 ];
 window.authorizedMarketingEmails = authorizedMarketingEmails;
 
@@ -3978,6 +3980,7 @@ function getTopContributorsData() {
     { name: 'Ishita Dhaddha', team: 'Marketing', count: 3, email: 'ishita.dhaddha@1cell.ai' },
     { name: 'Sanskar Haldankar', team: 'Marketing', count: 3, email: 'sanskar.haldankar@1cell.ai' },
     { name: 'Rohan Arora', team: 'Marketing', count: 2, email: 'rohan.arora@1cell.ai' },
+    { name: 'Shruti Dere', team: 'Marketing', count: 6, email: 'shruti.dere@1cell.ai' },
     { name: 'Devin Thorne', team: 'Leadership & Strategy', count: 2, email: '' },
     { name: 'Rajesh Kumar', team: 'Commercial & Sales', count: 2, email: '' }
   ];
