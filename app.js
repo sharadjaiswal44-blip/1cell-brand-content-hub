@@ -1586,6 +1586,35 @@ function renderDashboard() {
         </div>
       `}
     </div>
+
+    <!-- Product-wise SharePoint Folder Directory Tabs (Quick Product Assets) -->
+    <div class="dashboard-section">
+      <div class="section-title-row" style="margin-bottom: 12px;">
+        <h2 class="section-headline">Quick Product Assets (SharePoint Directory)</h2>
+      </div>
+      
+      <!-- Product Tabs Container -->
+      <div class="product-tabs-container">
+        ${db.products.filter(p => p.id !== 'icore' && p.id !== 'icare').map((p, idx) => `
+          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
+        `).join('')}
+      </div>
+      
+      <!-- Folders Directory Content View -->
+      <div id="dashboardProductDocsContainer" class="product-docs-folder-view">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Recently Added / Updated -->
+    <div class="dashboard-section">
+      <div class="section-title-row">
+        <h2 class="section-headline">Recently Added / Updated</h2>
+      </div>
+      <div class="assets-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+        ${db.documents.slice(0, 4).map(d => renderDocumentCard(d)).join('')}
+      </div>
+    </div>
   `;
 
   // Attach button triggers
@@ -1594,6 +1623,28 @@ function renderDashboard() {
     dashUploadBtn.addEventListener('click', () => {
       window.triggerRegisterAssetModal('dashboard');
     });
+  }
+
+  // Set up product tabs click handlers
+  const tabs = workspaceViewport.querySelectorAll('.product-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const selectedProduct = tab.getAttribute('data-product');
+      renderDashboardProductDocs(selectedProduct);
+    });
+  });
+
+  // Initial render: check URL hash or default to oncoindx
+  const initialHash = (window.location.hash || '').replace('#', '').toLowerCase();
+  const matchedTab = initialHash && workspaceViewport.querySelector(`.product-tab[data-product="${initialHash}"]`);
+  if (matchedTab) {
+    tabs.forEach(t => t.classList.remove('active'));
+    matchedTab.classList.add('active');
+    renderDashboardProductDocs(initialHash);
+  } else {
+    renderDashboardProductDocs('oncoindx');
   }
 }
 
