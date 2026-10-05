@@ -1365,7 +1365,7 @@ function renderDashboardProductDocs(productName) {
             <img src="${productObj.logo}" alt="${productObj.name}" style="height:26px; max-width:140px; object-fit:contain;" onerror="this.onerror=null;this.src='assets/logos/logo_1cell.png';" />
           </div>
           <div>
-            <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">${productObj.name} SharePoint & OneDrive Assets</div>
+            <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">${productObj.name} Assets</div>
             <div style="font-size:12px; color:var(--text-secondary);">${relatedDocs.length} files accessible to your team</div>
           </div>
         </div>
@@ -1555,6 +1555,25 @@ function renderDashboard() {
       </div>
     </div>
 
+    <!-- Quick Product Assets -->
+    <div class="dashboard-section">
+      <div class="section-title-row" style="margin-bottom: 12px;">
+        <h2 class="section-headline">Quick Product Assets</h2>
+      </div>
+      
+      <!-- Product Tabs Container -->
+      <div class="product-tabs-container">
+        ${db.products.filter(p => p.id !== 'icore' && p.id !== 'icare').map((p, idx) => `
+          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
+        `).join('')}
+      </div>
+      
+      <!-- Folders Directory Content View -->
+      <div id="dashboardProductDocsContainer" class="product-docs-folder-view">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
     <!-- Company Announcements -->
     <div class="dashboard-section">
       <div class="section-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
@@ -1592,25 +1611,6 @@ function renderDashboard() {
           <p>Click the bookmark button on any asset card across the hub to add it to your Favourites.</p>
         </div>
       `}
-    </div>
-
-    <!-- Product-wise SharePoint Folder Directory Tabs (Quick Product Assets) -->
-    <div class="dashboard-section">
-      <div class="section-title-row" style="margin-bottom: 12px;">
-        <h2 class="section-headline">Quick Product Assets (SharePoint Directory)</h2>
-      </div>
-      
-      <!-- Product Tabs Container -->
-      <div class="product-tabs-container">
-        ${db.products.filter(p => p.id !== 'icore' && p.id !== 'icare').map((p, idx) => `
-          <button class="product-tab ${idx === 0 ? 'active' : ''}" data-product="${p.id}">${p.name}</button>
-        `).join('')}
-      </div>
-      
-      <!-- Folders Directory Content View -->
-      <div id="dashboardProductDocsContainer" class="product-docs-folder-view">
-        <!-- Rendered dynamically -->
-      </div>
     </div>
 
     <!-- Recently Added / Updated -->
