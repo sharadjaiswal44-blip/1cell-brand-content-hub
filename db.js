@@ -2096,7 +2096,6 @@ const db = {
     {
       id: "4basecare",
       name: "4baseCare",
-      headquarters: "Bengaluru, Karnataka",
       website: "https://4basecare.com",
       focus: "TarGT Panels, Precision Oncology, INDAM Database, WES + WTS",
       tagline: "Genomics for oncology backed by the INDAM Indian patient cohort database",
@@ -2105,7 +2104,6 @@ const db = {
     {
       id: "strand-life-sciences",
       name: "Strand Life Sciences",
-      headquarters: "Bengaluru, Karnataka",
       website: "https://strandls.com",
       focus: "StrandAdvantage 500-Gene Panels, Liquid Biopsy, Somatic & Germline NGS",
       tagline: "Pioneering Indian clinical genomics and diagnostic bioinformatics powerhouse",
@@ -2114,7 +2112,6 @@ const db = {
     {
       id: "medgenome",
       name: "MedGenome Labs",
-      headquarters: "Bengaluru, Karnataka",
       website: "https://medgenome.com",
       focus: "OncoTrack Liquid Biopsy, Comprehensive Panels, Immuno-oncology, High-Throughput NGS",
       tagline: "India's largest genomics sequencing and clinical diagnostic testing network",
@@ -2123,7 +2120,6 @@ const db = {
     {
       id: "datar-cancer-genetics",
       name: "Datar Cancer Genetics",
-      headquarters: "Nashik & Mumbai, Maharashtra",
       website: "https://datarpgx.com",
       focus: "Circulating Tumor Cells (CTC), Trublood, Exacta Chemosensitivity, Early Detection",
       tagline: "Leader in non-invasive blood-based CTC detection and functional chemosensitivity",
@@ -2132,7 +2128,6 @@ const db = {
     {
       id: "neuberg-diagnostics",
       name: "Neuberg Diagnostics (NCGM)",
-      headquarters: "Chennai & Ahmedabad",
       website: "https://neubergdiagnostics.com",
       focus: "OncoGenomix, Solid Tumor NGS, Liquid Biopsy ctDNA, Molecular Pathology",
       tagline: "Multi-national laboratory alliance with specialized Center for Genomic Medicine",
@@ -2141,7 +2136,6 @@ const db = {
     {
       id: "positive-bioscience",
       name: "Positive Bioscience",
-      headquarters: "Mumbai, Maharashtra",
       website: "https://positivebioscience.com",
       focus: "PositiveOnco, Clinical NGS, Lung & Breast Genomic Panels",
       tagline: "AI-enabled genomics and targeted clinical testing for hospital networks",

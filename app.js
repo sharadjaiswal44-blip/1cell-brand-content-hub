@@ -2910,6 +2910,9 @@ function getCompetitors() {
     list = (db.competitors || []).map(c => ({ ...c }));
     saveCompetitors(list);
   }
+  if (Array.isArray(list)) {
+    list.forEach(c => { delete c.headquarters; });
+  }
   return list;
 }
 window.getCompetitors = getCompetitors;
@@ -2988,7 +2991,7 @@ function renderCompetitiveIntelligence() {
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
-          <input type="text" id="competitorSearchInput" placeholder="Search competitors by name, city, assays, or keywords..." oninput="window.searchCompetitors(this.value)" value="${escapeHtml(competitorSearchQuery)}" style="border:none;background:transparent;outline:none;width:100%;font-size:13px;color:var(--text-primary);">
+          <input type="text" id="competitorSearchInput" placeholder="Search competitors by name, assays, or keywords..." oninput="window.searchCompetitors(this.value)" value="${escapeHtml(competitorSearchQuery)}" style="border:none;background:transparent;outline:none;width:100%;font-size:13px;color:var(--text-primary);">
         </div>
         <div id="competitorCountBadgeWrapper"></div>
       </div>
@@ -3013,7 +3016,6 @@ function renderCompetitiveIntelligenceList() {
   const filtered = allCompetitors.filter(c => {
     if (!q) return true;
     return (c.name && c.name.toLowerCase().includes(q)) ||
-           (c.headquarters && c.headquarters.toLowerCase().includes(q)) ||
            (c.focus && c.focus.toLowerCase().includes(q)) ||
            (c.tagline && c.tagline.toLowerCase().includes(q)) ||
            (c.details && c.details.toLowerCase().includes(q));
@@ -3043,7 +3045,7 @@ function renderCompetitiveIntelligenceList() {
     return `
       <div class="competitor-tile-card" onclick="window.openCompetitorFolder('${c.id}')" title="Open ${escapeHtml(c.name)} Folder">
         <div class="competitor-header-row">
-          <span class="badge badge-dept" style="font-size:11px; padding:3px 8px; font-weight:600;">${escapeHtml(c.headquarters || 'India')}</span>
+          <span class="badge badge-dept" style="font-size:11px; padding:3px 8px; font-weight:600;">Competitor</span>
           <span style="font-size: 11px; font-weight: 700; color: var(--accent-color); background: var(--accent-light); padding: 4px 10px; border-radius: 6px;">Explore Folder →</span>
         </div>
         <h3 class="competitor-title">${escapeHtml(c.name)}</h3>
@@ -3098,8 +3100,7 @@ window.openCompetitorFolder = function(competitorId, defaultTab = 'all') {
       <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
         <div>
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
-            <span class="product-tagline" style="margin:0;">Competitive Intelligence • Indian Competitor Folder</span>
-            <span class="badge badge-dept" style="font-size:11.5px; padding:3px 9px; font-weight:600;">${escapeHtml(competitor.headquarters || 'India')}</span>
+            <span class="product-tagline" style="margin:0;">Competitive Intelligence • Competitor Folder</span>
             ${competitor.website ? `
               <a href="${escapeHtml(competitor.website)}" target="_blank" rel="noopener noreferrer" style="font-size:11.5px; color:var(--accent-color); font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:3px;">
                 <span>${escapeHtml(competitor.website.replace('https://', '').replace('http://', '').replace(/\/$/, ''))} ↗</span>
@@ -3248,7 +3249,6 @@ window.openCompetitorModal = function(competitorId = null) {
   document.getElementById('competitorModalTitle').innerText = existing ? 'Edit Competitor' : 'New Competitor Profile';
   document.getElementById('competitorFormId').value = existing ? existing.id : '';
   document.getElementById('compName').value = existing ? existing.name : '';
-  document.getElementById('compHq').value = existing ? existing.headquarters : '';
   document.getElementById('compWebsite').value = existing ? (existing.website || '') : '';
   document.getElementById('compFocus').value = existing ? (existing.focus || '') : '';
   document.getElementById('compTagline').value = existing ? (existing.tagline || '') : '';
@@ -3265,13 +3265,12 @@ window.closeCompetitorModal = function() {
 window.saveCompetitor = function() {
   const idInput = document.getElementById('competitorFormId').value;
   const name = document.getElementById('compName').value.trim();
-  const hq = document.getElementById('compHq').value.trim();
   const website = document.getElementById('compWebsite').value.trim();
   const focus = document.getElementById('compFocus').value.trim();
   const tagline = document.getElementById('compTagline').value.trim();
   const details = document.getElementById('compDetails').value.trim();
 
-  if (!name || !hq || !tagline) {
+  if (!name || !tagline) {
     showToast("Please fill in all required competitor fields (*)");
     return;
   }
@@ -3289,7 +3288,6 @@ window.saveCompetitor = function() {
   const entry = {
     id: compId,
     name,
-    headquarters: hq,
     website,
     focus: focus || 'Genomics & Oncology',
     tagline,
@@ -3352,7 +3350,7 @@ window.openCompetitorCollateralModal = function(collateralId = null, defaultComp
   // Populate competitor dropdown
   const compSelect = document.getElementById('collatCompetitorSelect');
   compSelect.innerHTML = competitors.map(c => `
-    <option value="${c.id}">${escapeHtml(c.name)} (${escapeHtml(c.headquarters || 'India')})</option>
+    <option value="${c.id}">${escapeHtml(c.name)}</option>
   `).join('');
 
   const allAssets = getCompetitorAssets();
