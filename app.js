@@ -3845,11 +3845,6 @@ function renderCoBrandedList() {
   }
 
   container.innerHTML = products.map(p => {
-    const pAssets = allAssets.filter(a => a.productId === p.id);
-    const brochureCount = pAssets.filter(a => a.contentType === 'Brochure').length;
-    const presCount = pAssets.filter(a => a.contentType === 'Presentation' || a.contentType === 'Slide Deck').length;
-    const reportCount = pAssets.filter(a => a.contentType === 'Sample Report').length;
-
     return `
       <div class="quick-tile-card" style="align-items: flex-start; text-align: left; padding: 24px; cursor: pointer;" onclick="window.openCoBrandedProductFolder('${p.id}')">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 16px;">
@@ -3859,14 +3854,7 @@ function renderCoBrandedList() {
           <span style="font-size: 11px; font-weight: 700; color: var(--accent-color); background: var(--accent-light); padding: 4px 10px; border-radius: 6px;">Explore Folder →</span>
         </div>
         <h3 style="font-size:18px; margin-bottom: 8px; font-weight:700;">${escapeHtml(p.name)}</h3>
-        <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-bottom: 20px;">${escapeHtml(p.description)}</p>
-        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; font-size:11px; font-weight:600; color:var(--text-tertiary);">
-          <span style="background-color:rgba(30, 58, 138, 0.08); color:var(--accent-color); padding:2px 8px; border-radius:4px; font-weight:700;">Owner: ${escapeHtml(p.owner || 'Marketing')}</span>
-          <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${pAssets.length} Co-Branded Collaterals</span>
-          <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${brochureCount} Brochures</span>
-          <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${presCount} Decks</span>
-          <span style="background-color:var(--bg-tertiary); padding:2px 8px; border-radius:4px;">${reportCount} Reports</span>
-        </div>
+        <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-bottom: 0;">${escapeHtml(p.description)}</p>
       </div>
     `;
   }).join('');
