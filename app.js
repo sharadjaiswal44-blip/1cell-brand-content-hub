@@ -1,5 +1,5 @@
 // 1Cell.Ai Content Hub Application Controller
-import db from './db.js?v=20261013-v54';
+import db from './db.js?v=20261013-v55';
 import { 
   normalizeTeam,
   canTeamViewVisibility,
@@ -618,9 +618,50 @@ const userProfiles = {
   marketing_admin: { name: "Sarah Jenkins", role: "Marketing Admin", avatar: "MA" },
   sales: { name: "Rajesh Kumar", role: "Sales Specialist", avatar: "RS" },
   medical: { name: "Dr. Amanda Ross", role: "Medical Affairs Coordinator", avatar: "MD" },
-  channel_partner: { name: "Channel Partner Lead", role: "Channel Partner", avatar: "CP" },
+  channel_partner: { name: "Apollo Hospitals Commercial Team", role: "Channel Partner", avatar: "AH" },
   leadership: { name: "Devin Thorne", role: "VP Strategy & Leadership", avatar: "LD" }
 };
+
+function getActiveChannelPartner() {
+  try {
+    const stored = localStorage.getItem('1cell_active_channel_partner') || sessionStorage.getItem('authPartner');
+    if (stored) return stored;
+  } catch (e) {}
+  return 'Apollo Hospitals';
+}
+window.getActiveChannelPartner = getActiveChannelPartner;
+
+function setActiveChannelPartner(partnerName) {
+  if (!partnerName) return;
+  try {
+    localStorage.setItem('1cell_active_channel_partner', partnerName);
+    sessionStorage.setItem('authPartner', partnerName);
+  } catch (e) {}
+
+  if (userProfiles.channel_partner) {
+    userProfiles.channel_partner.name = `${partnerName} Commercial Team`;
+    const initials = partnerName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    userProfiles.channel_partner.avatar = initials || 'CP';
+  }
+
+  const sel = document.getElementById('activePartnerSelect');
+  if (sel && sel.value !== partnerName) sel.value = partnerName;
+
+  updateUserBadge();
+
+  if (currentRoute === 'co-branded') {
+    if (currentCoBrandedFolderId) {
+      window.openCoBrandedProductFolder(currentCoBrandedFolderId, currentCoBrandedTab);
+    } else {
+      renderCoBranded();
+    }
+  } else if (currentRoute === 'dashboard') {
+    renderDashboard();
+  } else if (currentRoute === 'favorites') {
+    renderFavorites();
+  }
+}
+window.setActiveChannelPartner = setActiveChannelPartner;
 
 function isChannelPartner() {
   const team = getCurrentUserTeam();
@@ -884,6 +925,16 @@ function init() {
     const activeRoute = activeRouteEl ? activeRouteEl.getAttribute('data-route') : 'dashboard';
     renderRoute(activeRoute);
   });
+
+  // Active Channel Partner switching
+  const partnerSelectEl = document.getElementById('activePartnerSelect');
+  if (partnerSelectEl) {
+    partnerSelectEl.value = getActiveChannelPartner();
+    partnerSelectEl.addEventListener('change', (e) => {
+      setActiveChannelPartner(e.target.value);
+      showToast(`Switched Channel Partner to: ${e.target.value}`);
+    });
+  }
 
   // Theme switching
   themeToggleBtn.addEventListener('click', () => {
@@ -1166,7 +1217,24 @@ function updateUserBadge() {
   const userLabel = document.getElementById('userNameLabel');
   const roleLabel = document.getElementById('userRoleLabel');
 
-  if (authName) {
+  const partnerPill = document.getElementById('partnerSelectorPill');
+  if (partnerPill) {
+    if (isChannelPartner() || isMarketingUser()) {
+      partnerPill.style.display = isChannelPartner() ? 'flex' : 'none';
+      const sel = document.getElementById('activePartnerSelect');
+      if (sel) sel.value = getActiveChannelPartner();
+    } else {
+      partnerPill.style.display = 'none';
+    }
+  }
+
+  if (isChannelPartner()) {
+    const activePartner = getActiveChannelPartner();
+    const initials = activePartner.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    if (avatarEl) avatarEl.innerText = initials || "CP";
+    if (userLabel) userLabel.innerText = `${activePartner} Team`;
+    if (roleLabel) roleLabel.innerText = "Channel Partner";
+  } else if (authName) {
     if (avatarEl) avatarEl.innerText = getInitials(authName);
     if (userLabel) userLabel.innerText = authName;
     if (roleLabel) {
@@ -1208,6 +1276,11 @@ function updateSidebarCategories() {
     } else {
       roleSelectorWrapper.style.display = 'none';
     }
+  }
+
+  const partnerPill = document.getElementById('partnerSelectorPill');
+  if (partnerPill) {
+    partnerPill.style.display = isChannelPartner() ? 'flex' : 'none';
   }
 
   // Dashboard Analytics visibility: strictly Marketing & Leadership only
@@ -1619,15 +1692,26 @@ window.renderCategoryHeader = function(title, subtitle, routeName) {
 
 function renderChannelPartnerDashboard() {
   const canManage = isMarketingUser();
-  const announcements = getPartnerAnnouncements();
+  const currentPartner = getActiveChannelPartner();
+  const partnerLower = currentPartner.toLowerCase().trim();
+
+  const announcements = getPartnerAnnouncements().filter(ann => {
+    if (!ann.targetPartner || ann.targetPartner === 'All Partners' || ann.targetPartner === 'All Channel Partners') return true;
+    const t = ann.targetPartner.toLowerCase().trim();
+    return t === partnerLower || t.includes(partnerLower) || partnerLower.includes(t);
+  });
   const partnerFavs = getCoBrandedFavorites();
-  const recentCoBranded = getCoBrandedAssets().slice(0, 4);
+  const recentCoBranded = getCoBrandedAssets().slice(0, 6);
 
   workspaceViewport.innerHTML = `
     <div class="welcome-banner">
       <div>
-        <h1 class="welcome-title">1Cell.Ai Channel Partner Portal</h1>
-        <p class="welcome-subtitle">Search, discover, and download approved co-branded product collateral, clinical dossiers, and distributor updates.</p>
+        <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.15); padding:3px 10px; border-radius:12px; font-size:11.5px; font-weight:700; margin-bottom:8px;">
+          <span>🤝</span>
+          <span>Verified Partner Workspace: ${escapeHtml(currentPartner)}</span>
+        </div>
+        <h1 class="welcome-title">${escapeHtml(currentPartner)} — Channel Portal</h1>
+        <p class="welcome-subtitle">Search, discover, and download approved dual-branded collateral, clinical dossiers, and distributor updates configured specifically for your organization.</p>
       </div>
       <div class="welcome-banner-actions" style="display:flex; gap:10px; align-items:center;">
         ${canManage ? `
@@ -3587,11 +3671,21 @@ window.deleteCompetitorCollateral = function(collateralId) {
 // Co-Branded Assets System (Channel Partners & Products)
 // Products: OncoIndx Prime+ (primeplus), OncoMonitor (oncomonitor), OncoTarget (oncotarget)
 // ==========================================================
-const COBRANDED_STORAGE_KEY = '1cell_cobranded_assets';
-const PARTNER_ANNOUNCEMENTS_STORAGE_KEY = '1cell_partner_announcements';
+const COBRANDED_STORAGE_KEY = '1cell_cobranded_assets_v3';
+const PARTNER_ANNOUNCEMENTS_STORAGE_KEY = '1cell_partner_announcements_v2';
 let currentCoBrandedFolderId = null;
 let currentCoBrandedTab = 'all';
 let coBrandedSearchQuery = '';
+let activeAdminPartnerFilter = 'all'; // 'all' or specific partner name (e.g. 'Apollo Hospitals')
+
+window.setAdminCoBrandPartnerFilter = function(partner) {
+  activeAdminPartnerFilter = partner || 'all';
+  if (currentCoBrandedFolderId) {
+    window.openCoBrandedProductFolder(currentCoBrandedFolderId, currentCoBrandedTab);
+  } else {
+    renderCoBrandedList();
+  }
+};
 
 const DEFAULT_COBRANDED_PRODUCTS = [
   {
@@ -3646,7 +3740,7 @@ function getCoBrandedProducts() {
 }
 window.getCoBrandedProducts = getCoBrandedProducts;
 
-function getCoBrandedAssets(productId = null) {
+function getCoBrandedAssets(productId = null, partnerFilter = null) {
   let list = null;
   try {
     const raw = localStorage.getItem(COBRANDED_STORAGE_KEY);
@@ -3662,9 +3756,41 @@ function getCoBrandedAssets(productId = null) {
     saveCoBrandedAssets(list);
   }
 
+  // Filter by product if specified
   if (productId) {
-    return list.filter(a => a.productId === productId);
+    list = list.filter(a => a.productId === productId);
   }
+
+  // Partner-based filtering:
+  // 1. If currently logged in / active as Channel Partner:
+  if (isChannelPartner()) {
+    const activePartner = getActiveChannelPartner().toLowerCase().trim();
+    return list.filter(a => {
+      const aPartner = (a.partnerName || '').toLowerCase().trim();
+      return aPartner === activePartner ||
+             aPartner.includes(activePartner) ||
+             activePartner.includes(aPartner) ||
+             aPartner === 'all partners' ||
+             aPartner === 'all channel partners' ||
+             aPartner === 'authorized channel partners' ||
+             !a.partnerName;
+    });
+  }
+
+  // 2. If Marketing / Admin or other role with an active partner filter:
+  const effectiveFilter = partnerFilter || (activeAdminPartnerFilter !== 'all' ? activeAdminPartnerFilter : null);
+  if (effectiveFilter && effectiveFilter !== 'all') {
+    const filterLower = effectiveFilter.toLowerCase().trim();
+    return list.filter(a => {
+      const aPartner = (a.partnerName || '').toLowerCase().trim();
+      return aPartner === filterLower ||
+             aPartner.includes(filterLower) ||
+             filterLower.includes(aPartner) ||
+             aPartner === 'all partners' ||
+             aPartner === 'all channel partners';
+    });
+  }
+
   return list;
 }
 window.getCoBrandedAssets = getCoBrandedAssets;
@@ -3716,24 +3842,30 @@ function renderCoBrandedCard(asset) {
   const cType = asset.contentType || 'Brochure';
   const cTypeLabel = formatContentTypeLabel(cType);
   const fileType = asset.fileType || (cType === 'Presentation' || cType === 'Slide Deck' ? 'PPTX' : 'PDF');
+  const partnerLabel = asset.partnerName || 'All Partners';
 
   return `
     <div class="doc-card" id="card-${escapeHtml(asset.id)}" onclick="window.openCollateralUrl('${escapeHtml(asset.sharePointUrl)}')" style="cursor:pointer;" title="Click to open collateral in SharePoint">
-      <div class="card-header-bar">
-        <div class="card-tags" style="display:flex; gap:6px; flex-wrap:wrap;">
+      <div class="card-header-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+        <div class="card-tags" style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
           <span class="badge badge-content-type" style="background:#e0f2fe; color:#0369a1; font-weight:600; border:1px solid #bae6fd; font-size:11px; padding:2px 8px; border-radius:4px;">${escapeHtml(cTypeLabel)}</span>
           ${asset.version ? `<span class="badge badge-prod" style="font-size:10.5px; padding:2px 7px;">${escapeHtml(asset.version)}</span>` : ''}
           <span class="badge" style="background:#f3f4f6; color:#4b5563; font-size:10.5px; padding:2px 7px;">${escapeHtml(fileType)}</span>
         </div>
+        <span class="badge" style="background:rgba(30,58,138,0.08); color:var(--accent-color); font-weight:700; font-size:10.5px; padding:2px 8px; border-radius:4px; border:1px solid rgba(30,58,138,0.12);">
+          ${escapeHtml(partnerLabel)}
+        </span>
       </div>
       <div class="card-body">
         <h3 class="card-title">${escapeHtml(asset.title)}</h3>
         <p class="card-description">${escapeHtml(asset.description || '')}</p>
         <div class="card-metadata" style="margin-top:auto; padding-top:10px; border-top:1px solid var(--border-subtle); font-size:11px; color:var(--text-tertiary); display:flex; flex-direction:column; gap:4px;">
-          ${asset.partnerName ? `<div><strong style="color:var(--text-secondary);">Partner:</strong> ${escapeHtml(asset.partnerName)}</div>` : ''}
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span><strong style="color:var(--text-secondary);">Partner:</strong> ${escapeHtml(partnerLabel)}</span>
+            <span>By ${escapeHtml(asset.updatedBy || 'Marketing')}</span>
+          </div>
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span>Updated: ${formatCardDateDDMMYYYY(asset.date || asset.updatedDate)}</span>
-            <span>By ${escapeHtml(asset.updatedBy || 'Marketing')}</span>
           </div>
         </div>
       </div>
@@ -3773,14 +3905,18 @@ window.renderCoBrandedCard = renderCoBrandedCard;
 function renderCoBranded() {
   currentCoBrandedFolderId = null;
 
+  const currentPartner = getActiveChannelPartner();
+  const isAdmin = isMarketingUser();
+  const isPartner = isChannelPartner();
+
   workspaceViewport.innerHTML = `
     <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
       <div>
         <h1 class="welcome-title">Co-Branded Assets</h1>
-        <p class="welcome-subtitle">Dedicated product workspaces and dual-branded collateral folders for authorized channel partners.</p>
+        <p class="welcome-subtitle">Dedicated product workspaces and dual-branded collateral folders configured for each channel partner.</p>
       </div>
       <div class="welcome-banner-actions" style="display:flex; gap:10px; align-items:center;">
-        ${isMarketingUser() ? `
+        ${isAdmin ? `
         <button class="btn-primary" onclick="window.openCoBrandedAssetModal()" style="display:inline-flex; align-items:center; gap:6px; padding:9px 16px; font-weight:600; font-size:12.5px;">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:15px;height:15px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -3790,6 +3926,33 @@ function renderCoBranded() {
         ` : ''}
       </div>
     </div>
+
+    ${isAdmin ? `
+    <!-- Marketing Admin: Partner Filter Pill Bar -->
+    <div class="partner-filter-bar" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:18px; padding:12px 16px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px;">
+      <span style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em; margin-right:4px;">Filter by Partner:</span>
+      <button class="partner-filter-pill ${activeAdminPartnerFilter === 'all' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('all')">All Partners (All Collateral)</button>
+      <button class="partner-filter-pill ${activeAdminPartnerFilter === 'Apollo Hospitals' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('Apollo Hospitals')">Apollo Hospitals</button>
+      <button class="partner-filter-pill ${activeAdminPartnerFilter === 'Dr. Lal PathLabs' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('Dr. Lal PathLabs')">Dr. Lal PathLabs</button>
+      <button class="partner-filter-pill ${activeAdminPartnerFilter === 'Metropolis Healthcare' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('Metropolis Healthcare')">Metropolis Healthcare</button>
+      <button class="partner-filter-pill ${activeAdminPartnerFilter === 'Medanta - The Medicity' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('Medanta - The Medicity')">Medanta - The Medicity</button>
+      <button class="partner-filter-pill ${activeAdminPartnerFilter === 'SRL Diagnostics' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('SRL Diagnostics')">SRL Diagnostics</button>
+    </div>
+    ` : isPartner ? `
+    <!-- Channel Partner Verified Portal Banner -->
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:18px; padding:14px 20px; background:linear-gradient(135deg, rgba(30, 58, 138, 0.08) 0%, rgba(14, 165, 233, 0.08) 100%); border:1px solid rgba(14, 165, 233, 0.25); border-radius:10px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span style="font-size:26px;">🤝</span>
+        <div>
+          <div style="font-size:14px; font-weight:700; color:var(--text-primary);">Exclusive Portal for: <strong>${escapeHtml(currentPartner)}</strong></div>
+          <div style="font-size:12px; color:var(--text-secondary);">Showing official co-branded marketing & clinical collateral configured for your organization.</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="badge badge-prod" style="font-size:11px; padding:4px 10px; font-weight:700;">Partner Access Verified</span>
+      </div>
+    </div>
+    ` : ''}
 
     <!-- Search & Statistics Bar -->
     <div class="scientific-filter-container" style="margin-bottom:20px; padding:12px 18px;">
@@ -3835,11 +3998,14 @@ function renderCoBrandedList() {
   const products = getCoBrandedProducts();
   const allAssets = getCoBrandedAssets();
   const q = coBrandedSearchQuery.toLowerCase().trim();
+  const partnerLabel = isChannelPartner() 
+    ? getActiveChannelPartner() 
+    : (activeAdminPartnerFilter !== 'all' ? activeAdminPartnerFilter : 'All Partners');
 
   if (countWrapper) {
     countWrapper.innerHTML = `
       <span class="badge badge-prod" style="font-size:12px; padding:6px 12px; font-weight:600;">
-        ${products.length} Product Folders • ${allAssets.length} Total Co-Branded Assets
+        ${products.length} Product Folders • ${allAssets.length} Assets (${escapeHtml(partnerLabel)})
       </span>
     `;
   }
@@ -3872,7 +4038,7 @@ function renderCoBrandedList() {
       searchCardsGrid.innerHTML = matchedAssets.map(a => renderCoBrandedCard(a)).join('');
     } else {
       searchResultsBox.style.display = 'block';
-      searchCardsGrid.innerHTML = `<p style="grid-column: 1/-1; color: var(--text-tertiary); text-align: center; padding: 24px;">No specific collateral matching "${escapeHtml(q)}".</p>`;
+      searchCardsGrid.innerHTML = `<p style="grid-column: 1/-1; color: var(--text-tertiary); text-align: center; padding: 24px;">No specific collateral matching "${escapeHtml(q)}" for ${escapeHtml(partnerLabel)}.</p>`;
     }
   } else if (searchResultsBox) {
     searchResultsBox.style.display = 'none';
@@ -3898,16 +4064,27 @@ window.openCoBrandedProductFolder = function(productId, defaultTab = 'all') {
   const onePagers = allAssets.filter(a => a.contentType === 'One-Pager');
   const toolkits = allAssets.filter(a => a.contentType === 'Co-Branding Toolkit' || a.contentType === 'Whitepaper');
 
+  const partnerLabel = isChannelPartner() 
+    ? getActiveChannelPartner() 
+    : (activeAdminPartnerFilter !== 'all' ? activeAdminPartnerFilter : 'All Partners');
+
   workspaceViewport.innerHTML = `
-    <div class="breadcrumb-bar">
-      <button class="breadcrumb-back-btn" onclick="window.renderRoute('co-branded')">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px; height:13px;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        <span>Back to Co-Branded Assets</span>
-      </button>
-      <span style="color:var(--text-tertiary); font-size:12px;">/</span>
-      <span style="color:var(--text-secondary); font-size:12.5px; font-weight:600;">${escapeHtml(product.name)}</span>
+    <div class="breadcrumb-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="breadcrumb-back-btn" onclick="window.renderRoute('co-branded')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px; height:13px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          <span>Back to Co-Branded Assets</span>
+        </button>
+        <span style="color:var(--text-tertiary); font-size:12px;">/</span>
+        <span style="color:var(--text-secondary); font-size:12.5px; font-weight:600;">${escapeHtml(product.name)}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="badge" style="background:var(--accent-light); color:var(--accent-color); font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:12px; border:1px solid rgba(0, 102, 204, 0.2);">
+          ${isChannelPartner() ? 'Partner: ' : 'Viewing: '}${escapeHtml(partnerLabel)}
+        </span>
+      </div>
     </div>
 
     <!-- Product Microsite Header -->
@@ -3956,8 +4133,21 @@ window.openCoBrandedProductFolder = function(productId, defaultTab = 'all') {
         ` : ''}
       </div>
 
+      ${!isChannelPartner() ? `
+      <!-- Marketing Admin: Folder Partner Filter Bar -->
+      <div class="partner-filter-bar" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:14px; margin-bottom:4px; padding:10px 14px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:8px;">
+        <span style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em; margin-right:4px;">Filter by Partner:</span>
+        <button class="partner-filter-pill ${activeAdminPartnerFilter === 'all' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('all')">All Partners</button>
+        <button class="partner-filter-pill ${activeAdminPartnerFilter === 'Apollo Hospitals' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('Apollo Hospitals')">Apollo Hospitals</button>
+        <button class="partner-filter-pill ${activeAdminPartnerFilter === 'Dr. Lal PathLabs' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('Dr. Lal PathLabs')">Dr. Lal PathLabs</button>
+        <button class="partner-filter-pill ${activeAdminPartnerFilter === 'Metropolis Healthcare' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('Metropolis Healthcare')">Metropolis Healthcare</button>
+        <button class="partner-filter-pill ${activeAdminPartnerFilter === 'Medanta - The Medicity' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('Medanta - The Medicity')">Medanta - The Medicity</button>
+        <button class="partner-filter-pill ${activeAdminPartnerFilter === 'SRL Diagnostics' ? 'active' : ''}" onclick="window.setAdminCoBrandPartnerFilter('SRL Diagnostics')">SRL Diagnostics</button>
+      </div>
+      ` : ''}
+
       <!-- Category Filter Tabs -->
-      <div class="product-tabs-bar" style="margin-top:16px;">
+      <div class="product-tabs-bar" style="margin-top:14px;">
         <button class="product-tab-btn ${currentCoBrandedTab === 'all' ? 'active' : ''}" onclick="window.switchCoBrandedTab('all')">
           All Collateral (${allAssets.length})
         </button>
@@ -4034,13 +4224,27 @@ function renderCoBrandedFolderContent(productId, tab = 'all') {
 }
 
 // 3. Co-Branded Asset Modal Management (Add, Edit, Delete)
+window.toggleCoBrandPartnerCustom = function(val) {
+  const customInput = document.getElementById('coBrandPartnerCustom');
+  if (customInput) {
+    customInput.style.display = val === '__custom__' ? 'block' : 'none';
+    if (val === '__custom__') customInput.focus();
+  }
+};
+
 window.openCoBrandedAssetModal = function(assetId = null, defaultProductId = null) {
   const modal = document.getElementById('coBrandedAssetModal');
   if (!modal) return;
 
-  const allAssets = getCoBrandedAssets();
-  const existing = assetId ? allAssets.find(a => a.id === assetId) : null;
-  const today = new Date().toISOString().split('T')[0];
+  // Retrieve asset across all filters if editing
+  let rawList = null;
+  try {
+    const raw = localStorage.getItem(COBRANDED_STORAGE_KEY);
+    if (raw) rawList = JSON.parse(raw);
+  } catch (e) {}
+  if (!rawList && db && Array.isArray(db.coBrandedAssets)) rawList = db.coBrandedAssets;
+
+  const existing = assetId && rawList ? rawList.find(a => a.id === assetId) : null;
 
   document.getElementById('coBrandedAssetModalTitle').innerText = existing ? 'Edit Co-Branded Asset' : 'New Co-Branded Asset';
   document.getElementById('coBrandAssetId').value = existing ? existing.id : '';
@@ -4049,7 +4253,31 @@ window.openCoBrandedAssetModal = function(assetId = null, defaultProductId = nul
   document.getElementById('coBrandTypeSelect').value = existing ? existing.contentType : 'Brochure';
   document.getElementById('coBrandUrl').value = existing ? existing.sharePointUrl : '';
   document.getElementById('coBrandDesc').value = existing ? existing.description : '';
-  document.getElementById('coBrandPartner').value = existing ? (existing.partnerName || 'Authorized Channel Partners') : 'Authorized Channel Partners';
+
+  // Partner selection setup
+  const partnerSelect = document.getElementById('coBrandPartnerSelect');
+  const partnerCustom = document.getElementById('coBrandPartnerCustom');
+  const targetPartner = existing 
+    ? (existing.partnerName || 'All Partners') 
+    : (activeAdminPartnerFilter !== 'all' ? activeAdminPartnerFilter : 'All Partners');
+
+  if (partnerSelect) {
+    const knownValues = Array.from(partnerSelect.options).map(o => o.value);
+    if (knownValues.includes(targetPartner)) {
+      partnerSelect.value = targetPartner;
+      if (partnerCustom) {
+        partnerCustom.style.display = 'none';
+        partnerCustom.value = '';
+      }
+    } else {
+      partnerSelect.value = '__custom__';
+      if (partnerCustom) {
+        partnerCustom.style.display = 'block';
+        partnerCustom.value = targetPartner;
+      }
+    }
+  }
+
   document.getElementById('coBrandVersion').value = existing ? (existing.version || 'v1.0 Co-Branded') : 'v1.0 Co-Branded';
   document.getElementById('coBrandFileType').value = existing ? (existing.fileType || 'PDF') : 'PDF';
   document.getElementById('coBrandAuthor').value = existing ? (existing.updatedBy || 'Marketing Team') : (getCurrentUserName() || 'Marketing Team');
@@ -4069,7 +4297,20 @@ window.saveCoBrandedAsset = function() {
   const contentType = document.getElementById('coBrandTypeSelect').value;
   const sharePointUrl = document.getElementById('coBrandUrl').value.trim();
   const description = document.getElementById('coBrandDesc').value.trim();
-  const partnerName = document.getElementById('coBrandPartner').value.trim() || 'Authorized Channel Partners';
+
+  // Partner name resolution
+  const partnerSelect = document.getElementById('coBrandPartnerSelect');
+  const partnerCustom = document.getElementById('coBrandPartnerCustom');
+  let partnerName = 'All Partners';
+  if (partnerSelect) {
+    if (partnerSelect.value === '__custom__') {
+      partnerName = partnerCustom ? partnerCustom.value.trim() : 'Custom Partner';
+      if (!partnerName) partnerName = 'Custom Partner';
+    } else {
+      partnerName = partnerSelect.value;
+    }
+  }
+
   const version = document.getElementById('coBrandVersion').value.trim() || 'v1.0 Co-Branded';
   const fileType = document.getElementById('coBrandFileType').value || 'PDF';
   const author = document.getElementById('coBrandAuthor').value.trim() || getCurrentUserName() || 'Marketing Team';
@@ -4079,7 +4320,16 @@ window.saveCoBrandedAsset = function() {
     return;
   }
 
-  const list = getCoBrandedAssets();
+  // Load raw list to modify
+  let list = [];
+  try {
+    const raw = localStorage.getItem(COBRANDED_STORAGE_KEY);
+    if (raw) list = JSON.parse(raw);
+  } catch (e) {}
+  if (!Array.isArray(list) || list.length === 0) {
+    if (db && Array.isArray(db.coBrandedAssets)) list = db.coBrandedAssets.map(a => ({ ...a }));
+  }
+
   const assetId = idInput || ('cobrand-' + Date.now());
 
   const entry = {
@@ -4108,7 +4358,7 @@ window.saveCoBrandedAsset = function() {
   showToast(idx >= 0 ? `Updated co-branded asset: ${title}` : `Added co-branded asset: ${title}`);
 
   if (currentCoBrandedFolderId) {
-    renderCoBrandedFolderContent(currentCoBrandedFolderId, currentCoBrandedTab);
+    window.openCoBrandedProductFolder(currentCoBrandedFolderId, currentCoBrandedTab);
   } else {
     const activeRouteEl = document.querySelector('.sidebar .nav-item.active');
     const route = activeRouteEl ? activeRouteEl.getAttribute('data-route') : 'co-branded';

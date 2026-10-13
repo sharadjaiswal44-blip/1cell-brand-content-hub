@@ -3260,3 +3260,30 @@ body.authenticated .login-overlay,
   border-top: 1px solid var(--border-color);
   font-size: 12px;
 }
+
+/* Partner Filter Pills in Co-Branded Section */
+.partner-filter-pill {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.partner-filter-pill:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+.partner-filter-pill.active {
+  background: var(--accent-color) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: var(--shadow-sm);
+}
+

@@ -170,6 +170,18 @@
             </select>
           </div>
 
+          <!-- Active Channel Partner Selector (visible for Channel Partner role) -->
+          <div class="role-pill-selector" id="partnerSelectorPill" style="display: none;">
+            <span class="role-pill-label">Partner:</span>
+            <select id="activePartnerSelect" class="role-select" title="Active Channel Partner Organization">
+              <option value="Apollo Hospitals" selected>Apollo Hospitals</option>
+              <option value="Dr. Lal PathLabs">Dr. Lal PathLabs</option>
+              <option value="Metropolis Healthcare">Metropolis Healthcare</option>
+              <option value="Medanta - The Medicity">Medanta - The Medicity</option>
+              <option value="SRL Diagnostics">SRL Diagnostics</option>
+            </select>
+          </div>
+
           <!-- Central Cloud Sync Status & Config Button -->
           <button class="control-btn cloud-db-pill-btn" id="cloudDbBtn" title="Supabase Cloud Database & Synchronization" style="display:inline-flex; align-items:center; gap:7px; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid var(--border-color); background:var(--bg-primary); cursor:pointer; color:var(--text-primary); transition:all var(--transition-fast);">
             <span id="cloudDbDot" style="width:8px; height:8px; border-radius:50%; background:#f59e0b; display:inline-block;"></span>
@@ -1114,8 +1126,17 @@
             <textarea id="coBrandDesc" rows="3" required placeholder="Summary of co-branded material, target clinical audience, custom logo placement instructions..."></textarea>
           </div>
           <div class="form-group">
-            <label for="coBrandPartner">Partner / Distribution Network</label>
-            <input type="text" id="coBrandPartner" placeholder="e.g. Authorized Channel Partners, Apollo Network" value="Authorized Channel Partners">
+            <label for="coBrandPartnerSelect">Target Channel Partner *</label>
+            <select id="coBrandPartnerSelect" onchange="const c = document.getElementById('coBrandPartnerCustom'); if (c) c.style.display = (this.value === '__custom__') ? 'block' : 'none';">
+              <option value="All Partners">All Partners (Universal / Shared)</option>
+              <option value="Apollo Hospitals">Apollo Hospitals</option>
+              <option value="Dr. Lal PathLabs">Dr. Lal PathLabs</option>
+              <option value="Metropolis Healthcare">Metropolis Healthcare</option>
+              <option value="Medanta - The Medicity">Medanta - The Medicity</option>
+              <option value="SRL Diagnostics">SRL Diagnostics</option>
+              <option value="__custom__">+ Enter Custom Partner Name...</option>
+            </select>
+            <input type="text" id="coBrandPartnerCustom" placeholder="Enter Custom Partner Name" style="display: none; margin-top: 6px;">
           </div>
           <div class="form-group">
             <label for="coBrandVersion">Asset Version</label>
@@ -1162,13 +1183,25 @@
         </div>
         <div class="form-group">
           <label for="loginDept" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary);">YOUR TEAM / DEPARTMENT *</label>
-          <select id="loginDept" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary); transition: border-color var(--transition-fast); cursor: pointer;">
+          <select id="loginDept" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary); transition: border-color var(--transition-fast); cursor: pointer;" onchange="const pw = document.getElementById('loginPartnerWrapper'); if (pw) pw.style.display = (this.value === 'Channel Partner') ? 'block' : 'none';">
             <option value="Marketing">Marketing Team</option>
             <option value="Scientific">Scientific Team (Genomic Scientist)</option>
             <option value="Sales">Sales Team</option>
             <option value="Leadership">Leadership Team</option>
             <option value="Channel Partner">Channel Partners</option>
           </select>
+        </div>
+        <div class="form-group" id="loginPartnerWrapper" style="display: none;">
+          <label for="loginPartnerSelect" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary);">SELECT YOUR PARTNER ORGANIZATION *</label>
+          <select id="loginPartnerSelect" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary); transition: border-color var(--transition-fast); cursor: pointer;" onchange="const c = document.getElementById('loginPartnerCustom'); if (c) c.style.display = (this.value === '__custom__') ? 'block' : 'none';">
+            <option value="Apollo Hospitals" selected>Apollo Hospitals</option>
+            <option value="Dr. Lal PathLabs">Dr. Lal PathLabs</option>
+            <option value="Metropolis Healthcare">Metropolis Healthcare</option>
+            <option value="Medanta - The Medicity">Medanta - The Medicity</option>
+            <option value="SRL Diagnostics">SRL Diagnostics</option>
+            <option value="__custom__">+ Enter Custom Partner Name...</option>
+          </select>
+          <input type="text" id="loginPartnerCustom" placeholder="Enter Your Organization Name" style="display: none; margin-top: 8px; width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary);">
         </div>
         <div id="loginErrorMessage" class="login-error-message" style="display: none; color: var(--danger); font-family: 'Outfit', sans-serif; font-size: 11.5px; font-weight: 600; margin-top: -4px; align-items: center; gap: 6px;">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px; height:14px; flex-shrink:0;">
@@ -1284,6 +1317,19 @@
 
         const normTeam = isMarketing ? 'marketing' : isPartner ? 'channel_partner' : (deptLower.includes('scien') || deptLower.includes('genomic') || deptLower.includes('medical')) ? 'scientific' : (deptLower.includes('sale')) ? 'sales' : 'leadership';
 
+        if (isPartner) {
+          const pSelect = document.getElementById('loginPartnerSelect');
+          const pCustom = document.getElementById('loginPartnerCustom');
+          let partnerName = pSelect ? pSelect.value : 'Apollo Hospitals';
+          if (partnerName === '__custom__' && pCustom && pCustom.value.trim()) {
+            partnerName = pCustom.value.trim();
+          }
+          try {
+            sessionStorage.setItem("authPartner", partnerName);
+            localStorage.setItem("1cell_active_channel_partner", partnerName);
+          } catch (e) {}
+        }
+
         try {
           sessionStorage.setItem("authName", name);
           sessionStorage.setItem("authEmail", email);
@@ -1334,6 +1380,6 @@
   </script>
 
   <!-- Main Application Script -->
-  <script type="module" src="app.js?v=20261013-v54"></script>
+  <script type="module" src="app.js?v=20261013-v55"></script>
 </body>
 </html>
