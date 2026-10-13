@@ -2371,6 +2371,276 @@ const db = {
       date: "2026-07-19",
       updatedBy: "Vikas"
     }
+  ],
+  coBrandedProducts: [
+    {
+      id: "primeplus",
+      name: "OncoIndx\u00ae Prime+",
+      logo: "assets/logos/logo_primeplus.png",
+      owner: "Vikas",
+      description: "NexGen sequencing using Tissue-Liquid-Normal matching for true somatic vs. germline identification, whole transcriptomics, and CUP tissue-of-origin resolution.",
+      details: "OncoIndx\u00ae Prime+ is a comprehensive multi-technology, multi-specimen test performing simultaneous molecular profiling of tumor and normal samples from the same patient. Co-branded collateral packages support channel partner diagnostic centers and hospital networks in offering true somatic-vs-germline sequencing.",
+      clinicalBenefits: [
+        "Simultaneous Tissue-Liquid-Normal match eliminating false-positive CHIP and germline background variants.",
+        "Transcriptomics validation with 25,000 genes for exceptional expressions and RNA fusions.",
+        "Authorized dual-branding template options for certified hospital chains and diagnostic distributors.",
+        "Co-branded patient counseling kits and clinical summary dossiers."
+      ]
+    },
+    {
+      id: "oncomonitor",
+      name: "OncoMonitor\u00ae",
+      logo: "assets/logos/logo_oncomonitor.png",
+      owner: "Dr. Pranad",
+      description: "Novel liquid biopsy monitoring suite featuring OncoMonitor\u00ae MRD for early-stage recurrence surveillance and OncoMonitor\u00ae TRM for metastatic monitoring.",
+      details: "OncoMonitor\u00ae provides non-invasive longitudinal disease monitoring through cell-free tumor DNA (ctDNA). Co-branded collateral packages enable channel partners to market longitudinal monitoring programs directly to medical oncologists.",
+      clinicalBenefits: [
+        "Ultra-sensitive liquid biopsy ctDNA detection up to 0.01% VAF for residual disease.",
+        "Dual monitoring pathways: MRD (Minimal Residual Disease) and TRM (Therapeutic Response Monitoring).",
+        "Co-branded sample collection protocols and phlebotomy partner instructions.",
+        "Joint distributor-physician clinical education slide decks and sample reports."
+      ]
+    },
+    {
+      id: "oncotarget",
+      name: "OncoTarget\u00ae",
+      logo: "assets/logos/logo_oncotarget.png",
+      owner: "Vikas",
+      description: "Targeted disease-specific NGS panel customizable for guideline-mandated mutations across 10 major solid tumors with rapid 48-72 hour reporting.",
+      details: "OncoTarget\u00ae delivers actionable targeted sequencing for high-incidence solid tumors with rapid turnaround. Co-branded assets enable channel partners to market cost-effective, guideline-driven NGS panels directly to tier-1 and tier-2 hospital oncology departments.",
+      clinicalBenefits: [
+        "Customizable disease-specific panels for 10 cancer types covering NCCN, ASCO, and ESMO targets.",
+        "Rapid 48-72 hour laboratory turnaround time ideal for acute clinical management.",
+        "Dual-branded doctor brochures, turnaround-time flyers, and sample requisitions.",
+        "Partner margin guidance and physician detailing presentations."
+      ]
+    }
+  ],
+  coBrandedAssets: [
+    {
+      id: "cobrand-001",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Dual-Branded Clinical Brochure (Hospital Edition)",
+      contentType: "Brochure",
+      partnerName: "Authorized Channel Partners",
+      version: "v2.1 Co-Branded",
+      fileType: "PDF",
+      description: "Comprehensive 8-page co-branded clinical brochure covering Tissue-Liquid-Normal matching, CUP indications, and dual-logo front cover lockup.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaPrimePlusCoBrandedBrochure",
+      date: "2026-10-02",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-002",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Physician Detailing Presentation Deck",
+      contentType: "Presentation",
+      partnerName: "Channel Partner Network",
+      version: "v3.0 Co-Branded",
+      fileType: "PPTX",
+      description: "Customizable 24-slide clinical detailing deck designed for channel partner sales reps presenting to oncologists and tumor boards.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:p:/g/personal/marketing_1cell_ai/EaPrimePlusPartnerPitchDeck",
+      date: "2026-09-28",
+      updatedBy: "Vikas"
+    },
+    {
+      id: "cobrand-003",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Comprehensive Sample Patient Genomic Report",
+      contentType: "Sample Report",
+      partnerName: "Partner Hospitals & Diagnostic Labs",
+      version: "v2.0 Sample",
+      fileType: "PDF",
+      description: "De-identified clinical specimen report showcasing the dual-branded header, actionable therapeutic matches, and germline filtering breakdown.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaPrimePlusSampleReport",
+      date: "2026-09-15",
+      updatedBy: "Dr. Richa"
+    },
+    {
+      id: "cobrand-004",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Phlebotomy & Specimen Collection Partner One-Pager",
+      contentType: "One-Pager",
+      partnerName: "Phlebotomy & Channel Partners",
+      version: "v1.2",
+      fileType: "PDF",
+      description: "Quick reference card for sample logistics: Streck tubes for cfDNA, EDTA for PBMC normal, and cold-chain courier transport guidelines.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaPrimePlusLogisticsGuide",
+      date: "2026-08-30",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-005",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Co-Branding Brand Guidelines & Dual-Logo Toolkit",
+      contentType: "Co-Branding Toolkit",
+      partnerName: "All Channel Partners",
+      version: "v1.0 Guidelines",
+      fileType: "PDF",
+      description: "Official guide on clear-space margins, partner co-logo positioning, color reproduction rules, and trademark attribution requirements.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaPrimePlusBrandKit",
+      date: "2026-08-10",
+      updatedBy: "Sharad Jaiswal"
+    },
+    {
+      id: "cobrand-006",
+      productId: "oncomonitor",
+      title: "OncoMonitor Liquid Biopsy Recurrence Surveillance Brochure",
+      contentType: "Brochure",
+      partnerName: "Channel Partner Oncology Division",
+      version: "v2.0 Co-Branded",
+      fileType: "PDF",
+      description: "Physician & patient-facing brochure detailing non-invasive longitudinal ctDNA monitoring for early post-surgical recurrence detection.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncoMonitorBrochure",
+      date: "2026-10-05",
+      updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "cobrand-007",
+      productId: "oncomonitor",
+      title: "OncoMonitor MRD & TRM Clinical Overview Slide Deck",
+      contentType: "Slide Deck",
+      partnerName: "Authorized Channel Partners",
+      version: "v1.5",
+      fileType: "PPTX",
+      description: "18-slide scientific deck illustrating the 0.01% VAF sensitivity curve, serial monitoring intervals, and immunotherapy response tracking.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:p:/g/personal/marketing_1cell_ai/EaOncoMonitorDeck",
+      date: "2026-09-22",
+      updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "cobrand-008",
+      productId: "oncomonitor",
+      title: "OncoMonitor ctDNA Longitudinal Monitoring Sample Report",
+      contentType: "Sample Report",
+      partnerName: "Partner Diagnostics Network",
+      version: "v2.0 Sample",
+      fileType: "PDF",
+      description: "Visual longitudinal report sample depicting kinetic ctDNA clearance curves across baseline, post-op cycle 1, and month 6 visits.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncoMonitorSampleReport",
+      date: "2026-09-12",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-009",
+      productId: "oncomonitor",
+      title: "OncoMonitor Partner Phlebotomy & Plasma Handling Protocol",
+      contentType: "One-Pager",
+      partnerName: "Collection Centers & Partner Labs",
+      version: "v1.1",
+      fileType: "PDF",
+      description: "Standard operating procedure for double-spin plasma separation, BCT tube stability windows, and ambient dispatch protocols.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncoMonitorProtocol",
+      date: "2026-08-25",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-010",
+      productId: "oncomonitor",
+      title: "OncoMonitor Channel Partner Commercial Detailer & FAQ",
+      contentType: "One-Pager",
+      partnerName: "Commercial Partners",
+      version: "v1.0",
+      fileType: "PDF",
+      description: "Quick-reference sales battlecard answering oncologist questions regarding sensitivity, blood draw schedules, and reimbursement pathways.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncoMonitorSalesDetailer",
+      date: "2026-08-14",
+      updatedBy: "Vikas"
+    },
+    {
+      id: "cobrand-011",
+      productId: "oncotarget",
+      title: "OncoTarget Disease-Specific Targeted NGS Panel Brochure",
+      contentType: "Brochure",
+      partnerName: "Authorized Channel Partners",
+      version: "v2.0 Co-Branded",
+      fileType: "PDF",
+      description: "Dual-branded promotional brochure showcasing customizable targeted panels across 10 common solid cancers with 48-72h turnaround.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncoTargetBrochure",
+      date: "2026-10-08",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-012",
+      productId: "oncotarget",
+      title: "OncoTarget 10 Solid Tumor Panels Doctor Detailing Presentation",
+      contentType: "Presentation",
+      partnerName: "Channel Partner Network",
+      version: "v2.2",
+      fileType: "PPTX",
+      description: "Modular pitch deck with cancer-specific slide sections for lung, breast, colorectal, and ovarian targeted clinical testing options.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:p:/g/personal/marketing_1cell_ai/EaOncoTargetPitchDeck",
+      date: "2026-09-30",
+      updatedBy: "Vikas"
+    },
+    {
+      id: "cobrand-013",
+      productId: "oncotarget",
+      title: "OncoTarget Actionable Genomic Mutation Sample Report",
+      contentType: "Sample Report",
+      partnerName: "Hospital Oncology Departments",
+      version: "v1.8 Sample",
+      fileType: "PDF",
+      description: "Sample report illustrating targeted actionable biomarkers, tier-1 drug matches, resistance mutations, and pharmacogenomic notes.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncoTargetSampleReport",
+      date: "2026-09-18",
+      updatedBy: "Dr. Richa"
+    },
+    {
+      id: "cobrand-014",
+      productId: "oncotarget",
+      title: "OncoTarget 48-72 Hour Rapid Turnaround Clinical Brief",
+      contentType: "One-Pager",
+      partnerName: "Channel Partners & Hospitals",
+      version: "v1.4",
+      fileType: "PDF",
+      description: "Urgent therapy decision-making collateral highlighting fast lab processing timeline, FFPE minimal input criteria, and digital results delivery.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncoTargetTATBrief",
+      date: "2026-09-02",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-015",
+      productId: "oncotarget",
+      title: "OncoTarget Hospital Distribution Margin & Pricing Matrix",
+      contentType: "One-Pager",
+      partnerName: "Authorized Channel Partners",
+      version: "v2.0 Partner Only",
+      fileType: "PDF",
+      description: "Confidential channel partner commercial sheet detailing volume-based discounts, institutional margin tiers, and bundling options.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncoTargetMarginSheet",
+      date: "2026-08-19",
+      updatedBy: "Sharad Jaiswal"
+    }
+  ],
+  partnerAnnouncements: [
+    {
+      id: "ptnr-ann-001",
+      title: "New Co-Branded Marketing Toolkits Released for Q4 2026",
+      message: "Updated dual-logo marketing kits and clinical detailing presentations for OncoIndx Prime+, OncoMonitor, and OncoTarget are now live in the Co-Branded Assets repository. Download the editable PowerPoint decks to insert your institution's logo alongside 1Cell.Ai.",
+      category: "Toolkit",
+      postedBy: "Marketing Admin",
+      date: "2026-10-06",
+      pinned: true
+    },
+    {
+      id: "ptnr-ann-002",
+      title: "Dual-Logo Co-Branding Guidelines & Compliance Notice",
+      message: "Please review the updated Co-Branding Brand Guidelines before printing or distributing collateral to oncologists. All dual-branded hospital collateral must maintain approved logo clear spaces and trademark designations (\u00ae). Reach out to marketing@1cell.ai for rapid design approval.",
+      category: "Compliance",
+      postedBy: "Brand & Legal",
+      date: "2026-09-29",
+      pinned: false
+    },
+    {
+      id: "ptnr-ann-003",
+      title: "Q4 Channel Partner Commercial Margin Structure & Logistics Updates",
+      message: "Our nationwide cold-chain turnaround logistics have expanded to 45 additional regional centers. Review the revised OncoTarget and OncoMonitor distributor margin matrices in your product folders. Contact your regional commercial manager for territory review.",
+      category: "Commercial",
+      postedBy: "Channel Operations",
+      date: "2026-09-18",
+      pinned: false
+    }
   ]
 };
 export default db;

@@ -5,13 +5,15 @@ export const TEAMS = {
   MARKETING: 'marketing',
   SCIENTIFIC: 'scientific',
   SALES: 'sales',
-  LEADERSHIP: 'leadership'
+  LEADERSHIP: 'leadership',
+  CHANNEL_PARTNER: 'channel_partner'
 };
 
 export const VISIBILITY = {
   ALL: 'all',             // Cross-Team: Visible to Marketing & Scientific (+ Leadership & Sales)
   MARKETING: 'marketing', // Marketing Team Only
-  SCIENTIFIC: 'scientific' // Scientific Team Only
+  SCIENTIFIC: 'scientific', // Scientific Team Only
+  CHANNEL_PARTNER: 'channel_partner' // Channel Partner Only
 };
 
 export const BROADCAST_CHANNEL_NAME = '1cell_realtime_collaboration';
@@ -31,6 +33,9 @@ export const DEFAULT_CLOUD_CONFIG = {
 export function normalizeTeam(deptOrRole) {
   if (!deptOrRole) return TEAMS.MARKETING;
   const str = deptOrRole.toString().toLowerCase().trim();
+  if (str.includes('partner') || str.includes('channel')) {
+    return TEAMS.CHANNEL_PARTNER;
+  }
   if (str.includes('scien') || str.includes('genomic') || str.includes('medical') || str === 'doctor') {
     return TEAMS.SCIENTIFIC;
   }

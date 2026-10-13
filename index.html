@@ -57,6 +57,14 @@
                 <span class="nav-item-text">Product Hub</span>
               </a>
             </li>
+            <li class="nav-item" data-route="co-branded">
+              <a>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.999-3.199a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                </svg>
+                <span class="nav-item-text">Co-Branded Assets</span>
+              </a>
+            </li>
             <li class="nav-item" data-route="cases">
               <a>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -157,6 +165,7 @@
               <option value="marketing_admin" selected>Marketing Admin (Full Access)</option>
               <option value="sales">Sales (View & Share)</option>
               <option value="medical">Medical (Scientific & Pubs)</option>
+              <option value="channel_partner">Channel Partner (Co-Branded Only)</option>
               <option value="leadership">Leadership (Read Only Analytics)</option>
             </select>
           </div>
@@ -1058,6 +1067,82 @@
     </div>
   </div>
 
+  <!-- Modal: Add / Edit Co-Branded Asset -->
+  <div id="coBrandedAssetModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="coBrandedAssetModalTitle">New Co-Branded Asset</h3>
+        <button class="modal-close-btn" type="button" onclick="window.closeCoBrandedAssetModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px; height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="coBrandedAssetForm" class="form-grid" onsubmit="event.preventDefault(); window.saveCoBrandedAsset();">
+          <input type="hidden" id="coBrandAssetId">
+          <div class="form-group full-width">
+            <label for="coBrandTitle">Collateral Title *</label>
+            <input type="text" id="coBrandTitle" required placeholder="e.g. OncoIndx Prime+ Dual-Branded Hospital Brochure">
+          </div>
+          <div class="form-group">
+            <label for="coBrandProductSelect">Product Folder *</label>
+            <select id="coBrandProductSelect" required>
+              <option value="primeplus">OncoIndx® Prime+</option>
+              <option value="oncomonitor">OncoMonitor®</option>
+              <option value="oncotarget">OncoTarget®</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="coBrandTypeSelect">Content / Collateral Type *</label>
+            <select id="coBrandTypeSelect" required>
+              <option value="Brochure">Brochure</option>
+              <option value="Presentation">Presentation</option>
+              <option value="Slide Deck">Slide Deck</option>
+              <option value="Sample Report">Sample Report</option>
+              <option value="One-Pager">One-Pager / Product Brief</option>
+              <option value="Whitepaper">Whitepaper / Clinical Dossier</option>
+              <option value="Co-Branding Toolkit">Co-Branding Toolkit & Guidelines</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="coBrandUrl">SharePoint / OneDrive Direct Link *</label>
+            <input type="url" id="coBrandUrl" required placeholder="https://1cellai-my.sharepoint.com/...">
+          </div>
+          <div class="form-group full-width">
+            <label for="coBrandDesc">Description &amp; Key Messaging Takeaways *</label>
+            <textarea id="coBrandDesc" rows="3" required placeholder="Summary of co-branded material, target clinical audience, custom logo placement instructions..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="coBrandPartner">Partner / Distribution Network</label>
+            <input type="text" id="coBrandPartner" placeholder="e.g. Authorized Channel Partners, Apollo Network" value="Authorized Channel Partners">
+          </div>
+          <div class="form-group">
+            <label for="coBrandVersion">Asset Version</label>
+            <input type="text" id="coBrandVersion" placeholder="e.g. v2.0 Co-Branded" value="v1.0 Co-Branded">
+          </div>
+          <div class="form-group">
+            <label for="coBrandFileType">File Format</label>
+            <select id="coBrandFileType">
+              <option value="PDF">PDF Document</option>
+              <option value="PPTX">PowerPoint (PPTX)</option>
+              <option value="DOCX">Word Document</option>
+              <option value="ZIP">ZIP Package</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="coBrandAuthor">Curated By</label>
+            <input type="text" id="coBrandAuthor" placeholder="Marketing Admin">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-outline" type="button" onclick="window.closeCoBrandedAssetModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="window.saveCoBrandedAsset()">Save Co-Branded Asset</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Premium Login Portal -->
   <div id="loginOverlay" class="login-overlay">
     <div class="login-card animate-slide-up">
@@ -1082,6 +1167,7 @@
             <option value="Scientific">Scientific Team (Genomic Scientist)</option>
             <option value="Sales">Sales Team</option>
             <option value="Leadership">Leadership Team</option>
+            <option value="Channel Partner">Channel Partners</option>
           </select>
         </div>
         <div id="loginErrorMessage" class="login-error-message" style="display: none; color: var(--danger); font-family: 'Outfit', sans-serif; font-size: 11.5px; font-weight: 600; margin-top: -4px; align-items: center; gap: 6px;">
@@ -1161,7 +1247,11 @@
           return false;
         }
 
-        if (!email || !email.endsWith('@1cell.ai')) {
+        const deptLower = (dept || '').toLowerCase();
+        const isPartner = deptLower.includes('partner') || deptLower.includes('channel');
+        const isMarketing = deptLower.includes('market') || deptLower.includes('brand');
+
+        if (!isPartner && (!email || !email.endsWith('@1cell.ai'))) {
           if (emailEl) emailEl.classList.add('input-error');
           if (errorMsg) {
             const span = errorMsg.querySelector('span');
@@ -1169,10 +1259,15 @@
             errorMsg.style.display = 'flex';
           }
           return false;
+        } else if (isPartner && (!email || !email.includes('@'))) {
+          if (emailEl) emailEl.classList.add('input-error');
+          if (errorMsg) {
+            const span = errorMsg.querySelector('span');
+            if (span) span.innerText = "Please enter a valid corporate or partner email address.";
+            errorMsg.style.display = 'flex';
+          }
+          return false;
         }
-
-        const deptLower = (dept || '').toLowerCase();
-        const isMarketing = deptLower.includes('market') || deptLower.includes('brand');
 
         if (isMarketing) {
           const isAuth = authorizedMarketingEmails.map(m => m.toLowerCase().trim()).includes(email);
@@ -1187,7 +1282,7 @@
           }
         }
 
-        const normTeam = isMarketing ? 'marketing' : (deptLower.includes('scien') || deptLower.includes('genomic') || deptLower.includes('medical')) ? 'scientific' : (deptLower.includes('sale')) ? 'sales' : 'leadership';
+        const normTeam = isMarketing ? 'marketing' : isPartner ? 'channel_partner' : (deptLower.includes('scien') || deptLower.includes('genomic') || deptLower.includes('medical')) ? 'scientific' : (deptLower.includes('sale')) ? 'sales' : 'leadership';
 
         try {
           sessionStorage.setItem("authName", name);
@@ -1212,7 +1307,7 @@
         if (typeof window.checkAuth === 'function') window.checkAuth();
         if (typeof window.updateUserBadge === 'function') window.updateUserBadge();
         if (typeof window.updateSidebarCategories === 'function') window.updateSidebarCategories();
-        if (typeof window.renderRoute === 'function') window.renderRoute('dashboard');
+        if (typeof window.renderRoute === 'function') window.renderRoute(isPartner ? 'co-branded' : 'dashboard');
         return false;
       };
 
@@ -1239,6 +1334,6 @@
   </script>
 
   <!-- Main Application Script -->
-  <script type="module" src="app.js?v=20261005-v53"></script>
+  <script type="module" src="app.js?v=20261013-v54"></script>
 </body>
 </html>
