@@ -1254,7 +1254,7 @@ function init() {
     checkAuth();
     updateUserBadge();
     updateSidebarCategories();
-    renderRoute('co-branded');
+    renderRoute('dashboard');
     showToast(`Welcome to 1Cell.Ai Co-Branded Portal for ${partnerName}!`);
     return false;
   };
@@ -1307,7 +1307,7 @@ function init() {
   // Set default profile details & render view
   updateUserBadge();
   updateSidebarCategories();
-  const defaultRoute = isChannelPartner() ? 'co-branded' : 'dashboard';
+  const defaultRoute = 'dashboard';
   renderRoute(defaultRoute);
 }
 
@@ -1427,7 +1427,7 @@ function updateSidebarCategories() {
     coBrandedNavItem.style.display = isSales ? 'none' : '';
   }
 
-  // 2. Channel Partners can ONLY access Co-Branded content!
+  // 2. Channel Partners can ONLY access Dashboard, Co-Branded Assets, and Favorites!
   const dashboardNavItem = document.querySelector('.sidebar .nav-item[data-route="dashboard"]');
   const overviewGroup = dashboardNavItem ? dashboardNavItem.closest('.nav-group') : null;
   const companyAssetsNavItem = document.querySelector('.sidebar .nav-item[data-route="company-assets"]');
@@ -1438,20 +1438,19 @@ function updateSidebarCategories() {
   const personalGroup = favoritesNavItem ? favoritesNavItem.closest('.nav-group') : null;
 
   if (isPartner) {
-    if (dashboardNavItem) dashboardNavItem.style.display = 'none';
-    if (overviewGroup) overviewGroup.style.display = 'none';
+    if (dashboardNavItem) dashboardNavItem.style.display = '';
+    if (overviewGroup) overviewGroup.style.display = '';
     if (companyAssetsNavItem) companyAssetsNavItem.style.display = 'none';
     if (productHubNavItem) productHubNavItem.style.display = 'none';
     if (scientificNavItem) scientificNavItem.style.display = 'none';
     if (compIntelNavItem) compIntelNavItem.style.display = 'none';
-    if (favoritesNavItem) favoritesNavItem.style.display = 'none';
-    if (personalGroup) personalGroup.style.display = 'none';
+    if (favoritesNavItem) favoritesNavItem.style.display = '';
+    if (personalGroup) personalGroup.style.display = '';
     if (analyticsNavItem) analyticsNavItem.style.display = 'none';
     if (systemNavGroup) systemNavGroup.style.display = 'none';
 
     if (coBrandedNavItem) {
       coBrandedNavItem.style.display = '';
-      coBrandedNavItem.classList.add('active');
     }
     const catGroupTitle = coBrandedNavItem ? coBrandedNavItem.closest('.nav-group')?.querySelector('.nav-group-title') : null;
     if (catGroupTitle) catGroupTitle.innerText = "Partner Portal";
@@ -1515,11 +1514,7 @@ window.navigateToRoute = function(route) {
 };
 
 window.navigateToDashboard = function() {
-  if (isChannelPartner()) {
-    window.navigateToRoute('co-branded');
-  } else {
-    window.navigateToRoute('dashboard');
-  }
+  window.navigateToRoute('dashboard');
 };
 
 function renderRoute(route) {
@@ -1528,16 +1523,17 @@ function renderRoute(route) {
   workspaceViewport.innerHTML = '';
   suggestionsDropdown.style.display = 'none';
 
-  // Channel Partner access guard: strictly restricted to Co-Branded Assets ONLY!
-  if (isChannelPartner() && route !== 'co-branded') {
+  // Channel Partner access guard: strictly restricted to Dashboard, Co-Branded Assets, and Favorites ONLY!
+  const partnerAllowedRoutes = ['dashboard', 'co-branded', 'favorites'];
+  if (isChannelPartner() && !partnerAllowedRoutes.includes(route)) {
     sidebarItems.forEach(item => {
-      if (item.getAttribute('data-route') === 'co-branded') {
+      if (item.getAttribute('data-route') === 'dashboard') {
         item.classList.add('active');
       } else {
         item.classList.remove('active');
       }
     });
-    renderRoute('co-branded');
+    renderRoute('dashboard');
     return;
   }
 
