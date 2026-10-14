@@ -2520,6 +2520,32 @@ const db = {
       date: "2026-09-20",
       updatedBy: "Vikas"
     },
+    {
+      id: "cobrand-apollo-08",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Apollo Multicentric Clinical Validation & Concordance Whitepaper",
+      contentType: "Whitepaper",
+      partnerName: "Apollo Hospitals",
+      version: "v1.2 Apollo",
+      fileType: "PDF",
+      description: "Comprehensive scientific whitepaper benchmarking OncoIndx Prime+ Tissue-Liquid-Normal concordances across 450+ Apollo oncology patient cohorts.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaApolloPrimePlusWhitepaper",
+      date: "2026-10-12",
+      updatedBy: "Dr. Richa"
+    },
+    {
+      id: "cobrand-apollo-09",
+      productId: "oncomonitor",
+      title: "OncoMonitor Apollo Minimal Residual Disease (MRD) Clinical Concordance Whitepaper",
+      contentType: "Whitepaper",
+      partnerName: "Apollo Hospitals",
+      version: "v1.0 Apollo",
+      fileType: "PDF",
+      description: "Peer-reviewed scientific validation study demonstrating 99.2% analytical specificity for early recurrence detection in Apollo colorectal and lung cancer cohorts.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaApolloOncoMonitorWhitepaper",
+      date: "2026-10-09",
+      updatedBy: "Dr. Pranad"
+    },
 
     // --- DR. LAL PATHLABS ---
     {
@@ -2612,6 +2638,32 @@ const db = {
       sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaDrLalOncoTargetBrochure",
       date: "2026-09-17",
       updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-drlal-08",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Dr. Lal PathLabs Molecular Concordance & Analytical Validation Whitepaper",
+      contentType: "Whitepaper",
+      partnerName: "Dr. Lal PathLabs",
+      version: "v1.5 Lal",
+      fileType: "PDF",
+      description: "Joint analytical performance dossier and clinical validation whitepaper covering 500+ cancer genes and HRD algorithms across Dr. Lal PathLabs network.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaDrLalPrimePlusWhitepaper",
+      date: "2026-10-13",
+      updatedBy: "Dr. Richa"
+    },
+    {
+      id: "cobrand-drlal-09",
+      productId: "oncotarget",
+      title: "OncoTarget Dr. Lal PathLabs Rapid NGS Solid Tumor Validation Whitepaper",
+      contentType: "Whitepaper",
+      partnerName: "Dr. Lal PathLabs",
+      version: "v1.1 Lal",
+      fileType: "PDF",
+      description: "Scientific evaluation of 48-hour rapid turnaround targeted NGS sequencing with Dr. Lal PathLabs reference laboratory quality assurance standards.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaDrLalOncoTargetWhitepaper",
+      date: "2026-10-08",
+      updatedBy: "Dr. Pranad"
     },
 
     // --- METROPOLIS HEALTHCARE ---
@@ -2706,6 +2758,32 @@ const db = {
       date: "2026-09-19",
       updatedBy: "Dr. Richa"
     },
+    {
+      id: "cobrand-metro-08",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Metropolis Clinical Concordance & Utility Whitepaper",
+      contentType: "Whitepaper",
+      partnerName: "Metropolis Healthcare",
+      version: "v1.0 Metropolis",
+      fileType: "PDF",
+      description: "Clinical validity study demonstrating high concordance between tissue and cell-free DNA molecular profiles in Metropolis advanced cancer cohorts.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaMetropolisPrimePlusWhitepaper",
+      date: "2026-10-10",
+      updatedBy: "Dr. Richa"
+    },
+    {
+      id: "cobrand-metro-09",
+      productId: "oncomonitor",
+      title: "OncoMonitor Metropolis Liquid Biopsy Analytical Validation Dossier",
+      contentType: "Whitepaper",
+      partnerName: "Metropolis Healthcare",
+      version: "v1.3 Metropolis",
+      fileType: "PDF",
+      description: "Scientific whitepaper detailing limit of detection (LOD) and longitudinal monitoring sensitivity for Metropolis molecular oncology clients.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaMetropolisOncoMonitorWhitepaper",
+      date: "2026-10-05",
+      updatedBy: "Dr. Pranad"
+    },
 
     // --- MEDANTA - THE MEDICITY ---
     {
@@ -2799,6 +2877,32 @@ const db = {
       date: "2026-09-21",
       updatedBy: "Vikas"
     },
+    {
+      id: "cobrand-medanta-08",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Medanta Multicentric Outcomes & Targeted Therapy Whitepaper",
+      contentType: "Whitepaper",
+      partnerName: "Medanta - The Medicity",
+      version: "v1.4 Medanta",
+      fileType: "PDF",
+      description: "Comprehensive scientific monograph and clinical evidence paper evaluating therapeutic response rates guided by whole transcriptomic profiling.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaMedantaPrimePlusWhitepaper",
+      date: "2026-10-11",
+      updatedBy: "Dr. Richa"
+    },
+    {
+      id: "cobrand-medanta-09",
+      productId: "oncotarget",
+      title: "OncoTarget Medanta Rapid NGS Analytical Performance Whitepaper",
+      contentType: "Whitepaper",
+      partnerName: "Medanta - The Medicity",
+      version: "v1.2 Medanta",
+      fileType: "PDF",
+      description: "Clinical validity whitepaper evaluating rapid targeted actionable variant detection across Medanta Cancer Institute inpatients.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaMedantaOncoTargetWhitepaper",
+      date: "2026-10-06",
+      updatedBy: "Dr. Pranad"
+    },
 
     // --- SRL DIAGNOSTICS ---
     {
@@ -2891,6 +2995,32 @@ const db = {
       sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaSRLOncoTargetBrochure",
       date: "2026-09-18",
       updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-srl-08",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ SRL Diagnostics Pan-India Clinical Concordance Whitepaper",
+      contentType: "Whitepaper",
+      partnerName: "SRL Diagnostics",
+      version: "v1.1 SRL",
+      fileType: "PDF",
+      description: "Peer-reviewed multicentric study validating 99.4% germline variant filtering accuracy across pan-India SRL Diagnostic reference labs.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaSRLPrimePlusWhitepaper",
+      date: "2026-10-12",
+      updatedBy: "Dr. Richa"
+    },
+    {
+      id: "cobrand-srl-09",
+      productId: "oncomonitor",
+      title: "OncoMonitor SRL Longitudinal ctDNA Recurrence Detection Performance Study",
+      contentType: "Whitepaper",
+      partnerName: "SRL Diagnostics",
+      version: "v1.0 SRL",
+      fileType: "PDF",
+      description: "Scientific whitepaper detailing serial liquid biopsy performance and lead-time advantage over conventional radiological imaging.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaSRLOncoMonitorWhitepaper",
+      date: "2026-10-07",
+      updatedBy: "Dr. Pranad"
     },
 
     // --- MAX HEALTHCARE & SUPER SPECIALITY ---

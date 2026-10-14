@@ -1110,15 +1110,29 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="coBrandTypeSelect">Content / Collateral Type *</label>
+            <label for="coBrandTypeSelect">Content / Collateral Section & Type *</label>
             <select id="coBrandTypeSelect" required>
-              <option value="Brochure">Brochure</option>
-              <option value="Presentation">Presentation</option>
-              <option value="Slide Deck">Slide Deck</option>
-              <option value="Sample Report">Sample Report</option>
-              <option value="One-Pager">One-Pager / Product Brief</option>
-              <option value="Whitepaper">Whitepaper / Clinical Dossier</option>
-              <option value="Co-Branding Toolkit">Co-Branding Toolkit & Guidelines</option>
+              <optgroup label="About Product">
+                <option value="Brochure">Brochure (About Product)</option>
+                <option value="One-Pager">One-Pager / Brief (About Product)</option>
+                <option value="About Product">About Product</option>
+              </optgroup>
+              <optgroup label="Evidence">
+                <option value="Sample Report">Sample Report (Evidence)</option>
+                <option value="Case Study">Clinical Case Study (Evidence)</option>
+                <option value="Evidence">Evidence</option>
+              </optgroup>
+              <optgroup label="Scientific">
+                <option value="Whitepaper">Whitepaper / Clinical Validation (Scientific)</option>
+                <option value="Publication">Scientific Publication / Study (Scientific)</option>
+                <option value="Scientific">Scientific</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="Presentation">Presentation (Other)</option>
+                <option value="Slide Deck">Slide Deck (Other)</option>
+                <option value="Co-Branding Toolkit">Co-Branding Toolkit & Guidelines (Other)</option>
+                <option value="Other">Other</option>
+              </optgroup>
             </select>
           </div>
           <div class="form-group full-width">

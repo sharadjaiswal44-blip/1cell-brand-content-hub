@@ -3899,6 +3899,17 @@ function getCoBrandedAssets(productId = null, partnerFilter = null) {
       list = [];
     }
     saveCoBrandedAssets(list);
+  } else if (db && Array.isArray(db.coBrandedAssets)) {
+    // Merge any new seed assets missing from cached list
+    const existingIds = new Set(list.map(a => a.id));
+    let added = false;
+    db.coBrandedAssets.forEach(seed => {
+      if (!existingIds.has(seed.id)) {
+        list.push({ ...seed });
+        added = true;
+      }
+    });
+    if (added) saveCoBrandedAssets(list);
   }
 
   // Filter by product if specified
@@ -3951,6 +3962,77 @@ function getCoBrandedFavorites() {
   return all.filter(a => userFavorites.has(a.id));
 }
 window.getCoBrandedFavorites = getCoBrandedFavorites;
+
+// Map co-branded asset into standard sections: about-product, evidence, scientific, other
+function getCoBrandedAssetCategory(asset) {
+  if (!asset) return 'other';
+  const ct = (asset.contentType || '').toLowerCase().trim();
+  const title = (asset.title || '').toLowerCase();
+  const desc = (asset.description || '').toLowerCase();
+
+  // 1. Evidence: Sample reports, patient reports, case studies, clinical evidence
+  if (
+    ct === 'sample report' ||
+    ct === 'sample reports' ||
+    ct === 'patient report' ||
+    ct === 'case study' ||
+    ct === 'case studies' ||
+    ct === 'evidence' ||
+    ct.includes('sample report') ||
+    ct.includes('case') ||
+    title.includes('sample report') ||
+    title.includes('case review') ||
+    title.includes('tumor board requisition') ||
+    title.includes('patient report')
+  ) {
+    return 'evidence';
+  }
+
+  // 2. Scientific: Whitepaper, publication, clinical validation, dossier, scientific studies
+  if (
+    ct === 'whitepaper' ||
+    ct === 'white paper' ||
+    ct === 'publication' ||
+    ct === 'publications' ||
+    ct === 'journal' ||
+    ct === 'poster' ||
+    ct === 'scientific' ||
+    ct === 'clinical dossier' ||
+    title.includes('whitepaper') ||
+    title.includes('clinical validity') ||
+    title.includes('clinical dossier') ||
+    title.includes('concordance study') ||
+    title.includes('validation study') ||
+    title.includes('monograph') ||
+    desc.includes('whitepaper') ||
+    desc.includes('concordance')
+  ) {
+    return 'scientific';
+  }
+
+  // 3. About Product: Brochure, product overview, flyer, one-pager, about product
+  if (
+    ct === 'brochure' ||
+    ct === 'about product' ||
+    ct === 'product overview' ||
+    ct === 'one pager' ||
+    ct === 'one-pager' ||
+    ct === 'two pager' ||
+    ct === 'flyer' ||
+    ct === 'faq' ||
+    ct.includes('brochure') ||
+    title.includes('brochure') ||
+    title.includes('flyer') ||
+    title.includes('one-pager') ||
+    title.includes('overview')
+  ) {
+    return 'about-product';
+  }
+
+  // 4. Other: Presentations, Slide Decks, Co-Branding Toolkits, Brand Assets, etc.
+  return 'other';
+}
+window.getCoBrandedAssetCategory = getCoBrandedAssetCategory;
 
 function getPartnerAnnouncements() {
   let list = null;
@@ -4203,11 +4285,10 @@ window.openCoBrandedProductFolder = function(productId, defaultTab = 'all') {
   }
 
   const allAssets = getCoBrandedAssets(productId);
-  const brochures = allAssets.filter(a => a.contentType === 'Brochure');
-  const presentations = allAssets.filter(a => a.contentType === 'Presentation' || a.contentType === 'Slide Deck');
-  const sampleReports = allAssets.filter(a => a.contentType === 'Sample Report');
-  const onePagers = allAssets.filter(a => a.contentType === 'One-Pager');
-  const toolkits = allAssets.filter(a => a.contentType === 'Co-Branding Toolkit' || a.contentType === 'Whitepaper');
+  const aboutProductDocs = allAssets.filter(a => getCoBrandedAssetCategory(a) === 'about-product');
+  const evidenceDocs = allAssets.filter(a => getCoBrandedAssetCategory(a) === 'evidence');
+  const scientificDocs = allAssets.filter(a => getCoBrandedAssetCategory(a) === 'scientific');
+  const otherDocs = allAssets.filter(a => getCoBrandedAssetCategory(a) === 'other');
 
   const partnerLabel = isChannelPartner() 
     ? getActiveChannelPartner() 
@@ -4254,7 +4335,7 @@ window.openCoBrandedProductFolder = function(productId, defaultTab = 'all') {
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
           ${isMarketingUser() ? `
-          <button class="btn-primary" onclick="window.openCoBrandedAssetModal(null, '${productId}')" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; font-weight:600; font-size:13px; box-shadow:var(--shadow-md);">
+          <button class="btn-primary" onclick="window.openCoBrandedAssetModal(null, '${productId}', '${currentCoBrandedTab}')" style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; font-weight:600; font-size:13px; box-shadow:var(--shadow-md);">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:15px;height:15px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -4291,25 +4372,22 @@ window.openCoBrandedProductFolder = function(productId, defaultTab = 'all') {
       </div>
       ` : ''}
 
-      <!-- Category Filter Tabs -->
-      <div class="product-tabs-bar" style="margin-top:14px;">
-        <button class="product-tab-btn ${currentCoBrandedTab === 'all' ? 'active' : ''}" onclick="window.switchCoBrandedTab('all')">
-          All Collateral (${allAssets.length})
+      <!-- Category Filter Tabs: All Assets, About Product, Evidence, Scientific, Other -->
+      <div class="product-tabs-bar" style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="product-tab-btn ${currentCoBrandedTab === 'all' ? 'active' : ''}" data-tab="all" onclick="window.switchCoBrandedTab('all')">
+          All Assets (${allAssets.length})
         </button>
-        <button class="product-tab-btn ${currentCoBrandedTab === 'brochure' ? 'active' : ''}" onclick="window.switchCoBrandedTab('brochure')">
-          Brochures (${brochures.length})
+        <button class="product-tab-btn ${currentCoBrandedTab === 'about-product' ? 'active' : ''}" data-tab="about-product" onclick="window.switchCoBrandedTab('about-product')">
+          About Product (${aboutProductDocs.length})
         </button>
-        <button class="product-tab-btn ${currentCoBrandedTab === 'presentation' ? 'active' : ''}" onclick="window.switchCoBrandedTab('presentation')">
-          Presentations & Decks (${presentations.length})
+        <button class="product-tab-btn ${currentCoBrandedTab === 'evidence' ? 'active' : ''}" data-tab="evidence" onclick="window.switchCoBrandedTab('evidence')">
+          Evidence (${evidenceDocs.length})
         </button>
-        <button class="product-tab-btn ${currentCoBrandedTab === 'sample-report' ? 'active' : ''}" onclick="window.switchCoBrandedTab('sample-report')">
-          Sample Reports (${sampleReports.length})
+        <button class="product-tab-btn ${currentCoBrandedTab === 'scientific' ? 'active' : ''}" data-tab="scientific" onclick="window.switchCoBrandedTab('scientific')">
+          Scientific (${scientificDocs.length})
         </button>
-        <button class="product-tab-btn ${currentCoBrandedTab === 'one-pager' ? 'active' : ''}" onclick="window.switchCoBrandedTab('one-pager')">
-          One-Pagers (${onePagers.length})
-        </button>
-        <button class="product-tab-btn ${currentCoBrandedTab === 'toolkit' ? 'active' : ''}" onclick="window.switchCoBrandedTab('toolkit')">
-          Brand Toolkits (${toolkits.length})
+        <button class="product-tab-btn ${currentCoBrandedTab === 'other' ? 'active' : ''}" data-tab="other" onclick="window.switchCoBrandedTab('other')">
+          Other (${otherDocs.length})
         </button>
       </div>
     </div>
@@ -4323,9 +4401,13 @@ window.openCoBrandedProductFolder = function(productId, defaultTab = 'all') {
 
 window.switchCoBrandedTab = function(tab) {
   currentCoBrandedTab = tab;
-  document.querySelectorAll('.product-tab-btn').forEach(btn => btn.classList.remove('active'));
-  const activeBtn = Array.from(document.querySelectorAll('.product-tab-btn')).find(b => b.textContent.toLowerCase().includes(tab.replace('-', ' ')));
-  if (activeBtn) activeBtn.classList.add('active');
+  document.querySelectorAll('.product-tabs-bar .product-tab-btn').forEach(btn => {
+    if (btn.getAttribute('data-tab') === tab) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
   renderCoBrandedFolderContent(currentCoBrandedFolderId, tab);
 };
 
@@ -4334,27 +4416,76 @@ function renderCoBrandedFolderContent(productId, tab = 'all') {
   if (!container) return;
 
   const allAssets = getCoBrandedAssets(productId);
-  let filtered = allAssets;
+  const aboutProductDocs = allAssets.filter(a => getCoBrandedAssetCategory(a) === 'about-product');
+  const evidenceDocs = allAssets.filter(a => getCoBrandedAssetCategory(a) === 'evidence');
+  const scientificDocs = allAssets.filter(a => getCoBrandedAssetCategory(a) === 'scientific');
+  const otherDocs = allAssets.filter(a => getCoBrandedAssetCategory(a) === 'other');
 
-  if (tab === 'brochure') {
-    filtered = allAssets.filter(a => a.contentType === 'Brochure');
-  } else if (tab === 'presentation') {
-    filtered = allAssets.filter(a => a.contentType === 'Presentation' || a.contentType === 'Slide Deck');
-  } else if (tab === 'sample-report') {
-    filtered = allAssets.filter(a => a.contentType === 'Sample Report');
-  } else if (tab === 'one-pager') {
-    filtered = allAssets.filter(a => a.contentType === 'One-Pager');
-  } else if (tab === 'toolkit') {
-    filtered = allAssets.filter(a => a.contentType === 'Co-Branding Toolkit' || a.contentType === 'Whitepaper');
+  if (tab === 'all') {
+    if (allAssets.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state-box" style="padding:48px 24px; text-align:center;">
+          <h3>No co-branded collateral registered</h3>
+          <p>No materials currently found for this product folder.</p>
+          ${isMarketingUser() ? `
+            <button class="btn-primary" onclick="window.openCoBrandedAssetModal(null, '${productId}')" style="margin-top:14px;">+ Add New Co-Branded Asset</button>
+          ` : ''}
+        </div>
+      `;
+      return;
+    }
+
+    const sections = [
+      { key: 'about-product', title: 'About Product', docs: aboutProductDocs, icon: '📄', desc: 'Dual-branded brochures, patient flyers, and product overviews' },
+      { key: 'evidence', title: 'Evidence', docs: evidenceDocs, icon: '🧪', desc: 'Sample patient genomic reports, clinical cases, and tumor board requisitions' },
+      { key: 'scientific', title: 'Scientific', docs: scientificDocs, icon: '🧬', desc: 'Clinical validation whitepapers, concordance dossiers, and publications' },
+      { key: 'other', title: 'Other', docs: otherDocs, icon: '📁', desc: 'Custom clinical slide decks, detailing presentations, and toolkits' }
+    ];
+
+    container.innerHTML = sections.map(sec => {
+      if (sec.docs.length === 0) return '';
+      return `
+        <div class="cobrand-section-block" style="margin-bottom: 32px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom: 14px; border-bottom: 1.5px solid var(--border-color); padding-bottom: 8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">${sec.icon}</span>
+              <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary);">${sec.title}</h3>
+              <span class="badge" style="background:var(--bg-tertiary); color:var(--text-secondary); font-size:11.5px; padding:2px 8px; border-radius:10px; font-weight:600;">${sec.docs.length}</span>
+            </div>
+            <button class="btn-outline" style="font-size:11px; padding:3px 8px;" onclick="window.switchCoBrandedTab('${sec.key}')">View All ${sec.title} →</button>
+          </div>
+          <div class="assets-grid" style="grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));">
+            ${sec.docs.map(a => renderCoBrandedCard(a)).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+    return;
+  }
+
+  let filtered = [];
+  let tabTitle = 'Collateral';
+  if (tab === 'about-product') {
+    filtered = aboutProductDocs;
+    tabTitle = 'About Product';
+  } else if (tab === 'evidence') {
+    filtered = evidenceDocs;
+    tabTitle = 'Evidence';
+  } else if (tab === 'scientific') {
+    filtered = scientificDocs;
+    tabTitle = 'Scientific';
+  } else if (tab === 'other') {
+    filtered = otherDocs;
+    tabTitle = 'Other';
   }
 
   if (filtered.length === 0) {
     container.innerHTML = `
       <div class="empty-state-box" style="padding:48px 24px; text-align:center;">
-        <h3>No co-branded collateral in this category</h3>
-        <p>No materials found under this filter tab.</p>
+        <h3>No ${tabTitle} collateral available</h3>
+        <p>No materials currently found under the ${tabTitle} section for this partner.</p>
         ${isMarketingUser() ? `
-          <button class="btn-primary" onclick="window.openCoBrandedAssetModal(null, '${productId}')" style="margin-top:14px;">+ Add New Co-Branded Asset</button>
+          <button class="btn-primary" onclick="window.openCoBrandedAssetModal(null, '${productId}', '${tab}')" style="margin-top:14px;">+ Add ${tabTitle} Asset</button>
         ` : ''}
       </div>
     `;
@@ -4377,7 +4508,7 @@ window.toggleCoBrandPartnerCustom = function(val) {
   }
 };
 
-window.openCoBrandedAssetModal = function(assetId = null, defaultProductId = null) {
+window.openCoBrandedAssetModal = function(assetId = null, defaultProductId = null, defaultTab = null) {
   const modal = document.getElementById('coBrandedAssetModal');
   if (!modal) return;
 
@@ -4391,11 +4522,17 @@ window.openCoBrandedAssetModal = function(assetId = null, defaultProductId = nul
 
   const existing = assetId && rawList ? rawList.find(a => a.id === assetId) : null;
 
+  let defaultType = 'Brochure';
+  if (defaultTab === 'about-product') defaultType = 'Brochure';
+  else if (defaultTab === 'evidence') defaultType = 'Sample Report';
+  else if (defaultTab === 'scientific') defaultType = 'Whitepaper';
+  else if (defaultTab === 'other') defaultType = 'Presentation';
+
   document.getElementById('coBrandedAssetModalTitle').innerText = existing ? 'Edit Co-Branded Asset' : 'New Co-Branded Asset';
   document.getElementById('coBrandAssetId').value = existing ? existing.id : '';
   document.getElementById('coBrandTitle').value = existing ? existing.title : '';
   document.getElementById('coBrandProductSelect').value = existing ? existing.productId : (defaultProductId || 'primeplus');
-  document.getElementById('coBrandTypeSelect').value = existing ? existing.contentType : 'Brochure';
+  document.getElementById('coBrandTypeSelect').value = existing ? existing.contentType : defaultType;
   document.getElementById('coBrandUrl').value = existing ? existing.sharePointUrl : '';
   document.getElementById('coBrandDesc').value = existing ? existing.description : '';
 
