@@ -7270,9 +7270,9 @@ window.openSharePoint = function(id) {
   const cobrand = (typeof getCoBrandedAssets === 'function' ? getCoBrandedAssets() : []).find(a => a.id === id);
   if (cobrand && cobrand.sharePointUrl) {
     let url = cobrand.sharePointUrl.trim();
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    if (!/^https?:\/\//i.test(url) && !url.startsWith('assets/') && !url.startsWith('/')) url = 'https://' + url;
     window.open(url, '_blank');
-    showToast(`Redirecting to SharePoint: ${cobrand.title}`);
+    showToast(`Opening: ${cobrand.title}`);
     return;
   }
   // 0. Check clinical sample reports

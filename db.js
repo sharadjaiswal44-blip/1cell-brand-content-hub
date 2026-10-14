@@ -2546,6 +2546,19 @@ const db = {
       date: "2026-10-09",
       updatedBy: "Dr. Pranad"
     },
+    {
+      id: "cobrand-apollo-10",
+      productId: "oncotarget",
+      title: "OncoTarget Apollo Cancer Centres Rapid Solid Tumor Clinical Brochure",
+      contentType: "Brochure",
+      partnerName: "Apollo Hospitals",
+      version: "v1.8 Apollo",
+      fileType: "PDF",
+      description: "Apollo Cancer Centres dual-branded clinician brochure for rapid 48-72h turnaround actionable NGS mutation profiling.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788782154419.pdf",
+      date: "2026-10-14",
+      updatedBy: "Apollo Liaison"
+    },
 
     // --- DR. LAL PATHLABS ---
     {
@@ -2784,6 +2797,32 @@ const db = {
       date: "2026-10-05",
       updatedBy: "Dr. Pranad"
     },
+    {
+      id: "cobrand-metro-10",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Metropolis Precision Oncology Clinical Brochure",
+      contentType: "Brochure",
+      partnerName: "Metropolis Healthcare",
+      version: "v2.2 Metro",
+      fileType: "PDF",
+      description: "Metropolis Healthcare co-branded brochure highlighting tissue-liquid-normal matching and comprehensive biomarker reporting.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788728774487.pdf",
+      date: "2026-10-14",
+      updatedBy: "Metropolis Team"
+    },
+    {
+      id: "cobrand-metro-11",
+      productId: "oncotarget",
+      title: "OncoTarget Metropolis Rapid Solid Tumor Gene Panel Brochure",
+      contentType: "Brochure",
+      partnerName: "Metropolis Healthcare",
+      version: "v1.6 Metro",
+      fileType: "PDF",
+      description: "Dual-branded clinician brochure explaining Metropolis specimen collection protocols for fast targeted NGS panel testing.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788782154419.pdf",
+      date: "2026-10-14",
+      updatedBy: "Marketing Team"
+    },
 
     // --- MEDANTA - THE MEDICITY ---
     {
@@ -2902,6 +2941,19 @@ const db = {
       sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaMedantaOncoTargetWhitepaper",
       date: "2026-10-06",
       updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "cobrand-medanta-10",
+      productId: "oncomonitor",
+      title: "OncoMonitor Medanta Liquid Biopsy ctDNA Monitoring Brochure",
+      contentType: "Brochure",
+      partnerName: "Medanta - The Medicity",
+      version: "v1.9 Medanta",
+      fileType: "PDF",
+      description: "Medanta Cancer Institute dual-branded clinician brochure on longitudinal liquid biopsy ctDNA surveillance.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788770257251.pdf",
+      date: "2026-10-14",
+      updatedBy: "Medanta Liaison"
     },
 
     // --- SRL DIAGNOSTICS ---
@@ -3022,6 +3074,19 @@ const db = {
       date: "2026-10-07",
       updatedBy: "Dr. Pranad"
     },
+    {
+      id: "cobrand-srl-10",
+      productId: "oncomonitor",
+      title: "OncoMonitor SRL Diagnostics Precision ctDNA Surveillance Brochure",
+      contentType: "Brochure",
+      partnerName: "SRL Diagnostics",
+      version: "v2.0 SRL",
+      fileType: "PDF",
+      description: "SRL Diagnostics pan-India liquid biopsy guide for oncologists and molecular pathology collection centers.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788770257251.pdf",
+      date: "2026-10-14",
+      updatedBy: "SRL Account Lead"
+    },
 
     // --- MAX HEALTHCARE & SUPER SPECIALITY ---
     {
@@ -3061,6 +3126,32 @@ const db = {
       description: "One-pager overview of rapid targeted NGS testing pathways for acute clinical decision-making across Max cancer wards.",
       sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaMaxOncoTargetOnePager",
       date: "2026-10-02",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-max-04",
+      productId: "oncomonitor",
+      title: "OncoMonitor Max Healthcare ctDNA Recurrence Surveillance Brochure",
+      contentType: "Brochure",
+      partnerName: "Max Healthcare & Super Speciality",
+      version: "v1.7 Max",
+      fileType: "PDF",
+      description: "Dual-branded brochure for Max Institute of Cancer Care explaining liquid biopsy surveillance intervals and clinical utility.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788770257251.pdf",
+      date: "2026-10-14",
+      updatedBy: "Max Liaison"
+    },
+    {
+      id: "cobrand-max-05",
+      productId: "oncotarget",
+      title: "OncoTarget Max Healthcare Rapid Targeted Oncology Brochure",
+      contentType: "Brochure",
+      partnerName: "Max Healthcare & Super Speciality",
+      version: "v1.5 Max",
+      fileType: "PDF",
+      description: "Max Healthcare clinician brochure for rapid 48-hour turn-around actionable mutation detection.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788782154419.pdf",
+      date: "2026-10-14",
       updatedBy: "Marketing Team"
     },
 
@@ -3104,6 +3195,32 @@ const db = {
       date: "2026-09-20",
       updatedBy: "Marketing Team"
     },
+    {
+      id: "cobrand-fortis-04",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Fortis Memorial Comprehensive Genomic Profiling Brochure",
+      contentType: "Brochure",
+      partnerName: "Fortis Memorial Research Institute",
+      version: "v2.1 Fortis",
+      fileType: "PDF",
+      description: "Fortis Cancer Institute dual-branded clinical brochure covering multi-specimen genomic profiling and tumor board guidance.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788728774487.pdf",
+      date: "2026-10-14",
+      updatedBy: "Fortis Liaison"
+    },
+    {
+      id: "cobrand-fortis-05",
+      productId: "oncomonitor",
+      title: "OncoMonitor Fortis Memorial Liquid Biopsy ctDNA Surveillance Brochure",
+      contentType: "Brochure",
+      partnerName: "Fortis Memorial Research Institute",
+      version: "v1.8 Fortis",
+      fileType: "PDF",
+      description: "Clinician brochure on Fortis-1Cell joint minimal residual disease monitoring protocol.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788770257251.pdf",
+      date: "2026-10-14",
+      updatedBy: "Marketing Team"
+    },
 
     // --- TATA MEMORIAL ONCOLOGY NETWORK ---
     {
@@ -3131,6 +3248,32 @@ const db = {
       sharePointUrl: "https://1cellai-my.sharepoint.com/:p:/g/personal/marketing_1cell_ai/EaTMHOncoMonitorDeck",
       date: "2026-10-01",
       updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "cobrand-tata-03",
+      productId: "oncomonitor",
+      title: "OncoMonitor Tata Memorial Liquid Biopsy ctDNA Surveillance Brochure",
+      contentType: "Brochure",
+      partnerName: "Tata Memorial Oncology Network",
+      version: "v1.9 Tata",
+      fileType: "PDF",
+      description: "Tata Memorial Network dual-branded brochure for liquid biopsy ctDNA MRD detection and tracking.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788770257251.pdf",
+      date: "2026-10-14",
+      updatedBy: "Tata Liaison"
+    },
+    {
+      id: "cobrand-tata-04",
+      productId: "oncotarget",
+      title: "OncoTarget Tata Memorial Rapid Actionable Solid Tumor Panel Brochure",
+      contentType: "Brochure",
+      partnerName: "Tata Memorial Oncology Network",
+      version: "v1.6 Tata",
+      fileType: "PDF",
+      description: "Clinician reference brochure on rapid targeted NGS sequencing for high-volume public and private oncology services.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788782154419.pdf",
+      date: "2026-10-14",
+      updatedBy: "Clinical Team"
     },
 
     // --- ONCQUEST LABORATORIES ---
@@ -3160,8 +3303,73 @@ const db = {
       date: "2026-09-24",
       updatedBy: "Marketing Team"
     },
+    {
+      id: "cobrand-oncquest-03",
+      productId: "oncomonitor",
+      title: "OncoMonitor Oncquest Liquid Biopsy ctDNA Recurrence Brochure",
+      contentType: "Brochure",
+      partnerName: "Oncquest Laboratories",
+      version: "v1.8 Oncquest",
+      fileType: "PDF",
+      description: "Dual-branded brochure for Oncquest oncology network describing liquid biopsy collection and clinical indications.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788770257251.pdf",
+      date: "2026-10-14",
+      updatedBy: "Oncquest Liaison"
+    },
+    {
+      id: "cobrand-oncquest-04",
+      productId: "oncotarget",
+      title: "OncoTarget Oncquest Rapid Solid Tumor Targeted NGS Brochure",
+      contentType: "Brochure",
+      partnerName: "Oncquest Laboratories",
+      version: "v1.7 Oncquest",
+      fileType: "PDF",
+      description: "Actionable targeted solid tumor NGS profiling clinician guide formatted for Oncquest pathology centers.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788782154419.pdf",
+      date: "2026-10-14",
+      updatedBy: "Marketing Team"
+    },
 
     // --- ALL PARTNERS (UNIVERSAL & SHARED) ---
+    {
+      id: "cobrand-shared-brochure-primeplus",
+      productId: "primeplus",
+      title: "OncoIndx® Prime+ Dual-Branded Comprehensive Genomic Profiling Brochure",
+      contentType: "Brochure",
+      partnerName: "All Partners",
+      version: "v2.4 Brochure",
+      fileType: "PDF",
+      description: "Official dual-branded clinician and patient brochure for OncoIndx Prime+ covering Tissue-Liquid-Normal matching, 500+ cancer genes, MSI, TMB, and HRD clinical actionability.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788728774487.pdf",
+      date: "2026-10-14",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-shared-brochure-oncomonitor",
+      productId: "oncomonitor",
+      title: "OncoMonitor® ctDNA Liquid Biopsy Surveillance Protocol Brochure",
+      contentType: "Brochure",
+      partnerName: "All Partners",
+      version: "v2.0 Brochure",
+      fileType: "PDF",
+      description: "Clinician reference brochure for OncoMonitor ultra-sensitive ctDNA liquid biopsy for longitudinal minimal residual disease (MRD) tracking and recurrence monitoring.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788770257251.pdf",
+      date: "2026-10-14",
+      updatedBy: "Medical Affairs"
+    },
+    {
+      id: "cobrand-shared-brochure-oncotarget",
+      productId: "oncotarget",
+      title: "OncoTarget® Rapid Solid Tumor Targeted NGS Panel Clinical Brochure",
+      contentType: "Brochure",
+      partnerName: "All Partners",
+      version: "v1.8 Brochure",
+      fileType: "PDF",
+      description: "Dual-branded product brochure detailing rapid turnaround targeted NGS sequencing for actionable hotspot mutations and therapy matching in solid tumors.",
+      sharePointUrl: "assets/docs_and_guidelines/media_1788782154419.pdf",
+      date: "2026-10-14",
+      updatedBy: "Clinical Genomics"
+    },
     {
       id: "cobrand-shared-01",
       productId: "primeplus",
