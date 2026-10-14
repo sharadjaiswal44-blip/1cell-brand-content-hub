@@ -702,8 +702,8 @@ function checkAuth() {
   let authName = null;
   let authEmail = null;
   try {
-    authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
-    authEmail = sessionStorage.getItem("authEmail") || localStorage.getItem("1cell_auth_email");
+    authName = sessionStorage.getItem("authName");
+    authEmail = sessionStorage.getItem("authEmail");
   } catch (e) {}
 
   const overlay = document.getElementById('loginOverlay');
@@ -1093,23 +1093,21 @@ function init() {
     if (e && e.preventDefault) e.preventDefault();
     const emailEl = document.getElementById('teamLoginEmail');
     const deptEl = document.getElementById('teamLoginDept');
-    const passEl = document.getElementById('teamLoginPassword');
     const errEl = document.getElementById('teamLoginError');
 
     const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
     const dept = deptEl ? deptEl.value : 'Marketing';
-    const password = passEl ? passEl.value.trim() : '';
 
-    if (password.toLowerCase() !== '1cell') {
+    if (!email || !email.includes('@')) {
       if (errEl) {
-        errEl.innerText = "Incorrect password. The platform password is 1Cell.";
+        errEl.innerText = "Please enter a valid corporate email address.";
         errEl.style.display = 'block';
       }
-      if (passEl) passEl.focus();
+      if (emailEl) emailEl.focus();
       return false;
     }
 
-    if (!email || !email.endsWith('@1cell.ai')) {
+    if (!email.endsWith('@1cell.ai')) {
       if (errEl) {
         errEl.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
         errEl.style.display = 'block';
@@ -1172,18 +1170,7 @@ function init() {
     const pSelect = document.getElementById('partnerSelectDropdown');
     const pCustom = document.getElementById('partnerCustomInput');
     const repNameEl = document.getElementById('partnerRepName');
-    const passEl = document.getElementById('partnerLoginPassword');
     const errEl = document.getElementById('partnerLoginError');
-
-    const password = passEl ? passEl.value.trim() : '';
-    if (password.toLowerCase() !== '1cell') {
-      if (errEl) {
-        errEl.innerText = "Incorrect password. The channel partner password is 1Cell.";
-        errEl.style.display = 'block';
-      }
-      if (passEl) passEl.focus();
-      return false;
-    }
 
     let partnerName = pSelect ? pSelect.value : 'Apollo Hospitals';
     if (partnerName === '__custom__') {
@@ -1235,10 +1222,6 @@ function init() {
       localStorage.removeItem("1cell_active_channel_partner");
     } catch (err) {}
 
-    const teamPass = document.getElementById('teamLoginPassword');
-    if (teamPass) teamPass.value = '';
-    const partnerPass = document.getElementById('partnerLoginPassword');
-    if (partnerPass) partnerPass.value = '';
     const teamErr = document.getElementById('teamLoginError');
     if (teamErr) teamErr.style.display = 'none';
     const partnerErr = document.getElementById('partnerLoginError');

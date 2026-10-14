@@ -1172,15 +1172,18 @@
   <div id="loginOverlay" class="login-overlay">
     <div class="login-dual-card animate-slide-up">
       <div class="login-dual-header">
-        <h2 style="font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent-color); margin-bottom: 6px;">1Cell.Ai Enterprise Content Hub</h2>
-        <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Select your authorization category to access corporate collateral. Platform password is <strong>1Cell</strong>.</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+          <img src="logo.svg" alt="1Cell.Ai" style="height: 34px; width: auto;" onerror="this.style.display='none'">
+          <h2 style="font-family: 'Outfit', sans-serif; font-size: 23px; font-weight: 700; color: var(--accent-color); margin: 0; letter-spacing: -0.01em;">1Cell.Ai Content Hub</h2>
+        </div>
+        <p style="font-size: 13.5px; color: var(--text-secondary); margin: 0; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.45;">Select your portal below to access official product collateral, clinical resources, and partner assets.</p>
       </div>
 
       <div class="login-dual-grid">
         <!-- LEFT: 1Cell Team -->
         <div class="login-pane">
           <div class="login-pane-header">
-            <div class="login-pane-icon" style="background: rgba(30, 58, 138, 0.1); color: var(--accent-color);">👥</div>
+            <div class="login-pane-icon" style="background: rgba(26, 54, 93, 0.08); color: var(--brand-navy);">👥</div>
             <div>
               <h3 class="login-pane-title">1Cell Team</h3>
               <p class="login-pane-desc">Internal access for Marketing, Scientific, Sales & Leadership.</p>
@@ -1188,14 +1191,14 @@
           </div>
 
           <form id="teamLoginForm" onsubmit="return window.handleTeamLogin(event);" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
-            <div class="form-group">
-              <label for="teamLoginEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary);">CORPORATE EMAIL *</label>
-              <input type="email" id="teamLoginEmail" required placeholder="name@1cell.ai" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary);">
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="teamLoginEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Corporate Email *</label>
+              <input type="email" id="teamLoginEmail" required placeholder="name@1cell.ai" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
             </div>
 
-            <div class="form-group">
-              <label for="teamLoginDept" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary);">DEPARTMENT / ROLE *</label>
-              <select id="teamLoginDept" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary); cursor: pointer;">
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="teamLoginDept" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Department / Role *</label>
+              <select id="teamLoginDept" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: border-color var(--transition-fast);">
                 <option value="Marketing" selected>Marketing Team (Full Management & Admin)</option>
                 <option value="Scientific">Scientific & Genomic Science Team</option>
                 <option value="Sales">Sales Enablement Team</option>
@@ -1203,14 +1206,9 @@
               </select>
             </div>
 
-            <div class="form-group">
-              <label for="teamLoginPassword" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary);">PASSWORD (1Cell) *</label>
-              <input type="password" id="teamLoginPassword" required placeholder="Enter password (1Cell)" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary);">
-            </div>
+            <div id="teamLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; margin-top: -2px; padding: 6px 10px; background: var(--danger-light); border-radius: 6px;"></div>
 
-            <div id="teamLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 11.5px; font-weight: 600; margin-top: -4px;"></div>
-
-            <button type="submit" class="btn-primary" style="margin-top: auto; width: 100%; height: 42px; justify-content: center; font-weight: 600;">Sign In as 1Cell Team →</button>
+            <button type="submit" class="btn-primary" style="margin-top: auto; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; border-radius: var(--radius-sm); cursor: pointer;">Sign In as 1Cell Team →</button>
           </form>
         </div>
 
@@ -1222,7 +1220,7 @@
         </div>
 
         <!-- RIGHT: 1Cell Channel Partners -->
-        <div class="login-pane" style="background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(14, 165, 233, 0.03) 100%);">
+        <div class="login-pane" style="background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(14, 165, 233, 0.04) 100%);">
           <div class="login-pane-header">
             <div class="login-pane-icon" style="background: rgba(14, 165, 233, 0.12); color: #0284c7;">🤝</div>
             <div>
@@ -1232,18 +1230,18 @@
           </div>
 
           <form id="partnerLoginForm" onsubmit="return window.handlePartnerLogin(event);" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
-            <div class="form-group">
-              <label for="partnerSearchInput" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary);">SELECT YOUR PARTNER ORGANIZATION *</label>
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="partnerSearchInput" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Select Channel Partner *</label>
               
               <!-- Search Filter Box -->
-              <div class="partner-search-box">
+              <div class="partner-search-box" style="margin-bottom: 6px;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-                <input type="text" id="partnerSearchInput" placeholder="Filter partner name (e.g. Apollo, Lal, Max)..." oninput="window.filterPartnerLoginDropdown(this.value)" style="width: 100%; height: 36px; font-size: 12.5px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-primary); color: var(--text-primary);">
+                <input type="text" id="partnerSearchInput" placeholder="Filter partner (e.g. Apollo, Lal, Max)..." oninput="window.filterPartnerLoginDropdown(this.value)" style="width: 100%; height: 38px; font-size: 13px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-secondary); color: var(--text-primary);">
               </div>
 
               <!-- Partner Select Dropdown -->
-              <select id="partnerSelectDropdown" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary); cursor: pointer;" onchange="window.handlePartnerSelectChange(this.value)">
-                <option value="Apollo Hospitals" selected>Apollo Hospitals</option>
+              <select id="partnerSelectDropdown" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); cursor: pointer;" onchange="window.handlePartnerSelectChange(this.value)">
+                <option value="Apollo Hospitals" selected>Apollo Hospitals & Cancer Care</option>
                 <option value="Dr. Lal PathLabs">Dr. Lal PathLabs</option>
                 <option value="Metropolis Healthcare">Metropolis Healthcare</option>
                 <option value="Medanta - The Medicity">Medanta - The Medicity</option>
@@ -1254,22 +1252,17 @@
                 <option value="Oncquest Laboratories">Oncquest Laboratories</option>
                 <option value="__custom__">+ Enter Custom Partner Organization...</option>
               </select>
-              <input type="text" id="partnerCustomInput" placeholder="Enter custom partner organization name" style="display: none; margin-top: 6px; width: 100%; height: 38px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 13.5px; background-color: var(--bg-primary); color: var(--text-primary);">
+              <input type="text" id="partnerCustomInput" placeholder="Enter custom partner organization name" style="display: none; margin-top: 6px; width: 100%; height: 40px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 13.5px; background-color: var(--bg-secondary); color: var(--text-primary);">
             </div>
 
-            <div class="form-group">
-              <label for="partnerRepName" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary);">REPRESENTATIVE NAME / EMAIL (OPTIONAL)</label>
-              <input type="text" id="partnerRepName" placeholder="e.g. Dr. Ramesh / partner@hospital.com" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary);">
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="partnerRepName" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Representative Name / Email (Optional)</label>
+              <input type="text" id="partnerRepName" placeholder="e.g. Dr. Ramesh / partner@hospital.com" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary);">
             </div>
 
-            <div class="form-group">
-              <label for="partnerLoginPassword" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary);">PASSWORD (1Cell) *</label>
-              <input type="password" id="partnerLoginPassword" required placeholder="Enter password (1Cell)" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary);">
-            </div>
+            <div id="partnerLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; margin-top: -2px; padding: 6px 10px; background: var(--danger-light); border-radius: 6px;"></div>
 
-            <div id="partnerLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 11.5px; font-weight: 600; margin-top: -4px;"></div>
-
-            <button type="submit" class="btn-primary" style="margin-top: auto; width: 100%; height: 42px; justify-content: center; font-weight: 600; background: linear-gradient(135deg, #0e7490 0%, #0284c7 100%);">Sign In as Channel Partner →</button>
+            <button type="submit" class="btn-primary" style="margin-top: auto; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; background: linear-gradient(135deg, #0e7490 0%, #0284c7 100%); border: none; border-radius: var(--radius-sm); cursor: pointer;">Sign In as Channel Partner →</button>
           </form>
         </div>
       </div>
@@ -1301,8 +1294,8 @@
       function checkSession() {
         let authName = null, authEmail = null;
         try {
-          authName = sessionStorage.getItem("authName") || localStorage.getItem("1cell_auth_name");
-          authEmail = sessionStorage.getItem("authEmail") || localStorage.getItem("1cell_auth_email");
+          authName = sessionStorage.getItem("authName");
+          authEmail = sessionStorage.getItem("authEmail");
         } catch (e) {}
 
         const overlay = document.getElementById('loginOverlay');
@@ -1355,30 +1348,28 @@
         }
       };
 
-      // 1. 1Cell Team Login Handler
+      // 1. 1Cell Team Login Handler (Password removed)
       window.handleTeamLogin = function(e) {
         if (e && e.preventDefault) e.preventDefault();
         const emailEl = document.getElementById('teamLoginEmail');
         const deptEl = document.getElementById('teamLoginDept');
-        const passEl = document.getElementById('teamLoginPassword');
         const errEl = document.getElementById('teamLoginError');
 
         const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
         const dept = deptEl ? deptEl.value : 'Marketing';
-        const password = passEl ? passEl.value.trim() : '';
-
-        if (password.toLowerCase() !== '1cell') {
-          if (errEl) {
-            errEl.innerText = "Incorrect password. The team password is 1Cell.";
-            errEl.style.display = 'block';
-          }
-          if (passEl) passEl.focus();
-          return false;
-        }
 
         if (!email || !email.includes('@')) {
           if (errEl) {
-            errEl.innerText = "Please enter a valid email address.";
+            errEl.innerText = "Please enter a valid official corporate email address.";
+            errEl.style.display = 'block';
+          }
+          if (emailEl) emailEl.focus();
+          return false;
+        }
+
+        if (!email.endsWith('@1cell.ai')) {
+          if (errEl) {
+            errEl.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
             errEl.style.display = 'block';
           }
           if (emailEl) emailEl.focus();
@@ -1405,10 +1396,12 @@
           sessionStorage.setItem("authEmail", email);
           sessionStorage.setItem("authDept", dept);
           sessionStorage.setItem("authTeam", normTeam);
+          sessionStorage.removeItem("authPartner");
           localStorage.setItem("1cell_auth_name", name);
           localStorage.setItem("1cell_auth_email", email);
           localStorage.setItem("1cell_auth_dept", dept);
           localStorage.setItem("1cell_auth_team", normTeam);
+          localStorage.removeItem("1cell_active_channel_partner");
         } catch (err) {}
 
         const targetRole = isMarketing ? 'marketing_admin' : normTeam === 'scientific' ? 'medical' : normTeam === 'sales' ? 'sales' : 'leadership';
@@ -1427,24 +1420,13 @@
         return false;
       };
 
-      // 2. 1Cell Channel Partner Login Handler
+      // 2. 1Cell Channel Partner Login Handler (Password removed)
       window.handlePartnerLogin = function(e) {
         if (e && e.preventDefault) e.preventDefault();
         const pSelect = document.getElementById('partnerSelectDropdown');
         const pCustom = document.getElementById('partnerCustomInput');
         const repNameEl = document.getElementById('partnerRepName');
-        const passEl = document.getElementById('partnerLoginPassword');
         const errEl = document.getElementById('partnerLoginError');
-
-        const password = passEl ? passEl.value.trim() : '';
-        if (password.toLowerCase() !== '1cell') {
-          if (errEl) {
-            errEl.innerText = "Incorrect password. The channel partner password is 1Cell.";
-            errEl.style.display = 'block';
-          }
-          if (passEl) passEl.focus();
-          return false;
-        }
 
         let partnerName = pSelect ? pSelect.value : 'Apollo Hospitals';
         if (partnerName === '__custom__') {
@@ -1501,10 +1483,10 @@
           localStorage.removeItem("1cell_active_channel_partner");
         } catch (err) {}
 
-        const teamPass = document.getElementById('teamLoginPassword');
-        if (teamPass) teamPass.value = '';
-        const partnerPass = document.getElementById('partnerLoginPassword');
-        if (partnerPass) partnerPass.value = '';
+        const teamErr = document.getElementById('teamLoginError');
+        if (teamErr) teamErr.style.display = 'none';
+        const partnerErr = document.getElementById('partnerLoginError');
+        if (partnerErr) partnerErr.style.display = 'none';
 
         checkSession();
         if (typeof window.updateUserBadge === 'function') window.updateUserBadge();
