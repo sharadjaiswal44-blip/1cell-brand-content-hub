@@ -1167,18 +1167,35 @@ function init() {
 
   window.handlePartnerLogin = function(e) {
     if (e && e.preventDefault) e.preventDefault();
-    const pSelect = document.getElementById('partnerSelectDropdown');
-    const pCustom = document.getElementById('partnerCustomInput');
-    const repNameEl = document.getElementById('partnerRepName');
+    const nameEl = document.getElementById('partnerNameInput');
+    const emailEl = document.getElementById('partnerRepEmail');
+    const passEl = document.getElementById('partnerLoginPassword');
     const errEl = document.getElementById('partnerLoginError');
 
-    let partnerName = pSelect ? pSelect.value : 'Apollo Hospitals';
-    if (partnerName === '__custom__') {
-      partnerName = pCustom && pCustom.value.trim() ? pCustom.value.trim() : 'Channel Partner';
+    const partnerName = nameEl ? nameEl.value.trim() : '';
+    const repEmail = emailEl ? emailEl.value.trim() : '';
+    const password = passEl ? passEl.value.trim() : '';
+
+    if (!partnerName) {
+      if (errEl) {
+        errEl.innerText = "Please enter or select your Partner Organization name.";
+        errEl.style.display = 'block';
+      }
+      if (nameEl) nameEl.focus();
+      return false;
     }
 
-    const repName = repNameEl && repNameEl.value.trim() ? repNameEl.value.trim() : `${partnerName} Representative`;
-    const partnerEmail = `partner.${partnerName.toLowerCase().replace(/[^a-z0-9]/g, '')}@partner.1cell.ai`;
+    if (password.toLowerCase() !== '1cell') {
+      if (errEl) {
+        errEl.innerText = "Incorrect password. The channel partner password is 1Cell.";
+        errEl.style.display = 'block';
+      }
+      if (passEl) passEl.focus();
+      return false;
+    }
+
+    const repName = `${partnerName} Representative`;
+    const partnerEmail = repEmail || `partner@${partnerName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
 
     try {
       sessionStorage.setItem("authName", repName);
@@ -1197,6 +1214,12 @@ function init() {
     if (roleSelect) {
       roleSelect.value = 'channel_partner';
     }
+
+    const partnerSelect = document.getElementById('activePartnerSelect');
+    if (partnerSelect) partnerSelect.value = partnerName;
+
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.style.cssText = "display: none !important; opacity: 0 !important; visibility: hidden !important;";
 
     setActiveChannelPartner(partnerName);
     checkAuth();
@@ -1226,6 +1249,12 @@ function init() {
     if (teamErr) teamErr.style.display = 'none';
     const partnerErr = document.getElementById('partnerLoginError');
     if (partnerErr) partnerErr.style.display = 'none';
+    const passEl = document.getElementById('partnerLoginPassword');
+    if (passEl) passEl.value = '';
+
+    if (typeof window.switchLoginTab === 'function') {
+      window.switchLoginTab('team');
+    }
 
     checkAuth();
     updateUserBadge();

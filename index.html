@@ -1168,103 +1168,106 @@
     </div>
   </div>
 
-  <!-- Modal: Premium Dual-Column Login Portal -->
+  <!-- Modal: Focused Single Login Portal with Channel Partner Switcher -->
   <div id="loginOverlay" class="login-overlay">
-    <div class="login-dual-card animate-slide-up">
-      <div class="login-dual-header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
-          <img src="logo.svg" alt="1Cell.Ai" style="height: 34px; width: auto;" onerror="this.style.display='none'">
-          <h2 style="font-family: 'Outfit', sans-serif; font-size: 23px; font-weight: 700; color: var(--accent-color); margin: 0; letter-spacing: -0.01em;">1Cell.Ai Content Hub</h2>
-        </div>
-        <p style="font-size: 13.5px; color: var(--text-secondary); margin: 0; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.45;">Select your portal below to access official product collateral, clinical resources, and partner assets.</p>
+    <div class="login-card-single animate-slide-up">
+      <!-- Brand Header -->
+      <div class="login-card-brand">
+        <img src="logo.svg" alt="1Cell.Ai" style="height: 32px; width: auto;" onerror="this.style.display='none'">
+        <h2 style="font-family: 'Outfit', sans-serif; font-size: 21px; font-weight: 700; color: var(--accent-color); margin: 0; letter-spacing: -0.01em;">1Cell.Ai Content Hub</h2>
       </div>
 
-      <div class="login-dual-grid">
-        <!-- LEFT: 1Cell Team -->
-        <div class="login-pane">
-          <div class="login-pane-header">
-            <div class="login-pane-icon" style="background: rgba(26, 54, 93, 0.08); color: var(--brand-navy);">👥</div>
-            <div>
-              <h3 class="login-pane-title">1Cell Team</h3>
-              <p class="login-pane-desc">Internal access for Marketing, Scientific, Sales & Leadership.</p>
-            </div>
+      <!-- Top Switcher: 1Cell Team vs Channel Partners Login -->
+      <div class="login-portal-switch">
+        <button type="button" class="login-switch-tab active" id="tabTeamLogin" onclick="window.switchLoginTab('team')">
+          <span>👥</span>
+          <span>1Cell Team</span>
+        </button>
+        <button type="button" class="login-switch-tab" id="tabPartnerLogin" onclick="window.switchLoginTab('partner')">
+          <span>🤝</span>
+          <span>Channel Partners Login</span>
+        </button>
+      </div>
+
+      <!-- Panel 1: 1Cell Team Login (Default view) -->
+      <div id="panelTeamLogin" class="login-panel-view">
+        <div class="login-panel-intro">
+          <h3 style="font-size: 15.5px; font-weight: 700; margin: 0 0 3px 0; color: var(--text-primary);">1Cell Team Sign In</h3>
+          <p style="font-size: 12.5px; color: var(--text-secondary); margin: 0;">Internal access for Marketing, Scientific, Sales & Leadership.</p>
+        </div>
+
+        <form id="teamLoginForm" onsubmit="return window.handleTeamLogin(event);" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="teamLoginEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Corporate Email *</label>
+            <input type="email" id="teamLoginEmail" required placeholder="name@1cell.ai" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
           </div>
 
-          <form id="teamLoginForm" onsubmit="return window.handleTeamLogin(event);" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
-            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-              <label for="teamLoginEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Corporate Email *</label>
-              <input type="email" id="teamLoginEmail" required placeholder="name@1cell.ai" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
-            </div>
-
-            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-              <label for="teamLoginDept" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Department / Role *</label>
-              <select id="teamLoginDept" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: border-color var(--transition-fast);">
-                <option value="Marketing" selected>Marketing Team (Full Management & Admin)</option>
-                <option value="Scientific">Scientific & Genomic Science Team</option>
-                <option value="Sales">Sales Enablement Team</option>
-                <option value="Leadership">Leadership & Executive Team</option>
-              </select>
-            </div>
-
-            <div id="teamLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; margin-top: -2px; padding: 6px 10px; background: var(--danger-light); border-radius: 6px;"></div>
-
-            <button type="submit" class="btn-primary" style="margin-top: auto; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; border-radius: var(--radius-sm); cursor: pointer;">Sign In as 1Cell Team →</button>
-          </form>
-        </div>
-
-        <!-- DIVIDER -->
-        <div class="login-divider-col">
-          <div class="login-divider-line"></div>
-          <div class="login-divider-badge">OR</div>
-          <div class="login-divider-line"></div>
-        </div>
-
-        <!-- RIGHT: 1Cell Channel Partners -->
-        <div class="login-pane" style="background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(14, 165, 233, 0.04) 100%);">
-          <div class="login-pane-header">
-            <div class="login-pane-icon" style="background: rgba(14, 165, 233, 0.12); color: #0284c7;">🤝</div>
-            <div>
-              <h3 class="login-pane-title">1Cell Channel Partners</h3>
-              <p class="login-pane-desc">Authorized hospital chains & diagnostic partner laboratories.</p>
-            </div>
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="teamLoginDept" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Department / Role *</label>
+            <select id="teamLoginDept" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: border-color var(--transition-fast);">
+              <option value="Marketing" selected>Marketing Team (Full Management & Admin)</option>
+              <option value="Scientific">Scientific & Genomic Science Team</option>
+              <option value="Sales">Sales Enablement Team</option>
+              <option value="Leadership">Leadership & Executive Team</option>
+            </select>
           </div>
 
-          <form id="partnerLoginForm" onsubmit="return window.handlePartnerLogin(event);" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
-            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-              <label for="partnerSearchInput" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Select Channel Partner *</label>
-              
-              <!-- Search Filter Box -->
-              <div class="partner-search-box" style="margin-bottom: 6px;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-                <input type="text" id="partnerSearchInput" placeholder="Filter partner (e.g. Apollo, Lal, Max)..." oninput="window.filterPartnerLoginDropdown(this.value)" style="width: 100%; height: 38px; font-size: 13px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-secondary); color: var(--text-primary);">
-              </div>
+          <div id="teamLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; padding: 6px 10px; background: var(--danger-light); border-radius: 6px;"></div>
 
-              <!-- Partner Select Dropdown -->
-              <select id="partnerSelectDropdown" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); cursor: pointer;" onchange="window.handlePartnerSelectChange(this.value)">
-                <option value="Apollo Hospitals" selected>Apollo Hospitals & Cancer Care</option>
-                <option value="Dr. Lal PathLabs">Dr. Lal PathLabs</option>
-                <option value="Metropolis Healthcare">Metropolis Healthcare</option>
-                <option value="Medanta - The Medicity">Medanta - The Medicity</option>
-                <option value="SRL Diagnostics">SRL Diagnostics</option>
-                <option value="Max Healthcare & Super Speciality">Max Healthcare & Super Speciality</option>
-                <option value="Fortis Memorial Research Institute">Fortis Memorial Research Institute</option>
-                <option value="Tata Memorial Oncology Network">Tata Memorial Oncology Network</option>
-                <option value="Oncquest Laboratories">Oncquest Laboratories</option>
-                <option value="__custom__">+ Enter Custom Partner Organization...</option>
-              </select>
-              <input type="text" id="partnerCustomInput" placeholder="Enter custom partner organization name" style="display: none; margin-top: 6px; width: 100%; height: 40px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 13.5px; background-color: var(--bg-secondary); color: var(--text-primary);">
-            </div>
+          <button type="submit" class="btn-primary" style="margin-top: 6px; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; border-radius: var(--radius-sm); cursor: pointer;">Sign In as 1Cell Team →</button>
 
-            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-              <label for="partnerRepName" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Representative Name / Email (Optional)</label>
-              <input type="text" id="partnerRepName" placeholder="e.g. Dr. Ramesh / partner@hospital.com" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary);">
-            </div>
+          <div style="text-align: center; margin-top: 8px;">
+            <span style="font-size: 12px; color: var(--text-tertiary);">Hospital / Diagnostic partner? </span>
+            <a href="javascript:void(0)" onclick="window.switchLoginTab('partner')" style="font-size: 12px; font-weight: 600; color: #0284c7; text-decoration: none;">Channel Partners Login →</a>
+          </div>
+        </form>
+      </div>
 
-            <div id="partnerLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; margin-top: -2px; padding: 6px 10px; background: var(--danger-light); border-radius: 6px;"></div>
-
-            <button type="submit" class="btn-primary" style="margin-top: auto; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; background: linear-gradient(135deg, #0e7490 0%, #0284c7 100%); border: none; border-radius: var(--radius-sm); cursor: pointer;">Sign In as Channel Partner →</button>
-          </form>
+      <!-- Panel 2: 1Cell Channel Partners Login -->
+      <div id="panelPartnerLogin" class="login-panel-view" style="display: none;">
+        <div class="login-panel-intro">
+          <h3 style="font-size: 15.5px; font-weight: 700; margin: 0 0 3px 0; color: #0284c7;">Channel Partner Sign In</h3>
+          <p style="font-size: 12.5px; color: var(--text-secondary); margin: 0;">Authorized hospital networks & diagnostic laboratory partners.</p>
         </div>
+
+        <form id="partnerLoginForm" onsubmit="return window.handlePartnerLogin(event);" style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- 1. Enter Partners Name in single field with search dropdown while typing -->
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; position: relative;">
+            <label for="partnerNameInput" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Enter Partners Name *</label>
+            
+            <div style="position: relative; width: 100%;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-tertiary); pointer-events: none;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+              <input type="text" id="partnerNameInput" required autocomplete="off" placeholder="Type partner name (e.g. Apollo, Lal, Max)..." onfocus="window.showPartnerSuggestions()" oninput="window.filterPartnerSuggestions(this.value)" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 32px 0 36px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
+              <button type="button" onclick="window.togglePartnerDropdown()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-tertiary); padding: 4px; display: flex; align-items: center;" title="Show all partners">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+              </button>
+            </div>
+
+            <!-- Floating search dropdown list appearing while typing -->
+            <div id="partnerSearchDropdown" class="partner-autocomplete-list" style="display: none;"></div>
+          </div>
+
+          <!-- 2. Representative Email as optional -->
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="partnerRepEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Representative Email (Optional)</label>
+            <input type="email" id="partnerRepEmail" placeholder="e.g. partner@hospital.com" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
+          </div>
+
+          <!-- 3. Password field at the bottom -->
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="partnerLoginPassword" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Password *</label>
+            <input type="password" id="partnerLoginPassword" required placeholder="Enter password (1Cell)" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
+          </div>
+
+          <div id="partnerLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; padding: 6px 10px; background: var(--danger-light); border-radius: 6px;"></div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 6px; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; background: linear-gradient(135deg, #0e7490 0%, #0284c7 100%); border: none; border-radius: var(--radius-sm); cursor: pointer;">Sign In as Channel Partner →</button>
+
+          <div style="text-align: center; margin-top: 8px;">
+            <span style="font-size: 12px; color: var(--text-tertiary);">1Cell Team member? </span>
+            <a href="javascript:void(0)" onclick="window.switchLoginTab('team')" style="font-size: 12px; font-weight: 600; color: var(--accent-color); text-decoration: none;">← Back to 1Cell Team Login</a>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -1290,6 +1293,18 @@
         "shruti.dere@1cell.ai"
       ];
       window.authorizedMarketingEmails = authorizedMarketingEmails;
+
+      const PARTNER_OPTIONS = [
+        "Apollo Hospitals & Cancer Care",
+        "Dr. Lal PathLabs",
+        "Metropolis Healthcare",
+        "Medanta - The Medicity",
+        "SRL Diagnostics",
+        "Max Healthcare & Super Speciality",
+        "Fortis Memorial Research Institute",
+        "Tata Memorial Oncology Network",
+        "Oncquest Laboratories"
+      ];
 
       function checkSession() {
         let authName = null, authEmail = null;
@@ -1318,37 +1333,103 @@
         }
       }
 
-      window.filterPartnerLoginDropdown = function(query) {
+      window.switchLoginTab = function(tab) {
+        const tabTeam = document.getElementById('tabTeamLogin');
+        const tabPartner = document.getElementById('tabPartnerLogin');
+        const panelTeam = document.getElementById('panelTeamLogin');
+        const panelPartner = document.getElementById('panelPartnerLogin');
+        const teamErr = document.getElementById('teamLoginError');
+        const partnerErr = document.getElementById('partnerLoginError');
+        if (teamErr) teamErr.style.display = 'none';
+        if (partnerErr) partnerErr.style.display = 'none';
+
+        if (tab === 'partner') {
+          if (tabTeam) tabTeam.classList.remove('active');
+          if (tabPartner) tabPartner.classList.add('active');
+          if (panelTeam) panelTeam.style.display = 'none';
+          if (panelPartner) panelPartner.style.display = 'block';
+          const pInput = document.getElementById('partnerNameInput');
+          if (pInput) setTimeout(() => pInput.focus(), 50);
+        } else {
+          if (tabPartner) tabPartner.classList.remove('active');
+          if (tabTeam) tabTeam.classList.add('active');
+          if (panelPartner) panelPartner.style.display = 'none';
+          if (panelTeam) panelTeam.style.display = 'block';
+          const eInput = document.getElementById('teamLoginEmail');
+          if (eInput) setTimeout(() => eInput.focus(), 50);
+        }
+      };
+
+      window.showPartnerSuggestions = function() {
+        const input = document.getElementById('partnerNameInput');
+        window.filterPartnerSuggestions(input ? input.value : '');
+      };
+
+      window.filterPartnerSuggestions = function(query) {
+        const dropdown = document.getElementById('partnerSearchDropdown');
+        if (!dropdown) return;
         const q = (query || '').toLowerCase().trim();
-        const select = document.getElementById('partnerSelectDropdown');
-        if (!select) return;
-        const options = select.options;
-        let firstMatch = null;
-        for (let i = 0; i < options.length; i++) {
-          const opt = options[i];
-          if (opt.value === '__custom__') {
-            opt.style.display = '';
-            continue;
+        const matches = PARTNER_OPTIONS.filter(p => p.toLowerCase().includes(q));
+
+        let html = '';
+        if (matches.length > 0) {
+          html = matches.map(p => `
+            <div class="partner-autocomplete-item" onclick="window.selectPartner('${p.replace(/'/g, "\\'")}')">
+              <span>🏥</span>
+              <span>${p}</span>
+            </div>
+          `).join('');
+        }
+
+        if (q && !PARTNER_OPTIONS.some(p => p.toLowerCase() === q)) {
+          const safeQ = query.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+          html += `
+            <div class="partner-autocomplete-item" onclick="window.selectPartner('${safeQ}')">
+              <span>🏢</span>
+              <span>Use "<strong>${query.replace(/</g, '&lt;')}</strong>" as partner name</span>
+              <span class="partner-autocomplete-badge">Custom</span>
+            </div>
+          `;
+        }
+
+        if (!html) {
+          html = `<div style="padding: 10px; font-size: 12px; color: var(--text-tertiary); text-align: center;">No matching partner found. Type custom name.</div>`;
+        }
+
+        dropdown.innerHTML = html;
+        dropdown.style.display = 'block';
+      };
+
+      window.togglePartnerDropdown = function() {
+        const dropdown = document.getElementById('partnerSearchDropdown');
+        if (!dropdown) return;
+        if (dropdown.style.display === 'block') {
+          dropdown.style.display = 'none';
+        } else {
+          window.showPartnerSuggestions();
+        }
+      };
+
+      window.selectPartner = function(name) {
+        const input = document.getElementById('partnerNameInput');
+        const dropdown = document.getElementById('partnerSearchDropdown');
+        if (input) input.value = name;
+        if (dropdown) dropdown.style.display = 'none';
+        const passInput = document.getElementById('partnerLoginPassword');
+        if (passInput) passInput.focus();
+      };
+
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('partnerSearchDropdown');
+        const input = document.getElementById('partnerNameInput');
+        if (dropdown && dropdown.style.display === 'block') {
+          if (!dropdown.contains(e.target) && e.target !== input) {
+            dropdown.style.display = 'none';
           }
-          const match = opt.text.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q);
-          opt.style.display = match ? '' : 'none';
-          if (match && !firstMatch && q) firstMatch = opt;
         }
-        if (firstMatch) {
-          select.value = firstMatch.value;
-          window.handlePartnerSelectChange(firstMatch.value);
-        }
-      };
+      });
 
-      window.handlePartnerSelectChange = function(val) {
-        const custom = document.getElementById('partnerCustomInput');
-        if (custom) {
-          custom.style.display = (val === '__custom__') ? 'block' : 'none';
-          if (val === '__custom__') custom.focus();
-        }
-      };
-
-      // 1. 1Cell Team Login Handler (Password removed)
+      // 1. 1Cell Team Login Handler
       window.handleTeamLogin = function(e) {
         if (e && e.preventDefault) e.preventDefault();
         const emailEl = document.getElementById('teamLoginEmail');
@@ -1420,22 +1501,38 @@
         return false;
       };
 
-      // 2. 1Cell Channel Partner Login Handler (Password removed)
+      // 2. 1Cell Channel Partner Login Handler
       window.handlePartnerLogin = function(e) {
         if (e && e.preventDefault) e.preventDefault();
-        const pSelect = document.getElementById('partnerSelectDropdown');
-        const pCustom = document.getElementById('partnerCustomInput');
-        const repNameEl = document.getElementById('partnerRepName');
+        const nameEl = document.getElementById('partnerNameInput');
+        const emailEl = document.getElementById('partnerRepEmail');
+        const passEl = document.getElementById('partnerLoginPassword');
         const errEl = document.getElementById('partnerLoginError');
 
-        let partnerName = pSelect ? pSelect.value : 'Apollo Hospitals';
-        if (partnerName === '__custom__') {
-          partnerName = pCustom ? pCustom.value.trim() : '';
-          if (!partnerName) partnerName = 'Custom Partner';
+        const partnerName = nameEl ? nameEl.value.trim() : '';
+        const repEmail = emailEl ? emailEl.value.trim() : '';
+        const password = passEl ? passEl.value.trim() : '';
+
+        if (!partnerName) {
+          if (errEl) {
+            errEl.innerText = "Please enter or select your Partner Organization name.";
+            errEl.style.display = 'block';
+          }
+          if (nameEl) nameEl.focus();
+          return false;
         }
 
-        const repName = repNameEl && repNameEl.value.trim() ? repNameEl.value.trim() : `${partnerName} Representative`;
-        const email = `partner@${partnerName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+        if (password.toLowerCase() !== '1cell') {
+          if (errEl) {
+            errEl.innerText = "Incorrect password. The channel partner password is 1Cell.";
+            errEl.style.display = 'block';
+          }
+          if (passEl) passEl.focus();
+          return false;
+        }
+
+        const repName = `${partnerName} Representative`;
+        const email = repEmail || `partner@${partnerName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
 
         try {
           sessionStorage.setItem("authName", repName);
@@ -1487,6 +1584,12 @@
         if (teamErr) teamErr.style.display = 'none';
         const partnerErr = document.getElementById('partnerLoginError');
         if (partnerErr) partnerErr.style.display = 'none';
+        const passEl = document.getElementById('partnerLoginPassword');
+        if (passEl) passEl.value = '';
+
+        if (typeof window.switchLoginTab === 'function') {
+          window.switchLoginTab('team');
+        }
 
         checkSession();
         if (typeof window.updateUserBadge === 'function') window.updateUserBadge();
