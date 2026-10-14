@@ -1093,10 +1093,12 @@ function init() {
     if (e && e.preventDefault) e.preventDefault();
     const emailEl = document.getElementById('teamLoginEmail');
     const deptEl = document.getElementById('teamLoginDept');
+    const passEl = document.getElementById('teamLoginPassword');
     const errEl = document.getElementById('teamLoginError');
 
     const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
     const dept = deptEl ? deptEl.value : 'Marketing';
+    const password = passEl ? passEl.value.trim() : '';
 
     if (!email || !email.includes('@')) {
       if (errEl) {
@@ -1113,6 +1115,24 @@ function init() {
         errEl.style.display = 'block';
       }
       if (emailEl) emailEl.focus();
+      return false;
+    }
+
+    if (!password) {
+      if (errEl) {
+        errEl.innerText = "Please enter your password.";
+        errEl.style.display = 'block';
+      }
+      if (passEl) passEl.focus();
+      return false;
+    }
+
+    if (password.toLowerCase() !== '1cell') {
+      if (errEl) {
+        errEl.innerText = "Incorrect password. Please enter the valid password.";
+        errEl.style.display = 'block';
+      }
+      if (passEl) passEl.focus();
       return false;
     }
 
@@ -1185,9 +1205,18 @@ function init() {
       return false;
     }
 
+    if (!password) {
+      if (errEl) {
+        errEl.innerText = "Please enter your password.";
+        errEl.style.display = 'block';
+      }
+      if (passEl) passEl.focus();
+      return false;
+    }
+
     if (password.toLowerCase() !== '1cell') {
       if (errEl) {
-        errEl.innerText = "Incorrect password. The channel partner password is 1Cell.";
+        errEl.innerText = "Incorrect password. Please enter the valid password.";
         errEl.style.display = 'block';
       }
       if (passEl) passEl.focus();
@@ -1249,6 +1278,8 @@ function init() {
     if (teamErr) teamErr.style.display = 'none';
     const partnerErr = document.getElementById('partnerLoginError');
     if (partnerErr) partnerErr.style.display = 'none';
+    const teamPassEl = document.getElementById('teamLoginPassword');
+    if (teamPassEl) teamPassEl.value = '';
     const passEl = document.getElementById('partnerLoginPassword');
     if (passEl) passEl.value = '';
 
