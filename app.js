@@ -1244,10 +1244,11 @@ function init() {
     signOutBtn.addEventListener('click', window.handleSignOut);
   }
 
-  // Set default profile details & render dashboard
+  // Set default profile details & render view
   updateUserBadge();
   updateSidebarCategories();
-  renderRoute('dashboard');
+  const defaultRoute = isChannelPartner() ? 'co-branded' : 'dashboard';
+  renderRoute(defaultRoute);
 }
 
 // Update bottom profile badge when role changes or custom login occurs
@@ -1316,18 +1317,33 @@ function updateSidebarCategories() {
     else if (currentRole === 'leadership') dept = 'Leadership';
   }
 
+  const isPartner = isChannelPartner();
+
+  // Role selector pill: only for Marketing / Leadership internal team
   const roleSelectorWrapper = document.querySelector('.role-pill-selector');
   if (roleSelectorWrapper) {
-    if (dept === 'Marketing' || dept === 'Leadership' || isMarketingUser()) {
+    if (!isPartner && (dept === 'Marketing' || dept === 'Leadership' || isMarketingUser())) {
       roleSelectorWrapper.style.display = '';
     } else {
       roleSelectorWrapper.style.display = 'none';
     }
   }
 
+  // Active Partner pill: show locked badge for Channel Partner
   const partnerPill = document.getElementById('partnerSelectorPill');
   if (partnerPill) {
-    partnerPill.style.display = isChannelPartner() ? 'flex' : 'none';
+    partnerPill.style.display = isPartner ? 'flex' : 'none';
+    const sel = document.getElementById('activePartnerSelect');
+    if (sel) {
+      sel.value = getActiveChannelPartner();
+      sel.disabled = isPartner; // Strictly locked for Channel Partner so they can only see their organization
+    }
+  }
+
+  // Cloud Database button: strictly internal
+  const cloudDbBtn = document.getElementById('cloudDbBtn');
+  if (cloudDbBtn) {
+    cloudDbBtn.style.display = isPartner ? 'none' : 'inline-flex';
   }
 
   // Dashboard Analytics visibility: strictly Marketing & Leadership only
@@ -1335,10 +1351,10 @@ function updateSidebarCategories() {
   const systemNavGroup = analyticsNavItem ? analyticsNavItem.closest('.nav-group') : null;
   const hasAnalyticsAccess = canAccessAnalytics();
   if (analyticsNavItem) {
-    analyticsNavItem.style.display = hasAnalyticsAccess ? '' : 'none';
+    analyticsNavItem.style.display = (!isPartner && hasAnalyticsAccess) ? '' : 'none';
   }
   if (systemNavGroup) {
-    systemNavGroup.style.display = hasAnalyticsAccess ? '' : 'none';
+    systemNavGroup.style.display = (!isPartner && hasAnalyticsAccess) ? '' : 'none';
   }
 
   // Role-Based Navigation Matrix:
@@ -1346,30 +1362,52 @@ function updateSidebarCategories() {
   const coBrandedNavItem = document.querySelector('.sidebar .nav-item[data-route="co-branded"]');
   const userTeam = getCurrentUserTeam();
   const isSales = (currentRole === 'sales' || userTeam === TEAMS.SALES || (dept && dept.toLowerCase().includes('sale')));
-  const isPartner = isChannelPartner();
 
   if (coBrandedNavItem) {
     coBrandedNavItem.style.display = isSales ? 'none' : '';
   }
 
-  // 2. Channel Partners can ONLY access Co-Branded content, Dashboard, and Favorites
+  // 2. Channel Partners can ONLY access Co-Branded content!
+  const dashboardNavItem = document.querySelector('.sidebar .nav-item[data-route="dashboard"]');
+  const overviewGroup = dashboardNavItem ? dashboardNavItem.closest('.nav-group') : null;
   const companyAssetsNavItem = document.querySelector('.sidebar .nav-item[data-route="company-assets"]');
   const productHubNavItem = document.querySelector('.sidebar .nav-item[data-route="products"]');
   const scientificNavItem = document.querySelector('.sidebar .nav-item[data-route="cases"]');
   const compIntelNavItem = document.querySelector('.sidebar .nav-item[data-route="competitive-intelligence"]');
+  const favoritesNavItem = document.querySelector('.sidebar .nav-item[data-route="favorites"]');
+  const personalGroup = favoritesNavItem ? favoritesNavItem.closest('.nav-group') : null;
 
   if (isPartner) {
+    if (dashboardNavItem) dashboardNavItem.style.display = 'none';
+    if (overviewGroup) overviewGroup.style.display = 'none';
     if (companyAssetsNavItem) companyAssetsNavItem.style.display = 'none';
     if (productHubNavItem) productHubNavItem.style.display = 'none';
     if (scientificNavItem) scientificNavItem.style.display = 'none';
     if (compIntelNavItem) compIntelNavItem.style.display = 'none';
+    if (favoritesNavItem) favoritesNavItem.style.display = 'none';
+    if (personalGroup) personalGroup.style.display = 'none';
     if (analyticsNavItem) analyticsNavItem.style.display = 'none';
     if (systemNavGroup) systemNavGroup.style.display = 'none';
+
+    if (coBrandedNavItem) {
+      coBrandedNavItem.style.display = '';
+      coBrandedNavItem.classList.add('active');
+    }
+    const catGroupTitle = coBrandedNavItem ? coBrandedNavItem.closest('.nav-group')?.querySelector('.nav-group-title') : null;
+    if (catGroupTitle) catGroupTitle.innerText = "Partner Portal";
   } else {
+    if (dashboardNavItem) dashboardNavItem.style.display = '';
+    if (overviewGroup) overviewGroup.style.display = '';
     if (companyAssetsNavItem) companyAssetsNavItem.style.display = '';
     if (productHubNavItem) productHubNavItem.style.display = '';
     if (scientificNavItem) scientificNavItem.style.display = '';
     if (compIntelNavItem) compIntelNavItem.style.display = '';
+    if (favoritesNavItem) favoritesNavItem.style.display = '';
+    if (personalGroup) personalGroup.style.display = '';
+
+    const catGroupTitle = coBrandedNavItem ? coBrandedNavItem.closest('.nav-group')?.querySelector('.nav-group-title') : null;
+    if (catGroupTitle) catGroupTitle.innerText = "Categories";
+  }
 }
 window.updateUserBadge = updateUserBadge;
 window.updateSidebarCategories = updateSidebarCategories;
@@ -1417,7 +1455,11 @@ window.navigateToRoute = function(route) {
 };
 
 window.navigateToDashboard = function() {
-  window.navigateToRoute('dashboard');
+  if (isChannelPartner()) {
+    window.navigateToRoute('co-branded');
+  } else {
+    window.navigateToRoute('dashboard');
+  }
 };
 
 function renderRoute(route) {
@@ -1425,6 +1467,19 @@ function renderRoute(route) {
   // Clear main workspace
   workspaceViewport.innerHTML = '';
   suggestionsDropdown.style.display = 'none';
+
+  // Channel Partner access guard: strictly restricted to Co-Branded Assets ONLY!
+  if (isChannelPartner() && route !== 'co-branded') {
+    sidebarItems.forEach(item => {
+      if (item.getAttribute('data-route') === 'co-branded') {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+    renderRoute('co-branded');
+    return;
+  }
 
   // Sections hidden across platform for now
   const hiddenRoutes = ['campaigns', 'sales-enablement', 'videos', 'brand-assets', 'templates', 'newsletters'];
@@ -1467,20 +1522,6 @@ function renderRoute(route) {
       }
     });
     renderRoute('dashboard');
-    return;
-  }
-
-  // Channel Partner access guard: can ONLY access Co-Branded content, Dashboard, and Favorites
-  if (isChannelPartner() && !['dashboard', 'co-branded', 'favorites'].includes(route)) {
-    showToast("Access restricted: Channel Partners can only access Co-Branded Assets.");
-    sidebarItems.forEach(item => {
-      if (item.getAttribute('data-route') === 'co-branded') {
-        item.classList.add('active');
-      } else {
-        item.classList.remove('active');
-      }
-    });
-    renderRoute('co-branded');
     return;
   }
 
@@ -5510,10 +5551,10 @@ function renderAnalyticsDashboard() {
 function triggerSearchHub(query = '') {
   if (isChannelPartner()) {
     renderRoute('co-branded');
-    const searchInput = document.getElementById('coBrandedSearchInput');
+    const searchInput = document.getElementById('cobrandSearchInput');
     if (searchInput) {
       searchInput.value = query;
-      window.filterCoBrandedCollateral(query);
+      window.searchCoBranded(query);
     }
     return;
   }
