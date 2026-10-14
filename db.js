@@ -2421,7 +2421,11 @@ const db = {
     { id: "drlal", name: "Dr. Lal PathLabs", code: "DRLAL", region: "North & East India", logo: "🔬" },
     { id: "metropolis", name: "Metropolis Healthcare", code: "METROPOLIS", region: "West & South India", logo: "🩺" },
     { id: "medanta", name: "Medanta - The Medicity", code: "MEDANTA", region: "NCR & North India", logo: "🏢" },
-    { id: "srl", name: "SRL Diagnostics", code: "SRL", region: "Pan-India", logo: "🧪" }
+    { id: "srl", name: "SRL Diagnostics", code: "SRL", region: "Pan-India", logo: "🧪" },
+    { id: "max", name: "Max Healthcare & Super Speciality", code: "MAX", region: "North India", logo: "🏥" },
+    { id: "fortis", name: "Fortis Memorial Research Institute", code: "FORTIS", region: "Pan-India", logo: "🏥" },
+    { id: "tata", name: "Tata Memorial Oncology Network", code: "TATA", region: "West India", logo: "🎗️" },
+    { id: "oncquest", name: "Oncquest Laboratories", code: "ONCQUEST", region: "Pan-India", logo: "🔬" }
   ],
   coBrandedAssets: [
     // --- APOLLO HOSPITALS ---
@@ -2886,6 +2890,144 @@ const db = {
       description: "Clinician reference brochure co-branded with SRL Diagnostics covering cost-effective targeted NGS panels across 10 common cancers.",
       sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaSRLOncoTargetBrochure",
       date: "2026-09-18",
+      updatedBy: "Marketing Team"
+    },
+
+    // --- MAX HEALTHCARE & SUPER SPECIALITY ---
+    {
+      id: "cobrand-max-01",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Max Super Speciality Precision Oncology Detailing Brochure",
+      contentType: "Brochure",
+      partnerName: "Max Healthcare & Super Speciality",
+      version: "v2.0 Max",
+      fileType: "PDF",
+      description: "Dual-branded comprehensive genomic profiling brochure tailored for Max Oncology Day Care and tertiary cancer centers.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaMaxPrimePlusBrochure",
+      date: "2026-10-11",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-max-02",
+      productId: "oncomonitor",
+      title: "OncoMonitor Max Healthcare ctDNA MRD Monitoring Protocol Presentation",
+      contentType: "Presentation",
+      partnerName: "Max Healthcare & Super Speciality",
+      version: "v1.7 Max",
+      fileType: "PPTX",
+      description: "Clinical presentation co-branded with Max Healthcare detailing liquid biopsy surveillance in post-surgical resection cohorts.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:p:/g/personal/marketing_1cell_ai/EaMaxOncoMonitorDeck",
+      date: "2026-10-06",
+      updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "cobrand-max-03",
+      productId: "oncotarget",
+      title: "OncoTarget Max Healthcare Rapid 48-Hour Turnaround Action Sheet",
+      contentType: "One-Pager",
+      partnerName: "Max Healthcare & Super Speciality",
+      version: "v1.3 Max",
+      fileType: "PDF",
+      description: "One-pager overview of rapid targeted NGS testing pathways for acute clinical decision-making across Max cancer wards.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaMaxOncoTargetOnePager",
+      date: "2026-10-02",
+      updatedBy: "Marketing Team"
+    },
+
+    // --- FORTIS MEMORIAL RESEARCH INSTITUTE ---
+    {
+      id: "cobrand-fortis-01",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Fortis Cancer Institute Tumor Board Presentation Deck",
+      contentType: "Slide Deck",
+      partnerName: "Fortis Memorial Research Institute",
+      version: "v2.2 Fortis",
+      fileType: "PPTX",
+      description: "Custom slide deck for Fortis medical oncology fellows and senior consultants highlighting whole transcriptomics and fusion analysis.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:p:/g/personal/marketing_1cell_ai/EaFortisPrimePlusDeck",
+      date: "2026-10-09",
+      updatedBy: "Vikas"
+    },
+    {
+      id: "cobrand-fortis-02",
+      productId: "oncomonitor",
+      title: "OncoMonitor Fortis Memorial Liquid Biopsy Sample Report & Analysis",
+      contentType: "Sample Report",
+      partnerName: "Fortis Memorial Research Institute",
+      version: "v1.4 Sample",
+      fileType: "PDF",
+      description: "Demonstrative ctDNA monitoring report featuring Fortis Memorial Research Institute hospital logo, VAF tracking, and treatment timelines.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaFortisMRDSampleReport",
+      date: "2026-09-29",
+      updatedBy: "Dr. Pranad"
+    },
+    {
+      id: "cobrand-fortis-03",
+      productId: "oncotarget",
+      title: "OncoTarget Fortis Actionable Genomic Biomarker Quick Reference",
+      contentType: "Brochure",
+      partnerName: "Fortis Memorial Research Institute",
+      version: "v1.6 Fortis",
+      fileType: "PDF",
+      description: "Clinician reference booklet with Fortis branding detailing NCCN-guided lung, colon, breast, and prostate targeted panels.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaFortisOncoTargetBrochure",
+      date: "2026-09-20",
+      updatedBy: "Marketing Team"
+    },
+
+    // --- TATA MEMORIAL ONCOLOGY NETWORK ---
+    {
+      id: "cobrand-tata-01",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Tata Memorial Network Multimodal Sequencing Monograph",
+      contentType: "Brochure",
+      partnerName: "Tata Memorial Oncology Network",
+      version: "v2.5 TMH",
+      fileType: "PDF",
+      description: "Academic-grade clinical monograph co-branded for Tata Memorial collaborative centers, detailing 25,000-gene transcriptomics and CUP resolutions.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaTMHPrimePlusMonograph",
+      date: "2026-10-08",
+      updatedBy: "Dr. Richa"
+    },
+    {
+      id: "cobrand-tata-02",
+      productId: "oncomonitor",
+      title: "OncoMonitor Tata Memorial Minimal Residual Disease Clinical Dossier",
+      contentType: "Slide Deck",
+      partnerName: "Tata Memorial Oncology Network",
+      version: "v2.0 TMH",
+      fileType: "PPTX",
+      description: "Detailed liquid biopsy clinical research presentation highlighting ultra-sensitive 0.01% VAF detection for post-operative surveillance.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:p:/g/personal/marketing_1cell_ai/EaTMHOncoMonitorDeck",
+      date: "2026-10-01",
+      updatedBy: "Dr. Pranad"
+    },
+
+    // --- ONCQUEST LABORATORIES ---
+    {
+      id: "cobrand-oncquest-01",
+      productId: "primeplus",
+      title: "OncoIndx Prime+ Oncquest Specialized Molecular Lab Partner Booklet",
+      contentType: "Brochure",
+      partnerName: "Oncquest Laboratories",
+      version: "v1.8 Oncquest",
+      fileType: "PDF",
+      description: "Specialized pathology network brochure co-branded with Oncquest Laboratories for distributor outreach and tier-1 hospital detailing.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncquestPrimePlusBrochure",
+      date: "2026-10-07",
+      updatedBy: "Marketing Team"
+    },
+    {
+      id: "cobrand-oncquest-02",
+      productId: "oncotarget",
+      title: "OncoTarget Oncquest Rapid Solid Tumor NGS Panel Spec Sheet",
+      contentType: "One-Pager",
+      partnerName: "Oncquest Laboratories",
+      version: "v1.5 Oncquest",
+      fileType: "PDF",
+      description: "Specimen handling and turn-around time reference sheet formatted for Oncquest collection centers across India.",
+      sharePointUrl: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaOncquestOncoTargetFlyer",
+      date: "2026-09-24",
       updatedBy: "Marketing Team"
     },
 

@@ -587,7 +587,8 @@ const toastContainer = document.getElementById('toastContainer');
 
 // Login Portal DOM
 const loginOverlay = document.getElementById('loginOverlay');
-const loginForm = document.getElementById('loginForm');
+const teamLoginForm = document.getElementById('teamLoginForm');
+const partnerLoginForm = document.getElementById('partnerLoginForm');
 const signOutBtn = document.getElementById('signOutBtn');
 
 // Modals DOM
@@ -707,21 +708,25 @@ function checkAuth() {
 
   const overlay = document.getElementById('loginOverlay');
   if (authName && authEmail) {
-    document.body.classList.add("authenticated");
+    document.documentElement.classList.add("authenticated");
+    if (document.body) document.body.classList.add("authenticated");
     if (overlay) {
-      overlay.style.opacity = '0';
-      overlay.style.pointerEvents = 'none';
-      overlay.style.visibility = 'hidden';
-      setTimeout(() => { if (document.body.classList.contains("authenticated")) overlay.style.display = 'none'; }, 200);
+      overlay.classList.add('authenticated');
+      overlay.style.setProperty('display', 'none', 'important');
+      overlay.style.setProperty('opacity', '0', 'important');
+      overlay.style.setProperty('visibility', 'hidden', 'important');
+      overlay.style.setProperty('pointer-events', 'none', 'important');
     }
     return true;
   } else {
-    document.body.classList.remove("authenticated");
+    document.documentElement.classList.remove("authenticated");
+    if (document.body) document.body.classList.remove("authenticated");
     if (overlay) {
-      overlay.style.display = 'flex';
-      overlay.style.opacity = '1';
-      overlay.style.visibility = 'visible';
-      overlay.style.pointerEvents = 'all';
+      overlay.classList.remove('authenticated');
+      overlay.style.setProperty('display', 'flex', 'important');
+      overlay.style.setProperty('opacity', '1', 'important');
+      overlay.style.setProperty('visibility', 'visible', 'important');
+      overlay.style.setProperty('pointer-events', 'all', 'important');
     }
     return false;
   }
@@ -1084,64 +1089,65 @@ function init() {
 
 
   // Authentication Global Event Handlers
-  window.handleLoginPortalSubmit = function(e) {
+  window.handleTeamLogin = function(e) {
     if (e && e.preventDefault) e.preventDefault();
-    const nameEl = document.getElementById('loginName');
-    const emailEl = document.getElementById('loginEmail');
-    const deptEl = document.getElementById('loginDept');
-    const errorMsg = document.getElementById('loginErrorMessage');
+    const emailEl = document.getElementById('teamLoginEmail');
+    const deptEl = document.getElementById('teamLoginDept');
+    const passEl = document.getElementById('teamLoginPassword');
+    const errEl = document.getElementById('teamLoginError');
 
-    const name = nameEl ? nameEl.value.trim() : '';
     const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
     const dept = deptEl ? deptEl.value : 'Marketing';
+    const password = passEl ? passEl.value.trim() : '';
 
-    if (!name) {
-      showToast("Please enter your full name.");
-      if (nameEl) nameEl.focus();
+    if (password.toLowerCase() !== '1cell') {
+      if (errEl) {
+        errEl.innerText = "Incorrect password. The platform password is 1Cell.";
+        errEl.style.display = 'block';
+      }
+      if (passEl) passEl.focus();
       return false;
     }
 
-    // Email domain validation
     if (!email || !email.endsWith('@1cell.ai')) {
-      if (emailEl) emailEl.classList.add('input-error');
-      if (errorMsg) {
-        const span = errorMsg.querySelector('span');
-        if (span) span.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
-        errorMsg.style.display = 'flex';
+      if (errEl) {
+        errEl.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
+        errEl.style.display = 'block';
       }
-      showToast("Access denied: Only official @1cell.ai email domains are authorized.");
+      if (emailEl) emailEl.focus();
       return false;
     }
 
     const normTeam = normalizeTeam(dept);
 
-    // Marketing team authorization validation
     if (normTeam === TEAMS.MARKETING) {
       const isAuthorized = authorizedMarketingEmails.map(m => m.toLowerCase().trim()).includes(email);
       if (!isAuthorized) {
-        if (emailEl) emailEl.classList.add('input-error');
-        if (errorMsg) {
-          const span = errorMsg.querySelector('span');
-          if (span) span.innerText = "Access denied: Your email is not registered in the Marketing team. Choose another department.";
-          errorMsg.style.display = 'flex';
+        if (errEl) {
+          errEl.innerText = "Access denied: Your email is not registered in the Marketing team. Choose another department.";
+          errEl.style.display = 'block';
         }
-        showToast("Access denied: Email not registered in the Marketing team.");
+        if (emailEl) emailEl.focus();
         return false;
       }
     }
 
+    const namePart = email.split('@')[0].replace(/[._-]/g, ' ');
+    const displayName = namePart.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
     try {
-      sessionStorage.setItem("authName", name);
+      sessionStorage.setItem("authName", displayName);
       sessionStorage.setItem("authEmail", email);
       sessionStorage.setItem("authDept", dept);
       sessionStorage.setItem("authTeam", normTeam);
-      localStorage.setItem("1cell_auth_name", name);
+      sessionStorage.removeItem("authPartner");
+      localStorage.setItem("1cell_auth_name", displayName);
       localStorage.setItem("1cell_auth_email", email);
       localStorage.setItem("1cell_auth_dept", dept);
       localStorage.setItem("1cell_auth_team", normTeam);
+      localStorage.removeItem("1cell_active_channel_partner");
     } catch (err) {}
 
-    // Map team to matching role view
     let targetRole = 'marketing_admin';
     if (normTeam === TEAMS.SCIENTIFIC) targetRole = 'medical';
     else if (normTeam === TEAMS.SALES) targetRole = 'sales';
@@ -1157,7 +1163,60 @@ function init() {
     updateSidebarCategories();
     renderRoute('dashboard');
     const teamLabel = normTeam === 'scientific' ? 'Scientific Team' : normTeam === 'marketing' ? 'Marketing Team' : `${dept} Team`;
-    showToast(`Welcome to 1Cell.Ai, ${name} (${teamLabel})!`);
+    showToast(`Welcome to 1Cell.Ai, ${displayName} (${teamLabel})!`);
+    return false;
+  };
+
+  window.handlePartnerLogin = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const pSelect = document.getElementById('partnerSelectDropdown');
+    const pCustom = document.getElementById('partnerCustomInput');
+    const repNameEl = document.getElementById('partnerRepName');
+    const passEl = document.getElementById('partnerLoginPassword');
+    const errEl = document.getElementById('partnerLoginError');
+
+    const password = passEl ? passEl.value.trim() : '';
+    if (password.toLowerCase() !== '1cell') {
+      if (errEl) {
+        errEl.innerText = "Incorrect password. The channel partner password is 1Cell.";
+        errEl.style.display = 'block';
+      }
+      if (passEl) passEl.focus();
+      return false;
+    }
+
+    let partnerName = pSelect ? pSelect.value : 'Apollo Hospitals';
+    if (partnerName === '__custom__') {
+      partnerName = pCustom && pCustom.value.trim() ? pCustom.value.trim() : 'Channel Partner';
+    }
+
+    const repName = repNameEl && repNameEl.value.trim() ? repNameEl.value.trim() : `${partnerName} Representative`;
+    const partnerEmail = `partner.${partnerName.toLowerCase().replace(/[^a-z0-9]/g, '')}@partner.1cell.ai`;
+
+    try {
+      sessionStorage.setItem("authName", repName);
+      sessionStorage.setItem("authEmail", partnerEmail);
+      sessionStorage.setItem("authDept", "Channel Partner");
+      sessionStorage.setItem("authTeam", "channel_partner");
+      sessionStorage.setItem("authPartner", partnerName);
+      localStorage.setItem("1cell_auth_name", repName);
+      localStorage.setItem("1cell_auth_email", partnerEmail);
+      localStorage.setItem("1cell_auth_dept", "Channel Partner");
+      localStorage.setItem("1cell_auth_team", "channel_partner");
+      localStorage.setItem("1cell_active_channel_partner", partnerName);
+    } catch (err) {}
+
+    currentRole = 'channel_partner';
+    if (roleSelect) {
+      roleSelect.value = 'channel_partner';
+    }
+
+    setActiveChannelPartner(partnerName);
+    checkAuth();
+    updateUserBadge();
+    updateSidebarCategories();
+    renderRoute('co-branded');
+    showToast(`Welcome to 1Cell.Ai Co-Branded Portal for ${partnerName}!`);
     return false;
   };
 
@@ -1168,29 +1227,34 @@ function init() {
       sessionStorage.removeItem("authEmail");
       sessionStorage.removeItem("authDept");
       sessionStorage.removeItem("authTeam");
+      sessionStorage.removeItem("authPartner");
       localStorage.removeItem("1cell_auth_name");
       localStorage.removeItem("1cell_auth_email");
       localStorage.removeItem("1cell_auth_dept");
       localStorage.removeItem("1cell_auth_team");
+      localStorage.removeItem("1cell_active_channel_partner");
     } catch (err) {}
+
+    const teamPass = document.getElementById('teamLoginPassword');
+    if (teamPass) teamPass.value = '';
+    const partnerPass = document.getElementById('partnerLoginPassword');
+    if (partnerPass) partnerPass.value = '';
+    const teamErr = document.getElementById('teamLoginError');
+    if (teamErr) teamErr.style.display = 'none';
+    const partnerErr = document.getElementById('partnerLoginError');
+    if (partnerErr) partnerErr.style.display = 'none';
+
     checkAuth();
     updateUserBadge();
     updateSidebarCategories();
     showToast("Signed out successfully.");
   };
 
-  if (loginForm) {
-    const emailInput = document.getElementById('loginEmail');
-    const errorMsg = document.getElementById('loginErrorMessage');
-
-    if (emailInput) {
-      emailInput.addEventListener('input', () => {
-        emailInput.classList.remove('input-error');
-        if (errorMsg) errorMsg.style.display = 'none';
-      });
-    }
-
-    loginForm.addEventListener('submit', window.handleLoginPortalSubmit);
+  if (teamLoginForm) {
+    teamLoginForm.addEventListener('submit', window.handleTeamLogin);
+  }
+  if (partnerLoginForm) {
+    partnerLoginForm.addEventListener('submit', window.handlePartnerLogin);
   }
 
   if (signOutBtn) {
@@ -1323,8 +1387,9 @@ function updateSidebarCategories() {
     if (productHubNavItem) productHubNavItem.style.display = '';
     if (scientificNavItem) scientificNavItem.style.display = '';
     if (compIntelNavItem) compIntelNavItem.style.display = '';
-  }
 }
+window.updateUserBadge = updateUserBadge;
+window.updateSidebarCategories = updateSidebarCategories;
 
 // Toast notification helper
 function showToast(message) {
