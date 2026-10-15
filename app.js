@@ -1187,21 +1187,19 @@ function init() {
 
   window.handlePartnerLogin = function(e) {
     if (e && e.preventDefault) e.preventDefault();
-    const nameEl = document.getElementById('partnerNameInput');
-    const emailEl = document.getElementById('partnerRepEmail');
+    const emailEl = document.getElementById('partnerLoginEmail');
     const passEl = document.getElementById('partnerLoginPassword');
     const errEl = document.getElementById('partnerLoginError');
 
-    const partnerName = nameEl ? nameEl.value.trim() : '';
-    const repEmail = emailEl ? emailEl.value.trim() : '';
+    const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
     const password = passEl ? passEl.value.trim() : '';
 
-    if (!partnerName) {
+    if (!email || !email.includes('@')) {
       if (errEl) {
-        errEl.innerText = "Please enter or select your Partner Organization name.";
+        errEl.innerText = "Please enter your Channel Partner corporate email address.";
         errEl.style.display = 'block';
       }
-      if (nameEl) nameEl.focus();
+      if (emailEl) emailEl.focus();
       return false;
     }
 
@@ -1223,17 +1221,21 @@ function init() {
       return false;
     }
 
-    const repName = `${partnerName} Representative`;
-    const partnerEmail = repEmail || `partner@${partnerName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+    const partnerName = typeof window.resolvePartnerFromEmail === 'function'
+      ? window.resolvePartnerFromEmail(email)
+      : 'Apollo Hospitals';
+
+    const userPrefix = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const repName = `${partnerName} (${userPrefix})`;
 
     try {
       sessionStorage.setItem("authName", repName);
-      sessionStorage.setItem("authEmail", partnerEmail);
+      sessionStorage.setItem("authEmail", email);
       sessionStorage.setItem("authDept", "Channel Partner");
       sessionStorage.setItem("authTeam", "channel_partner");
       sessionStorage.setItem("authPartner", partnerName);
       localStorage.setItem("1cell_auth_name", repName);
-      localStorage.setItem("1cell_auth_email", partnerEmail);
+      localStorage.setItem("1cell_auth_email", email);
       localStorage.setItem("1cell_auth_dept", "Channel Partner");
       localStorage.setItem("1cell_auth_team", "channel_partner");
       localStorage.setItem("1cell_active_channel_partner", partnerName);
@@ -1245,7 +1247,16 @@ function init() {
     }
 
     const partnerSelect = document.getElementById('activePartnerSelect');
-    if (partnerSelect) partnerSelect.value = partnerName;
+    if (partnerSelect) {
+      let opt = Array.from(partnerSelect.options).find(o => o.value.toLowerCase() === partnerName.toLowerCase());
+      if (!opt) {
+        opt = document.createElement('option');
+        opt.value = partnerName;
+        opt.textContent = partnerName;
+        partnerSelect.appendChild(opt);
+      }
+      partnerSelect.value = opt.value;
+    }
 
     const overlay = document.getElementById('loginOverlay');
     if (overlay) overlay.style.cssText = "display: none !important; opacity: 0 !important; visibility: hidden !important;";
@@ -1282,6 +1293,8 @@ function init() {
     if (teamPassEl) teamPassEl.value = '';
     const passEl = document.getElementById('partnerLoginPassword');
     if (passEl) passEl.value = '';
+    const partnerEmailEl = document.getElementById('partnerLoginEmail');
+    if (partnerEmailEl) partnerEmailEl.value = '';
 
     if (typeof window.switchLoginTab === 'function') {
       window.switchLoginTab('team');

@@ -1251,29 +1251,13 @@
         </div>
 
         <form id="partnerLoginForm" onsubmit="return window.handlePartnerLogin(event);" style="display: flex; flex-direction: column; gap: 14px;">
-          <!-- 1. Enter Partners Name in single field with search dropdown while typing -->
-          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; position: relative;">
-            <label for="partnerNameInput" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Enter Partners Name *</label>
-            
-            <div style="position: relative; width: 100%;">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-tertiary); pointer-events: none;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-              <input type="text" id="partnerNameInput" required autocomplete="off" placeholder="Type partner name (e.g. Apollo, Lal, Max)..." onfocus="window.showPartnerSuggestions()" oninput="window.filterPartnerSuggestions(this.value)" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 32px 0 36px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
-              <button type="button" onclick="window.togglePartnerDropdown()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-tertiary); padding: 4px; display: flex; align-items: center;" title="Show all partners">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-              </button>
-            </div>
-
-            <!-- Floating search dropdown list appearing while typing -->
-            <div id="partnerSearchDropdown" class="partner-autocomplete-list" style="display: none;"></div>
-          </div>
-
-          <!-- 2. Representative Email as optional -->
+          <!-- 1. Channel Partner Email * (Required) -->
           <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label for="partnerRepEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Representative Email (Optional)</label>
-            <input type="email" id="partnerRepEmail" placeholder="e.g. partner@hospital.com" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
+            <label for="partnerLoginEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Channel Partner Email *</label>
+            <input type="email" id="partnerLoginEmail" required placeholder="name@hospital.com" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
           </div>
 
-          <!-- 3. Password field at the bottom -->
+          <!-- 2. Password field at the bottom -->
           <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
             <label for="partnerLoginPassword" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Password *</label>
             <input type="password" id="partnerLoginPassword" required placeholder="Enter Password" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
@@ -1368,7 +1352,7 @@
           if (tabPartner) tabPartner.classList.add('active');
           if (panelTeam) panelTeam.style.display = 'none';
           if (panelPartner) panelPartner.style.display = 'block';
-          const pInput = document.getElementById('partnerNameInput');
+          const pInput = document.getElementById('partnerLoginEmail');
           if (pInput) setTimeout(() => pInput.focus(), 50);
         } else {
           if (tabPartner) tabPartner.classList.remove('active');
@@ -1380,74 +1364,29 @@
         }
       };
 
-      window.showPartnerSuggestions = function() {
-        const input = document.getElementById('partnerNameInput');
-        window.filterPartnerSuggestions(input ? input.value : '');
-      };
+      function resolvePartnerFromEmail(email) {
+        const e = (email || '').toLowerCase().trim();
+        if (e.includes('apollo')) return 'Apollo Hospitals';
+        if (e.includes('lal') || e.includes('pathlab')) return 'Dr. Lal PathLabs';
+        if (e.includes('metropolis')) return 'Metropolis Healthcare';
+        if (e.includes('medanta')) return 'Medanta - The Medicity';
+        if (e.includes('srl')) return 'SRL Diagnostics';
+        if (e.includes('max')) return 'Max Healthcare & Super Speciality';
+        if (e.includes('fortis')) return 'Fortis Memorial Research Institute';
+        if (e.includes('tata') || e.includes('tmh')) return 'Tata Memorial Oncology Network';
+        if (e.includes('oncquest')) return 'Oncquest Laboratories';
 
-      window.filterPartnerSuggestions = function(query) {
-        const dropdown = document.getElementById('partnerSearchDropdown');
-        if (!dropdown) return;
-        const q = (query || '').toLowerCase().trim();
-        const matches = PARTNER_OPTIONS.filter(p => p.toLowerCase().includes(q));
-
-        let html = '';
-        if (matches.length > 0) {
-          html = matches.map(p => `
-            <div class="partner-autocomplete-item" onclick="window.selectPartner('${p.replace(/'/g, "\\'")}')">
-              <span>🏥</span>
-              <span>${p}</span>
-            </div>
-          `).join('');
+        // Check custom hospital or corporate domain
+        const domain = e.split('@')[1] || '';
+        const domainBase = domain.split('.')[0] || '';
+        const generic = ['gmail', 'yahoo', 'outlook', 'hotmail', 'icloud', 'proton', 'aol', 'mail', 'rediff', 'zoho'];
+        if (domainBase && !generic.includes(domainBase)) {
+          return domainBase.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
 
-        if (q && !PARTNER_OPTIONS.some(p => p.toLowerCase() === q)) {
-          const safeQ = query.replace(/"/g, '&quot;').replace(/'/g, "\\'");
-          html += `
-            <div class="partner-autocomplete-item" onclick="window.selectPartner('${safeQ}')">
-              <span>🏢</span>
-              <span>Use "<strong>${query.replace(/</g, '&lt;')}</strong>" as partner name</span>
-              <span class="partner-autocomplete-badge">Custom</span>
-            </div>
-          `;
-        }
-
-        if (!html) {
-          html = `<div style="padding: 10px; font-size: 12px; color: var(--text-tertiary); text-align: center;">No matching partner found. Type custom name.</div>`;
-        }
-
-        dropdown.innerHTML = html;
-        dropdown.style.display = 'block';
-      };
-
-      window.togglePartnerDropdown = function() {
-        const dropdown = document.getElementById('partnerSearchDropdown');
-        if (!dropdown) return;
-        if (dropdown.style.display === 'block') {
-          dropdown.style.display = 'none';
-        } else {
-          window.showPartnerSuggestions();
-        }
-      };
-
-      window.selectPartner = function(name) {
-        const input = document.getElementById('partnerNameInput');
-        const dropdown = document.getElementById('partnerSearchDropdown');
-        if (input) input.value = name;
-        if (dropdown) dropdown.style.display = 'none';
-        const passInput = document.getElementById('partnerLoginPassword');
-        if (passInput) passInput.focus();
-      };
-
-      document.addEventListener('click', (e) => {
-        const dropdown = document.getElementById('partnerSearchDropdown');
-        const input = document.getElementById('partnerNameInput');
-        if (dropdown && dropdown.style.display === 'block') {
-          if (!dropdown.contains(e.target) && e.target !== input) {
-            dropdown.style.display = 'none';
-          }
-        }
-      });
+        return 'Apollo Hospitals';
+      }
+      window.resolvePartnerFromEmail = resolvePartnerFromEmail;
 
       // 1. 1Cell Team Login Handler
       window.handleTeamLogin = function(e) {
@@ -1544,21 +1483,19 @@
       // 2. 1Cell Channel Partner Login Handler
       window.handlePartnerLogin = function(e) {
         if (e && e.preventDefault) e.preventDefault();
-        const nameEl = document.getElementById('partnerNameInput');
-        const emailEl = document.getElementById('partnerRepEmail');
+        const emailEl = document.getElementById('partnerLoginEmail');
         const passEl = document.getElementById('partnerLoginPassword');
         const errEl = document.getElementById('partnerLoginError');
 
-        const partnerName = nameEl ? nameEl.value.trim() : '';
-        const repEmail = emailEl ? emailEl.value.trim() : '';
+        const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
         const password = passEl ? passEl.value.trim() : '';
 
-        if (!partnerName) {
+        if (!email || !email.includes('@')) {
           if (errEl) {
-            errEl.innerText = "Please enter or select your Partner Organization name.";
+            errEl.innerText = "Please enter your Channel Partner corporate email address.";
             errEl.style.display = 'block';
           }
-          if (nameEl) nameEl.focus();
+          if (emailEl) emailEl.focus();
           return false;
         }
 
@@ -1580,8 +1517,9 @@
           return false;
         }
 
-        const repName = `${partnerName} Representative`;
-        const email = repEmail || `partner@${partnerName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+        const partnerName = resolvePartnerFromEmail(email);
+        const userPrefix = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const repName = `${partnerName} (${userPrefix})`;
 
         try {
           sessionStorage.setItem("authName", repName);
@@ -1599,7 +1537,16 @@
         const roleSelect = document.getElementById('roleSelect');
         if (roleSelect) roleSelect.value = 'channel_partner';
         const partnerSelect = document.getElementById('activePartnerSelect');
-        if (partnerSelect) partnerSelect.value = partnerName;
+        if (partnerSelect) {
+          let opt = Array.from(partnerSelect.options).find(o => o.value.toLowerCase() === partnerName.toLowerCase());
+          if (!opt) {
+            opt = document.createElement('option');
+            opt.value = partnerName;
+            opt.textContent = partnerName;
+            partnerSelect.appendChild(opt);
+          }
+          partnerSelect.value = opt.value;
+        }
 
         document.documentElement.classList.add("authenticated");
         if (document.body) document.body.classList.add("authenticated");
@@ -1637,6 +1584,8 @@
         if (teamPassEl) teamPassEl.value = '';
         const passEl = document.getElementById('partnerLoginPassword');
         if (passEl) passEl.value = '';
+        const partnerEmailEl = document.getElementById('partnerLoginEmail');
+        if (partnerEmailEl) partnerEmailEl.value = '';
 
         if (typeof window.switchLoginTab === 'function') {
           window.switchLoginTab('team');
