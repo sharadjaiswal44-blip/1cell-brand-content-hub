@@ -2,6 +2,7 @@
 // Configures shared real-time database connectivity (Supabase) + browser BroadcastChannel
 
 export const TEAMS = {
+  ADMIN: 'admin',
   MARKETING: 'marketing',
   SCIENTIFIC: 'scientific',
   SALES: 'sales',
@@ -33,6 +34,9 @@ export const DEFAULT_CLOUD_CONFIG = {
 export function normalizeTeam(deptOrRole) {
   if (!deptOrRole) return TEAMS.MARKETING;
   const str = deptOrRole.toString().toLowerCase().trim();
+  if (str === 'admin' || str.includes('admin') || str.includes('system')) {
+    return TEAMS.ADMIN;
+  }
   if (str.includes('partner') || str.includes('channel')) {
     return TEAMS.CHANNEL_PARTNER;
   }
@@ -45,7 +49,7 @@ export function normalizeTeam(deptOrRole) {
   if (str.includes('sale') || str.includes('rep')) {
     return TEAMS.SALES;
   }
-  if (str.includes('leader') || str.includes('exec') || str.includes('admin')) {
+  if (str.includes('leader') || str.includes('exec')) {
     return TEAMS.LEADERSHIP;
   }
   return TEAMS.MARKETING;
@@ -58,8 +62,8 @@ export function canTeamViewVisibility(userTeam, cardVisibility) {
   const normTeam = normalizeTeam(userTeam);
   const normVis = (cardVisibility || VISIBILITY.ALL).toLowerCase();
 
-  // Leadership can inspect all content
-  if (normTeam === TEAMS.LEADERSHIP) return true;
+  // Admin & Leadership can inspect all content
+  if (normTeam === TEAMS.ADMIN || normTeam === TEAMS.LEADERSHIP) return true;
 
   // Cross-team content is open to all
   if (normVis === VISIBILITY.ALL || normVis === 'cross-team' || normVis === 'both') return true;

@@ -46,7 +46,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m16.5-18v18m-13.5-18h10.5A2.25 2.25 0 0118 5.25v13.5A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V5.25A2.25 2.25 0 015.25 3z" />
                 </svg>
-                <span class="nav-item-text">Company Assets</span>
+                <span class="nav-item-text">1Cell.Ai Assets</span>
               </a>
             </li>
             <li class="nav-item" data-route="products">
@@ -101,7 +101,7 @@
 
         <!-- Management Group -->
         <div class="nav-group">
-          <span class="nav-group-title">System</span>
+          <span class="nav-group-title">System & Governance</span>
           <ul class="nav-list">
             <li class="nav-item" data-route="analytics">
               <a>
@@ -109,6 +109,22 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v5.625c0 .621-.504 1.125-1.125 1.125h-2.25A1.125 1.125 0 013 18.75v-5.625zM13.5 9.75c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v9c0 .621-.504 1.125-1.125 1.125h-2.25A1.125 1.125 0 0113.5 18.75v-9zM8.25 4.125C8.25 3.504 8.754 3 9.375 3h2.25c.621 0 1.125.504 1.125 1.125v14.625c0 .621-.504 1.125-1.125 1.125h-2.25A1.125 1.125 0 018.25 18.75V4.125z" />
                 </svg>
                 <span class="nav-item-text">Dashboard Analytics</span>
+              </a>
+            </li>
+            <li class="nav-item" data-route="access-control">
+              <a>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span class="nav-item-text">Access Control</span>
+              </a>
+            </li>
+            <li class="nav-item" data-route="login-audit">
+              <a>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="nav-item-text">Login Audit</span>
               </a>
             </li>
           </ul>
@@ -162,9 +178,10 @@
           <div class="role-pill-selector">
             <span class="role-pill-label">Access Role:</span>
             <select id="roleSelect" class="role-select">
+              <option value="admin">Admin (All Access & Governance)</option>
               <option value="marketing_admin" selected>Marketing Admin (Full Access)</option>
               <option value="sales">Sales (View & Share)</option>
-              <option value="medical">Medical (Scientific & Pubs)</option>
+              <option value="medical">Scientific / Medical</option>
               <option value="channel_partner">Channel Partner (Co-Branded Only)</option>
               <option value="leadership">Leadership (Read Only Analytics)</option>
             </select>
@@ -1182,97 +1199,50 @@
     </div>
   </div>
 
-  <!-- Modal: Focused Single Login Portal with Channel Partner Switcher -->
+  <!-- Modal: Single Unified Login Portal -->
   <div id="loginOverlay" class="login-overlay">
-    <div class="login-card-single animate-slide-up">
+    <div class="login-card-single animate-slide-up" style="max-width: 440px;">
       <!-- Brand Header -->
-      <div class="login-card-brand">
-        <img src="logo.svg" alt="1Cell.Ai" style="height: 32px; width: auto;" onerror="this.style.display='none'">
-        <h2 style="font-family: 'Outfit', sans-serif; font-size: 21px; font-weight: 700; color: var(--accent-color); margin: 0; letter-spacing: -0.01em;">1Cell.Ai Content Hub</h2>
+      <div class="login-card-brand" style="flex-direction: column; text-align: center; gap: 8px; margin-bottom: 22px;">
+        <img src="logo.svg" alt="1Cell.Ai" style="height: 34px; width: auto;" onerror="this.style.display='none'">
+        <div>
+          <h2 style="font-family: 'Outfit', sans-serif; font-size: 21px; font-weight: 700; color: var(--accent-color); margin: 0; letter-spacing: -0.01em;">1Cell.Ai Content Hub</h2>
+          <p style="font-size: 12.5px; color: var(--text-secondary); margin: 3px 0 0 0;">Unified Access Portal for Teams & Channel Partners</p>
+        </div>
       </div>
 
-      <!-- Top Switcher: 1Cell Team vs Channel Partners Login -->
-      <div class="login-portal-switch">
-        <button type="button" class="login-switch-tab active" id="tabTeamLogin" onclick="window.switchLoginTab('team')">
-          <span>👥</span>
-          <span>1Cell Team</span>
-        </button>
-        <button type="button" class="login-switch-tab" id="tabPartnerLogin" onclick="window.switchLoginTab('partner')">
-          <span>🤝</span>
-          <span>Channel Partners Login</span>
-        </button>
-      </div>
-
-      <!-- Panel 1: 1Cell Team Login (Default view) -->
-      <div id="panelTeamLogin" class="login-panel-view">
-        <div class="login-panel-intro">
-          <h3 style="font-size: 15.5px; font-weight: 700; margin: 0 0 3px 0; color: var(--text-primary);">1Cell Team Sign In</h3>
-          <p style="font-size: 12.5px; color: var(--text-secondary); margin: 0;">Internal access for Marketing, Scientific, Sales & Leadership.</p>
+      <!-- Single Unified Login Form -->
+      <form id="unifiedLoginForm" onsubmit="return window.handleUnifiedLogin(event);" style="display: flex; flex-direction: column; gap: 15px;">
+        <!-- Email -->
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="loginEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Email *</label>
+          <input type="email" id="loginEmail" required placeholder="name@1cell.ai" autocomplete="username email" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary); transition: border-color var(--transition-fast);">
+          <span id="loginEmailNote" style="font-size: 11px; color: var(--text-tertiary); margin-top: 2px;">Official @1cell.ai email required for 1Cell teams.</span>
         </div>
 
-        <form id="teamLoginForm" onsubmit="return window.handleTeamLogin(event);" style="display: flex; flex-direction: column; gap: 14px;">
-          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label for="teamLoginEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Corporate Email *</label>
-            <input type="email" id="teamLoginEmail" required placeholder="name@1cell.ai" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
-          </div>
-
-          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label for="teamLoginDept" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Department / Role *</label>
-            <select id="teamLoginDept" required style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: border-color var(--transition-fast);">
-              <option value="Marketing" selected>Marketing Team (Full Management & Admin)</option>
-              <option value="Scientific">Scientific & Genomic Science Team</option>
-              <option value="Sales">Sales Enablement Team</option>
-              <option value="Leadership">Leadership & Executive Team</option>
-            </select>
-          </div>
-
-          <!-- Password field for 1Cell Team -->
-          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label for="teamLoginPassword" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Password *</label>
-            <input type="password" id="teamLoginPassword" required placeholder="Enter Password" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
-          </div>
-
-          <div id="teamLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; padding: 6px 10px; background: var(--danger-light); border-radius: 6px;"></div>
-
-          <button type="submit" class="btn-primary" style="margin-top: 6px; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; border-radius: var(--radius-sm); cursor: pointer;">Sign In as 1Cell Team →</button>
-
-          <div style="text-align: center; margin-top: 8px;">
-            <span style="font-size: 12px; color: var(--text-tertiary);">Hospital / Diagnostic partner? </span>
-            <a href="javascript:void(0)" onclick="window.switchLoginTab('partner')" style="font-size: 12px; font-weight: 600; color: #0284c7; text-decoration: none;">Channel Partners Login →</a>
-          </div>
-        </form>
-      </div>
-
-      <!-- Panel 2: 1Cell Channel Partners Login -->
-      <div id="panelPartnerLogin" class="login-panel-view" style="display: none;">
-        <div class="login-panel-intro">
-          <h3 style="font-size: 15.5px; font-weight: 700; margin: 0 0 3px 0; color: #0284c7;">Channel Partner Sign In</h3>
-          <p style="font-size: 12.5px; color: var(--text-secondary); margin: 0;">Authorized hospital networks & diagnostic laboratory partners.</p>
+        <!-- Department -->
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="loginDepartment" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Department *</label>
+          <select id="loginDepartment" required onchange="window.handleLoginDeptChange(this.value)" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary); cursor: pointer; transition: border-color var(--transition-fast);">
+            <option value="Sales">Sales</option>
+            <option value="Channel Partners">Channel Partners</option>
+            <option value="Marketing" selected>Marketing</option>
+            <option value="Scientific">Scientific</option>
+            <option value="Leadership">Leadership</option>
+            <option value="Admin">Admin</option>
+          </select>
         </div>
 
-        <form id="partnerLoginForm" onsubmit="return window.handlePartnerLogin(event);" style="display: flex; flex-direction: column; gap: 14px;">
-          <!-- 1. Channel Partner Email * (Required) -->
-          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label for="partnerLoginEmail" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Channel Partner Email *</label>
-            <input type="email" id="partnerLoginEmail" required placeholder="name@hospital.com" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
-          </div>
+        <!-- Password -->
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="loginPassword" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Password *</label>
+          <input type="password" id="loginPassword" required placeholder="Enter Password" autocomplete="current-password" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-primary); color: var(--text-primary); transition: border-color var(--transition-fast);">
+        </div>
 
-          <!-- 2. Password field at the bottom -->
-          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label for="partnerLoginPassword" style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; color: var(--text-secondary); text-transform: uppercase;">Password *</label>
-            <input type="password" id="partnerLoginPassword" required placeholder="Enter Password" style="width: 100%; height: 42px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 14px; font-size: 14px; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color var(--transition-fast);">
-          </div>
+        <div id="unifiedLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; padding: 7px 11px; background: var(--danger-light); border-radius: 6px; line-height: 1.4;"></div>
 
-          <div id="partnerLoginError" class="login-error-message" style="display: none; color: var(--danger); font-size: 12px; font-weight: 600; padding: 6px 10px; background: var(--danger-light); border-radius: 6px;"></div>
-
-          <button type="submit" class="btn-primary" style="margin-top: 6px; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; background: linear-gradient(135deg, #0e7490 0%, #0284c7 100%); border: none; border-radius: var(--radius-sm); cursor: pointer;">Sign In as Channel Partner →</button>
-
-          <div style="text-align: center; margin-top: 8px;">
-            <span style="font-size: 12px; color: var(--text-tertiary);">1Cell Team member? </span>
-            <a href="javascript:void(0)" onclick="window.switchLoginTab('team')" style="font-size: 12px; font-weight: 600; color: var(--accent-color); text-decoration: none;">← Back to 1Cell Team Login</a>
-          </div>
-        </form>
-      </div>
+        <button type="submit" id="unifiedLoginSubmitBtn" class="btn-primary" style="margin-top: 4px; width: 100%; height: 44px; justify-content: center; font-weight: 600; font-size: 14px; border-radius: var(--radius-sm); cursor: pointer;">Sign In →</button>
+      </form>
     </div>
   </div>
 
@@ -1337,30 +1307,18 @@
         }
       }
 
-      window.switchLoginTab = function(tab) {
-        const tabTeam = document.getElementById('tabTeamLogin');
-        const tabPartner = document.getElementById('tabPartnerLogin');
-        const panelTeam = document.getElementById('panelTeamLogin');
-        const panelPartner = document.getElementById('panelPartnerLogin');
-        const teamErr = document.getElementById('teamLoginError');
-        const partnerErr = document.getElementById('partnerLoginError');
-        if (teamErr) teamErr.style.display = 'none';
-        if (partnerErr) partnerErr.style.display = 'none';
+      window.handleLoginDeptChange = function(dept) {
+        const emailInput = document.getElementById('loginEmail');
+        const emailNote = document.getElementById('loginEmailNote');
+        const errEl = document.getElementById('unifiedLoginError');
+        if (errEl) errEl.style.display = 'none';
 
-        if (tab === 'partner') {
-          if (tabTeam) tabTeam.classList.remove('active');
-          if (tabPartner) tabPartner.classList.add('active');
-          if (panelTeam) panelTeam.style.display = 'none';
-          if (panelPartner) panelPartner.style.display = 'block';
-          const pInput = document.getElementById('partnerLoginEmail');
-          if (pInput) setTimeout(() => pInput.focus(), 50);
+        if (dept === 'Channel Partners') {
+          if (emailInput) emailInput.placeholder = "partner@hospital.com";
+          if (emailNote) emailNote.innerText = "Channel Partners can sign in with personal or official email.";
         } else {
-          if (tabPartner) tabPartner.classList.remove('active');
-          if (tabTeam) tabTeam.classList.add('active');
-          if (panelPartner) panelPartner.style.display = 'none';
-          if (panelTeam) panelTeam.style.display = 'block';
-          const eInput = document.getElementById('teamLoginEmail');
-          if (eInput) setTimeout(() => eInput.focus(), 50);
+          if (emailInput) emailInput.placeholder = "name@1cell.ai";
+          if (emailNote) emailNote.innerText = "Official @1cell.ai email required for 1Cell teams.";
         }
       };
 
@@ -1388,164 +1346,148 @@
       }
       window.resolvePartnerFromEmail = resolvePartnerFromEmail;
 
-      // 1. 1Cell Team Login Handler
-      window.handleTeamLogin = function(e) {
+      // Single Unified Login Handler
+      window.handleUnifiedLogin = function(e) {
         if (e && e.preventDefault) e.preventDefault();
-        const emailEl = document.getElementById('teamLoginEmail');
-        const deptEl = document.getElementById('teamLoginDept');
-        const passEl = document.getElementById('teamLoginPassword');
-        const errEl = document.getElementById('teamLoginError');
+        const emailEl = document.getElementById('loginEmail');
+        const deptEl = document.getElementById('loginDepartment');
+        const passEl = document.getElementById('loginPassword');
+        const errEl = document.getElementById('unifiedLoginError');
 
         const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
         const dept = deptEl ? deptEl.value : 'Marketing';
         const password = passEl ? passEl.value.trim() : '';
 
-        if (!email || !email.includes('@')) {
+        const showError = function(msg) {
           if (errEl) {
-            errEl.innerText = "Please enter a valid official corporate email address.";
+            errEl.innerText = msg;
             errEl.style.display = 'block';
           }
+          if (typeof window.logLoginEvent === 'function') {
+            window.logLoginEvent({
+              email: email || 'anonymous',
+              department: dept,
+              status: 'Failed',
+              reason: msg,
+              timestamp: new Date().toISOString()
+            });
+          }
+        };
+
+        if (!email || !email.includes('@')) {
+          showError("Please enter a valid email address.");
           if (emailEl) emailEl.focus();
           return false;
         }
 
-        if (!email.endsWith('@1cell.ai')) {
-          if (errEl) {
-            errEl.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
-            errEl.style.display = 'block';
+        // Domain validation:
+        // Sales, Marketing, Leadership, Admin, Scientific must login through @1cell.ai email only.
+        // Channel partners can access with their own personal or official email id.
+        const isPartner = (dept === 'Channel Partners');
+        if (!isPartner) {
+          if (!email.endsWith('@1cell.ai')) {
+            showError(`Access denied: ${dept} team members must sign in using an official @1cell.ai email address.`);
+            if (emailEl) emailEl.focus();
+            return false;
           }
-          if (emailEl) emailEl.focus();
-          return false;
         }
 
         if (!password) {
-          if (errEl) {
-            errEl.innerText = "Please enter your password.";
-            errEl.style.display = 'block';
-          }
+          showError("Please enter your password.");
           if (passEl) passEl.focus();
           return false;
         }
 
         if (password.toLowerCase() !== '1cell') {
-          if (errEl) {
-            errEl.innerText = "Incorrect password. Please enter the valid password.";
-            errEl.style.display = 'block';
-          }
+          showError("Incorrect password. Please enter the valid password.");
           if (passEl) passEl.focus();
           return false;
         }
 
-        const isMarketing = dept.toLowerCase().includes('market');
-        if (isMarketing) {
-          const isAuth = authorizedMarketingEmails.map(m => m.toLowerCase().trim()).includes(email);
-          if (!isAuth) {
-            if (errEl) {
-              errEl.innerText = "Access denied: Your email is not registered in the Marketing team. Choose another department.";
-              errEl.style.display = 'block';
-            }
-            return false;
+        if (errEl) errEl.style.display = 'none';
+
+        // Successful authentication
+        let name = '';
+        let targetRole = '';
+        let targetTeam = '';
+        let partnerName = '';
+
+        if (isPartner) {
+          partnerName = resolvePartnerFromEmail(email);
+          const userPrefix = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          name = `${partnerName} (${userPrefix})`;
+          targetRole = 'channel_partner';
+          targetTeam = 'channel_partner';
+        } else {
+          name = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          if (dept === 'Admin') {
+            targetRole = 'admin';
+            targetTeam = 'admin';
+          } else if (dept === 'Marketing') {
+            targetRole = 'marketing_admin';
+            targetTeam = 'marketing';
+          } else if (dept === 'Leadership') {
+            targetRole = 'leadership';
+            targetTeam = 'leadership';
+          } else if (dept === 'Scientific') {
+            targetRole = 'medical';
+            targetTeam = 'scientific';
+          } else if (dept === 'Sales') {
+            targetRole = 'sales';
+            targetTeam = 'sales';
+          } else {
+            targetRole = 'marketing_admin';
+            targetTeam = 'marketing';
           }
         }
-
-        let name = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const normTeam = isMarketing ? 'marketing' : dept.toLowerCase().includes('scien') ? 'scientific' : dept.toLowerCase().includes('sale') ? 'sales' : 'leadership';
 
         try {
           sessionStorage.setItem("authName", name);
           sessionStorage.setItem("authEmail", email);
           sessionStorage.setItem("authDept", dept);
-          sessionStorage.setItem("authTeam", normTeam);
-          sessionStorage.removeItem("authPartner");
+          sessionStorage.setItem("authTeam", targetTeam);
           localStorage.setItem("1cell_auth_name", name);
           localStorage.setItem("1cell_auth_email", email);
           localStorage.setItem("1cell_auth_dept", dept);
-          localStorage.setItem("1cell_auth_team", normTeam);
-          localStorage.removeItem("1cell_active_channel_partner");
+          localStorage.setItem("1cell_auth_team", targetTeam);
+
+          if (isPartner) {
+            sessionStorage.setItem("authPartner", partnerName);
+            localStorage.setItem("1cell_active_channel_partner", partnerName);
+          } else {
+            sessionStorage.removeItem("authPartner");
+            localStorage.removeItem("1cell_active_channel_partner");
+          }
         } catch (err) {}
 
-        const targetRole = isMarketing ? 'marketing_admin' : normTeam === 'scientific' ? 'medical' : normTeam === 'sales' ? 'sales' : 'leadership';
         const roleSelect = document.getElementById('roleSelect');
         if (roleSelect) roleSelect.value = targetRole;
 
-        document.documentElement.classList.add("authenticated");
-        if (document.body) document.body.classList.add("authenticated");
-        const overlay = document.getElementById('loginOverlay');
-        if (overlay) overlay.style.cssText = "display: none !important; opacity: 0 !important; visibility: hidden !important;";
-
-        if (typeof window.checkAuth === 'function') window.checkAuth();
-        if (typeof window.updateUserBadge === 'function') window.updateUserBadge();
-        if (typeof window.updateSidebarCategories === 'function') window.updateSidebarCategories();
-        if (typeof window.renderRoute === 'function') window.renderRoute('dashboard');
-        return false;
-      };
-
-      // 2. 1Cell Channel Partner Login Handler
-      window.handlePartnerLogin = function(e) {
-        if (e && e.preventDefault) e.preventDefault();
-        const emailEl = document.getElementById('partnerLoginEmail');
-        const passEl = document.getElementById('partnerLoginPassword');
-        const errEl = document.getElementById('partnerLoginError');
-
-        const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
-        const password = passEl ? passEl.value.trim() : '';
-
-        if (!email || !email.includes('@')) {
-          if (errEl) {
-            errEl.innerText = "Please enter your Channel Partner corporate email address.";
-            errEl.style.display = 'block';
+        if (isPartner) {
+          const partnerSelect = document.getElementById('activePartnerSelect');
+          if (partnerSelect) {
+            let opt = Array.from(partnerSelect.options).find(o => o.value.toLowerCase() === partnerName.toLowerCase());
+            if (!opt) {
+              opt = document.createElement('option');
+              opt.value = partnerName;
+              opt.textContent = partnerName;
+              partnerSelect.appendChild(opt);
+            }
+            partnerSelect.value = opt.value;
           }
-          if (emailEl) emailEl.focus();
-          return false;
+          if (typeof window.setActiveChannelPartner === 'function') {
+            window.setActiveChannelPartner(partnerName);
+          }
         }
 
-        if (!password) {
-          if (errEl) {
-            errEl.innerText = "Please enter your password.";
-            errEl.style.display = 'block';
-          }
-          if (passEl) passEl.focus();
-          return false;
-        }
-
-        if (password.toLowerCase() !== '1cell') {
-          if (errEl) {
-            errEl.innerText = "Incorrect password. Please enter the valid password.";
-            errEl.style.display = 'block';
-          }
-          if (passEl) passEl.focus();
-          return false;
-        }
-
-        const partnerName = resolvePartnerFromEmail(email);
-        const userPrefix = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const repName = `${partnerName} (${userPrefix})`;
-
-        try {
-          sessionStorage.setItem("authName", repName);
-          sessionStorage.setItem("authEmail", email);
-          sessionStorage.setItem("authDept", "Channel Partner");
-          sessionStorage.setItem("authTeam", "channel_partner");
-          sessionStorage.setItem("authPartner", partnerName);
-          localStorage.setItem("1cell_auth_name", repName);
-          localStorage.setItem("1cell_auth_email", email);
-          localStorage.setItem("1cell_auth_dept", "Channel Partner");
-          localStorage.setItem("1cell_auth_team", "channel_partner");
-          localStorage.setItem("1cell_active_channel_partner", partnerName);
-        } catch (err) {}
-
-        const roleSelect = document.getElementById('roleSelect');
-        if (roleSelect) roleSelect.value = 'channel_partner';
-        const partnerSelect = document.getElementById('activePartnerSelect');
-        if (partnerSelect) {
-          let opt = Array.from(partnerSelect.options).find(o => o.value.toLowerCase() === partnerName.toLowerCase());
-          if (!opt) {
-            opt = document.createElement('option');
-            opt.value = partnerName;
-            opt.textContent = partnerName;
-            partnerSelect.appendChild(opt);
-          }
-          partnerSelect.value = opt.value;
+        // Log successful login audit
+        if (typeof window.logLoginEvent === 'function') {
+          window.logLoginEvent({
+            email: email,
+            department: dept,
+            status: 'Success',
+            timestamp: new Date().toISOString()
+          });
         }
 
         document.documentElement.classList.add("authenticated");
@@ -1553,7 +1495,6 @@
         const overlay = document.getElementById('loginOverlay');
         if (overlay) overlay.style.cssText = "display: none !important; opacity: 0 !important; visibility: hidden !important;";
 
-        if (typeof window.setActiveChannelPartner === 'function') window.setActiveChannelPartner(partnerName);
         if (typeof window.checkAuth === 'function') window.checkAuth();
         if (typeof window.updateUserBadge === 'function') window.updateUserBadge();
         if (typeof window.updateSidebarCategories === 'function') window.updateSidebarCategories();
@@ -1576,20 +1517,12 @@
           localStorage.removeItem("1cell_active_channel_partner");
         } catch (err) {}
 
-        const teamErr = document.getElementById('teamLoginError');
-        if (teamErr) teamErr.style.display = 'none';
-        const partnerErr = document.getElementById('partnerLoginError');
-        if (partnerErr) partnerErr.style.display = 'none';
-        const teamPassEl = document.getElementById('teamLoginPassword');
-        if (teamPassEl) teamPassEl.value = '';
-        const passEl = document.getElementById('partnerLoginPassword');
+        const errEl = document.getElementById('unifiedLoginError');
+        if (errEl) errEl.style.display = 'none';
+        const passEl = document.getElementById('loginPassword');
         if (passEl) passEl.value = '';
-        const partnerEmailEl = document.getElementById('partnerLoginEmail');
-        if (partnerEmailEl) partnerEmailEl.value = '';
-
-        if (typeof window.switchLoginTab === 'function') {
-          window.switchLoginTab('team');
-        }
+        const emailEl = document.getElementById('loginEmail');
+        if (emailEl) emailEl.value = '';
 
         checkSession();
         if (typeof window.updateUserBadge === 'function') window.updateUserBadge();

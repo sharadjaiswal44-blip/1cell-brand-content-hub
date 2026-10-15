@@ -30,6 +30,7 @@ function getCurrentUserTeam() {
   } catch (e) {}
   if (authTeam) return authTeam;
   if (authDept) return normalizeTeam(authDept);
+  if (currentRole === 'admin') return TEAMS.ADMIN;
   if (currentRole === 'marketing_admin') return TEAMS.MARKETING;
   if (currentRole === 'medical') return TEAMS.SCIENTIFIC;
   if (currentRole === 'sales') return TEAMS.SALES;
@@ -56,15 +57,15 @@ window.getCurrentUserName = getCurrentUserName;
 
 function canAccessAnalytics() {
   const team = getCurrentUserTeam();
-  if (team === TEAMS.MARKETING || team === TEAMS.LEADERSHIP) return true;
-  if (currentRole === 'marketing_admin' || currentRole === 'leadership') return true;
+  if (team === TEAMS.ADMIN || team === TEAMS.MARKETING || team === TEAMS.LEADERSHIP) return true;
+  if (currentRole === 'admin' || currentRole === 'marketing_admin' || currentRole === 'leadership') return true;
   let authDept = null;
   try {
     authDept = sessionStorage.getItem("authDept") || localStorage.getItem("1cell_auth_dept");
   } catch (e) {}
   if (authDept) {
     const dLower = authDept.toLowerCase();
-    if (dLower.includes('marketing') || dLower.includes('leadership') || dLower.includes('executive') || dLower.includes('strategy')) {
+    if (dLower.includes('admin') || dLower.includes('marketing') || dLower.includes('leadership') || dLower.includes('executive') || dLower.includes('strategy')) {
       return true;
     }
   }
@@ -74,15 +75,15 @@ window.canAccessAnalytics = canAccessAnalytics;
 
 function isMarketingUser() {
   const team = getCurrentUserTeam();
-  if (team === TEAMS.MARKETING || team === 'marketing') return true;
-  if (currentRole === 'marketing_admin') return true;
+  if (team === TEAMS.ADMIN || team === TEAMS.MARKETING || team === 'marketing' || team === 'admin') return true;
+  if (currentRole === 'admin' || currentRole === 'marketing_admin') return true;
   let authDept = null;
   let authEmail = null;
   try {
     authDept = sessionStorage.getItem("authDept") || localStorage.getItem("1cell_auth_dept");
     authEmail = sessionStorage.getItem("authEmail") || localStorage.getItem("1cell_auth_email");
   } catch (e) {}
-  if (authDept && authDept.toLowerCase().trim() === 'marketing') return true;
+  if (authDept && (authDept.toLowerCase().trim() === 'marketing' || authDept.toLowerCase().trim() === 'admin')) return true;
   if (authEmail && authorizedMarketingEmails.map(e => e.toLowerCase().trim()).includes(authEmail.toLowerCase().trim())) return true;
   return false;
 }
@@ -587,8 +588,7 @@ const toastContainer = document.getElementById('toastContainer');
 
 // Login Portal DOM
 const loginOverlay = document.getElementById('loginOverlay');
-const teamLoginForm = document.getElementById('teamLoginForm');
-const partnerLoginForm = document.getElementById('partnerLoginForm');
+const unifiedLoginForm = document.getElementById('unifiedLoginForm');
 const signOutBtn = document.getElementById('signOutBtn');
 
 // Modals DOM
@@ -616,6 +616,7 @@ const uploadForm = document.getElementById('uploadForm');
 
 // Role User profiles mapping
 const userProfiles = {
+  admin: { name: "System Administrator", role: "System Administrator", avatar: "AD" },
   marketing_admin: { name: "Sarah Jenkins", role: "Marketing Admin", avatar: "MA" },
   sales: { name: "Rajesh Kumar", role: "Sales Specialist", avatar: "RS" },
   medical: { name: "Dr. Amanda Ross", role: "Medical Affairs Coordinator", avatar: "MD" },
@@ -887,34 +888,14 @@ function init() {
   // Role switching
   roleSelect.addEventListener('change', (e) => {
     const newRole = e.target.value;
-    
-    // Validate Marketing email authorization if switching manually
-    if (newRole === 'marketing_admin') {
-      const email = sessionStorage.getItem("authEmail");
-      if (email) {
-        const cleanEmail = email.toLowerCase().trim();
-        if (!authorizedMarketingEmails.includes(cleanEmail)) {
-          showToast("Access denied: Your email is not authorized for the Marketing Admin role.");
-          // Revert selection
-          let prevRole = 'sales';
-          const authDept = sessionStorage.getItem("authDept");
-          if (authDept === 'Leadership') prevRole = 'leadership';
-          else if (authDept === 'Genomic Scientist') prevRole = 'medical';
-          else if (authDept === 'Channel Partner') prevRole = 'channel_partner';
-          roleSelect.value = prevRole;
-          currentRole = prevRole;
-          return;
-        }
-      }
-    }
-
     currentRole = newRole;
 
-    // Sync sessionStorage authDept if they switch roles manually (to keep category styling synced)
+    // Sync sessionStorage authDept if switching roles manually
     let correspondingDept = 'Marketing';
-    if (currentRole === 'sales') correspondingDept = 'Sales';
-    else if (currentRole === 'medical') correspondingDept = 'Genomic Scientist';
-    else if (currentRole === 'channel_partner') correspondingDept = 'Channel Partner';
+    if (currentRole === 'admin') correspondingDept = 'Admin';
+    else if (currentRole === 'sales') correspondingDept = 'Sales';
+    else if (currentRole === 'medical') correspondingDept = 'Scientific';
+    else if (currentRole === 'channel_partner') correspondingDept = 'Channel Partners';
     else if (currentRole === 'leadership') correspondingDept = 'Leadership';
 
     if (sessionStorage.getItem("authName")) {
@@ -923,7 +904,7 @@ function init() {
 
     updateUserBadge();
     updateSidebarCategories();
-    showToast(`Switched access role to: ${userProfiles[currentRole].role}`);
+    showToast(`Switched access role to: ${userProfiles[currentRole]?.role || currentRole}`);
     
     // Re-render current page to apply permissions
     const activeRouteEl = document.querySelector('.sidebar .nav-item.active');
@@ -1088,185 +1069,212 @@ function init() {
   }
 
 
-  // Authentication Global Event Handlers
-  window.handleTeamLogin = function(e) {
+  // Login Audit Log Store & Helpers
+  const AUDIT_STORAGE_KEY = '1cell_login_audit_logs_v1';
+
+  function getLoginAuditLogs() {
+    try {
+      const raw = localStorage.getItem(AUDIT_STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    const initialLogs = [
+      { id: 'LOG-1092', email: 'sharad.jaiswal@1cell.ai', department: 'Admin', status: 'Success', timestamp: '2026-10-15T10:14:22.000Z', ipAddress: '192.168.1.104', location: 'Bengaluru, IN' },
+      { id: 'LOG-1091', email: 'parita.razdan@1cell.ai', department: 'Marketing', status: 'Success', timestamp: '2026-10-15T09:42:15.000Z', ipAddress: '192.168.1.118', location: 'Bengaluru, IN' },
+      { id: 'LOG-1090', email: 'apollo.rep@apollohospitals.com', department: 'Channel Partners', status: 'Success', timestamp: '2026-10-15T09:15:30.000Z', ipAddress: '103.21.144.12', location: 'Hyderabad, IN' },
+      { id: 'LOG-1089', email: 'vikas.naguru@1cell.ai', department: 'Marketing', status: 'Success', timestamp: '2026-10-15T08:50:04.000Z', ipAddress: '192.168.1.105', location: 'Bengaluru, IN' },
+      { id: 'LOG-1088', email: 'external.lead@gmail.com', department: 'Sales', status: 'Failed', reason: 'Non-@1cell.ai email domain', timestamp: '2026-10-15T08:32:19.000Z', ipAddress: '49.36.88.201', location: 'Mumbai, IN' },
+      { id: 'LOG-1087', email: 'dr.jonathan.hayes@1cell.ai', department: 'Leadership', status: 'Success', timestamp: '2026-10-15T08:05:44.000Z', ipAddress: '192.168.1.140', location: 'Boston, US' },
+      { id: 'LOG-1086', email: 'dr.amanda.ross@1cell.ai', department: 'Scientific', status: 'Success', timestamp: '2026-10-15T07:48:10.000Z', ipAddress: '192.168.1.122', location: 'Bengaluru, IN' },
+      { id: 'LOG-1085', email: 'rajesh.kumar@1cell.ai', department: 'Sales', status: 'Success', timestamp: '2026-10-15T07:12:00.000Z', ipAddress: '192.168.1.115', location: 'Delhi, IN' },
+      { id: 'LOG-1084', email: 'dr.lal.pathlab@lalpath.com', department: 'Channel Partners', status: 'Success', timestamp: '2026-10-14T18:22:50.000Z', ipAddress: '182.72.68.90', location: 'Gurugram, IN' }
+    ];
+    try {
+      localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(initialLogs));
+    } catch (e) {}
+    return initialLogs;
+  }
+  window.getLoginAuditLogs = getLoginAuditLogs;
+
+  function logLoginEvent(event) {
+    try {
+      const logs = getLoginAuditLogs();
+      const newEntry = {
+        id: 'LOG-' + (Math.floor(Math.random() * 9000) + 1000),
+        email: event.email || 'anonymous',
+        department: event.department || 'Unknown',
+        status: event.status || 'Success',
+        reason: event.reason || '',
+        timestamp: event.timestamp || new Date().toISOString(),
+        ipAddress: event.ipAddress || '192.168.1.' + Math.floor(Math.random() * 80 + 10),
+        location: 'Bengaluru, IN'
+      };
+      logs.unshift(newEntry);
+      if (logs.length > 200) logs.length = 200;
+      localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(logs));
+    } catch (e) {}
+  }
+  window.logLoginEvent = logLoginEvent;
+
+  // Department-Level Access Permissions Matrix
+  const DEPARTMENT_PERMISSIONS = {
+    'Admin': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics', 'access-control', 'login-audit'],
+    'Marketing': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics'],
+    'Leadership': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics'],
+    'Scientific': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'favorites'],
+    'Sales': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'favorites'],
+    'Channel Partners': ['dashboard', 'co-branded', 'favorites']
+  };
+  window.DEPARTMENT_PERMISSIONS = DEPARTMENT_PERMISSIONS;
+
+  // Single Unified Login Global Event Handler
+  window.handleUnifiedLogin = function(e) {
     if (e && e.preventDefault) e.preventDefault();
-    const emailEl = document.getElementById('teamLoginEmail');
-    const deptEl = document.getElementById('teamLoginDept');
-    const passEl = document.getElementById('teamLoginPassword');
-    const errEl = document.getElementById('teamLoginError');
+    const emailEl = document.getElementById('loginEmail');
+    const deptEl = document.getElementById('loginDepartment');
+    const passEl = document.getElementById('loginPassword');
+    const errEl = document.getElementById('unifiedLoginError');
 
     const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
     const dept = deptEl ? deptEl.value : 'Marketing';
     const password = passEl ? passEl.value.trim() : '';
 
+    const showError = function(msg) {
+      if (errEl) {
+        errEl.innerText = msg;
+        errEl.style.display = 'block';
+      }
+      logLoginEvent({
+        email: email || 'anonymous',
+        department: dept,
+        status: 'Failed',
+        reason: msg,
+        timestamp: new Date().toISOString()
+      });
+    };
+
     if (!email || !email.includes('@')) {
-      if (errEl) {
-        errEl.innerText = "Please enter a valid corporate email address.";
-        errEl.style.display = 'block';
-      }
+      showError("Please enter a valid email address.");
       if (emailEl) emailEl.focus();
       return false;
     }
 
-    if (!email.endsWith('@1cell.ai')) {
-      if (errEl) {
-        errEl.innerText = "Access denied: Only official @1cell.ai email domains are authorized.";
-        errEl.style.display = 'block';
-      }
-      if (emailEl) emailEl.focus();
-      return false;
-    }
-
-    if (!password) {
-      if (errEl) {
-        errEl.innerText = "Please enter your password.";
-        errEl.style.display = 'block';
-      }
-      if (passEl) passEl.focus();
-      return false;
-    }
-
-    if (password.toLowerCase() !== '1cell') {
-      if (errEl) {
-        errEl.innerText = "Incorrect password. Please enter the valid password.";
-        errEl.style.display = 'block';
-      }
-      if (passEl) passEl.focus();
-      return false;
-    }
-
-    const normTeam = normalizeTeam(dept);
-
-    if (normTeam === TEAMS.MARKETING) {
-      const isAuthorized = authorizedMarketingEmails.map(m => m.toLowerCase().trim()).includes(email);
-      if (!isAuthorized) {
-        if (errEl) {
-          errEl.innerText = "Access denied: Your email is not registered in the Marketing team. Choose another department.";
-          errEl.style.display = 'block';
-        }
+    const isPartner = (dept === 'Channel Partners');
+    if (!isPartner) {
+      if (!email.endsWith('@1cell.ai')) {
+        showError(`Access denied: ${dept} team members must sign in using an official @1cell.ai email address.`);
         if (emailEl) emailEl.focus();
         return false;
       }
     }
 
-    const namePart = email.split('@')[0].replace(/[._-]/g, ' ');
-    const displayName = namePart.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    if (!password) {
+      showError("Please enter your password.");
+      if (passEl) passEl.focus();
+      return false;
+    }
+
+    if (password.toLowerCase() !== '1cell') {
+      showError("Incorrect password. Please enter the valid password.");
+      if (passEl) passEl.focus();
+      return false;
+    }
+
+    if (errEl) errEl.style.display = 'none';
+
+    let displayName = '';
+    let targetRole = '';
+    let targetTeam = '';
+    let partnerName = '';
+
+    if (isPartner) {
+      partnerName = typeof window.resolvePartnerFromEmail === 'function'
+        ? window.resolvePartnerFromEmail(email)
+        : 'Apollo Hospitals';
+      const userPrefix = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      displayName = `${partnerName} (${userPrefix})`;
+      targetRole = 'channel_partner';
+      targetTeam = 'channel_partner';
+    } else {
+      displayName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      if (dept === 'Admin') {
+        targetRole = 'admin';
+        targetTeam = 'admin';
+      } else if (dept === 'Marketing') {
+        targetRole = 'marketing_admin';
+        targetTeam = 'marketing';
+      } else if (dept === 'Leadership') {
+        targetRole = 'leadership';
+        targetTeam = 'leadership';
+      } else if (dept === 'Scientific') {
+        targetRole = 'medical';
+        targetTeam = 'scientific';
+      } else if (dept === 'Sales') {
+        targetRole = 'sales';
+        targetTeam = 'sales';
+      } else {
+        targetRole = 'marketing_admin';
+        targetTeam = 'marketing';
+      }
+    }
 
     try {
       sessionStorage.setItem("authName", displayName);
       sessionStorage.setItem("authEmail", email);
       sessionStorage.setItem("authDept", dept);
-      sessionStorage.setItem("authTeam", normTeam);
-      sessionStorage.removeItem("authPartner");
+      sessionStorage.setItem("authTeam", targetTeam);
       localStorage.setItem("1cell_auth_name", displayName);
       localStorage.setItem("1cell_auth_email", email);
       localStorage.setItem("1cell_auth_dept", dept);
-      localStorage.setItem("1cell_auth_team", normTeam);
-      localStorage.removeItem("1cell_active_channel_partner");
-    } catch (err) {}
+      localStorage.setItem("1cell_auth_team", targetTeam);
 
-    let targetRole = 'marketing_admin';
-    if (normTeam === TEAMS.SCIENTIFIC) targetRole = 'medical';
-    else if (normTeam === TEAMS.SALES) targetRole = 'sales';
-    else if (normTeam === TEAMS.LEADERSHIP) targetRole = 'leadership';
+      if (isPartner) {
+        sessionStorage.setItem("authPartner", partnerName);
+        localStorage.setItem("1cell_active_channel_partner", partnerName);
+      } else {
+        sessionStorage.removeItem("authPartner");
+        localStorage.removeItem("1cell_active_channel_partner");
+      }
+    } catch (err) {}
 
     currentRole = targetRole;
     if (roleSelect) {
       roleSelect.value = targetRole;
     }
 
-    checkAuth();
-    updateUserBadge();
-    updateSidebarCategories();
-    renderRoute('dashboard');
-    const teamLabel = normTeam === 'scientific' ? 'Scientific Team' : normTeam === 'marketing' ? 'Marketing Team' : `${dept} Team`;
-    showToast(`Welcome to 1Cell.Ai, ${displayName} (${teamLabel})!`);
-    return false;
-  };
-
-  window.handlePartnerLogin = function(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    const emailEl = document.getElementById('partnerLoginEmail');
-    const passEl = document.getElementById('partnerLoginPassword');
-    const errEl = document.getElementById('partnerLoginError');
-
-    const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
-    const password = passEl ? passEl.value.trim() : '';
-
-    if (!email || !email.includes('@')) {
-      if (errEl) {
-        errEl.innerText = "Please enter your Channel Partner corporate email address.";
-        errEl.style.display = 'block';
+    if (isPartner) {
+      const partnerSelect = document.getElementById('activePartnerSelect');
+      if (partnerSelect) {
+        let opt = Array.from(partnerSelect.options).find(o => o.value.toLowerCase() === partnerName.toLowerCase());
+        if (!opt) {
+          opt = document.createElement('option');
+          opt.value = partnerName;
+          opt.textContent = partnerName;
+          partnerSelect.appendChild(opt);
+        }
+        partnerSelect.value = opt.value;
       }
-      if (emailEl) emailEl.focus();
-      return false;
+      setActiveChannelPartner(partnerName);
     }
 
-    if (!password) {
-      if (errEl) {
-        errEl.innerText = "Please enter your password.";
-        errEl.style.display = 'block';
-      }
-      if (passEl) passEl.focus();
-      return false;
-    }
-
-    if (password.toLowerCase() !== '1cell') {
-      if (errEl) {
-        errEl.innerText = "Incorrect password. Please enter the valid password.";
-        errEl.style.display = 'block';
-      }
-      if (passEl) passEl.focus();
-      return false;
-    }
-
-    const partnerName = typeof window.resolvePartnerFromEmail === 'function'
-      ? window.resolvePartnerFromEmail(email)
-      : 'Apollo Hospitals';
-
-    const userPrefix = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    const repName = `${partnerName} (${userPrefix})`;
-
-    try {
-      sessionStorage.setItem("authName", repName);
-      sessionStorage.setItem("authEmail", email);
-      sessionStorage.setItem("authDept", "Channel Partner");
-      sessionStorage.setItem("authTeam", "channel_partner");
-      sessionStorage.setItem("authPartner", partnerName);
-      localStorage.setItem("1cell_auth_name", repName);
-      localStorage.setItem("1cell_auth_email", email);
-      localStorage.setItem("1cell_auth_dept", "Channel Partner");
-      localStorage.setItem("1cell_auth_team", "channel_partner");
-      localStorage.setItem("1cell_active_channel_partner", partnerName);
-    } catch (err) {}
-
-    currentRole = 'channel_partner';
-    if (roleSelect) {
-      roleSelect.value = 'channel_partner';
-    }
-
-    const partnerSelect = document.getElementById('activePartnerSelect');
-    if (partnerSelect) {
-      let opt = Array.from(partnerSelect.options).find(o => o.value.toLowerCase() === partnerName.toLowerCase());
-      if (!opt) {
-        opt = document.createElement('option');
-        opt.value = partnerName;
-        opt.textContent = partnerName;
-        partnerSelect.appendChild(opt);
-      }
-      partnerSelect.value = opt.value;
-    }
+    logLoginEvent({
+      email: email,
+      department: dept,
+      status: 'Success',
+      timestamp: new Date().toISOString()
+    });
 
     const overlay = document.getElementById('loginOverlay');
     if (overlay) overlay.style.cssText = "display: none !important; opacity: 0 !important; visibility: hidden !important;";
 
-    setActiveChannelPartner(partnerName);
     checkAuth();
     updateUserBadge();
     updateSidebarCategories();
     renderRoute('dashboard');
-    showToast(`Welcome to 1Cell.Ai Co-Branded Portal for ${partnerName}!`);
+
+    const welcomeMsg = isPartner
+      ? `Welcome to 1Cell.Ai Partner Portal for ${partnerName}!`
+      : `Welcome to 1Cell.Ai Content Hub, ${displayName} (${dept} Team)!`;
+    showToast(welcomeMsg);
     return false;
   };
 
@@ -1285,20 +1293,12 @@ function init() {
       localStorage.removeItem("1cell_active_channel_partner");
     } catch (err) {}
 
-    const teamErr = document.getElementById('teamLoginError');
-    if (teamErr) teamErr.style.display = 'none';
-    const partnerErr = document.getElementById('partnerLoginError');
-    if (partnerErr) partnerErr.style.display = 'none';
-    const teamPassEl = document.getElementById('teamLoginPassword');
-    if (teamPassEl) teamPassEl.value = '';
-    const passEl = document.getElementById('partnerLoginPassword');
+    const errEl = document.getElementById('unifiedLoginError');
+    if (errEl) errEl.style.display = 'none';
+    const passEl = document.getElementById('loginPassword');
     if (passEl) passEl.value = '';
-    const partnerEmailEl = document.getElementById('partnerLoginEmail');
-    if (partnerEmailEl) partnerEmailEl.value = '';
-
-    if (typeof window.switchLoginTab === 'function') {
-      window.switchLoginTab('team');
-    }
+    const emailEl = document.getElementById('loginEmail');
+    if (emailEl) emailEl.value = '';
 
     checkAuth();
     updateUserBadge();
@@ -1306,11 +1306,8 @@ function init() {
     showToast("Signed out successfully.");
   };
 
-  if (teamLoginForm) {
-    teamLoginForm.addEventListener('submit', window.handleTeamLogin);
-  }
-  if (partnerLoginForm) {
-    partnerLoginForm.addEventListener('submit', window.handlePartnerLogin);
+  if (unifiedLoginForm) {
+    unifiedLoginForm.addEventListener('submit', window.handleUnifiedLogin);
   }
 
   if (signOutBtn) {
@@ -1378,24 +1375,45 @@ function updateUserBadge() {
   }
 }
 
+// Department Helper Functions
+function getNormalizedDept() {
+  let dept = sessionStorage.getItem("authDept") || localStorage.getItem("1cell_auth_dept");
+  if (!dept) {
+    if (currentRole === 'admin') dept = 'Admin';
+    else if (currentRole === 'marketing_admin') dept = 'Marketing';
+    else if (currentRole === 'sales') dept = 'Sales';
+    else if (currentRole === 'medical') dept = 'Scientific';
+    else if (currentRole === 'channel_partner') dept = 'Channel Partners';
+    else if (currentRole === 'leadership') dept = 'Leadership';
+    else dept = 'Marketing';
+  }
+  const dLower = dept.toLowerCase().trim();
+  if (dLower === 'admin' || dLower.includes('admin') || dLower.includes('system')) return 'Admin';
+  if (dLower.includes('partner') || dLower.includes('channel')) return 'Channel Partners';
+  if (dLower.includes('scien') || dLower.includes('medical') || dLower.includes('genom')) return 'Scientific';
+  if (dLower.includes('sale')) return 'Sales';
+  if (dLower.includes('leader') || dLower.includes('exec')) return 'Leadership';
+  return 'Marketing';
+}
+window.getNormalizedDept = getNormalizedDept;
+
+function getAllowedRoutesForDepartment(dept) {
+  const norm = dept || getNormalizedDept();
+  return DEPARTMENT_PERMISSIONS[norm] || DEPARTMENT_PERMISSIONS['Marketing'];
+}
+window.getAllowedRoutesForDepartment = getAllowedRoutesForDepartment;
+
 // Toggle sidebar menu items visibility based on user department
 function updateSidebarCategories() {
-  const authDept = sessionStorage.getItem("authDept");
-  let dept = authDept;
-  if (!dept) {
-    if (currentRole === 'marketing_admin') dept = 'Marketing';
-    else if (currentRole === 'sales') dept = 'Sales';
-    else if (currentRole === 'medical') dept = 'Genomic Scientist';
-    else if (currentRole === 'channel_partner') dept = 'Channel Partner';
-    else if (currentRole === 'leadership') dept = 'Leadership';
-  }
+  const normDept = getNormalizedDept();
+  const allowedRoutes = getAllowedRoutesForDepartment(normDept);
+  const isPartner = (normDept === 'Channel Partners');
+  const isAdmin = (normDept === 'Admin');
 
-  const isPartner = isChannelPartner();
-
-  // Role selector pill: only for Marketing / Leadership internal team
+  // Role selector pill: only for Admin / Leadership / Marketing
   const roleSelectorWrapper = document.querySelector('.role-pill-selector');
   if (roleSelectorWrapper) {
-    if (!isPartner && (dept === 'Marketing' || dept === 'Leadership' || isMarketingUser())) {
+    if (isAdmin || normDept === 'Leadership' || normDept === 'Marketing') {
       roleSelectorWrapper.style.display = '';
     } else {
       roleSelectorWrapper.style.display = 'none';
@@ -1419,66 +1437,33 @@ function updateSidebarCategories() {
     cloudDbBtn.style.display = isPartner ? 'none' : 'inline-flex';
   }
 
-  // Dashboard Analytics visibility: strictly Marketing & Leadership only
-  const analyticsNavItem = document.querySelector('.sidebar .nav-item[data-route="analytics"]');
-  const systemNavGroup = analyticsNavItem ? analyticsNavItem.closest('.nav-group') : null;
-  const hasAnalyticsAccess = canAccessAnalytics();
-  if (analyticsNavItem) {
-    analyticsNavItem.style.display = (!isPartner && hasAnalyticsAccess) ? '' : 'none';
-  }
-  if (systemNavGroup) {
-    systemNavGroup.style.display = (!isPartner && hasAnalyticsAccess) ? '' : 'none';
-  }
-
-  // Role-Based Navigation Matrix:
-  // 1. Sales team CANNOT access Co-Branded Assets
-  const coBrandedNavItem = document.querySelector('.sidebar .nav-item[data-route="co-branded"]');
-  const userTeam = getCurrentUserTeam();
-  const isSales = (currentRole === 'sales' || userTeam === TEAMS.SALES || (dept && dept.toLowerCase().includes('sale')));
-
-  if (coBrandedNavItem) {
-    coBrandedNavItem.style.display = isSales ? 'none' : '';
-  }
-
-  // 2. Channel Partners can ONLY access Dashboard, Co-Branded Assets, and Favorites!
-  const dashboardNavItem = document.querySelector('.sidebar .nav-item[data-route="dashboard"]');
-  const overviewGroup = dashboardNavItem ? dashboardNavItem.closest('.nav-group') : null;
-  const companyAssetsNavItem = document.querySelector('.sidebar .nav-item[data-route="company-assets"]');
-  const productHubNavItem = document.querySelector('.sidebar .nav-item[data-route="products"]');
-  const scientificNavItem = document.querySelector('.sidebar .nav-item[data-route="cases"]');
-  const compIntelNavItem = document.querySelector('.sidebar .nav-item[data-route="competitive-intelligence"]');
-  const favoritesNavItem = document.querySelector('.sidebar .nav-item[data-route="favorites"]');
-  const personalGroup = favoritesNavItem ? favoritesNavItem.closest('.nav-group') : null;
-
-  if (isPartner) {
-    if (dashboardNavItem) dashboardNavItem.style.display = '';
-    if (overviewGroup) overviewGroup.style.display = '';
-    if (companyAssetsNavItem) companyAssetsNavItem.style.display = 'none';
-    if (productHubNavItem) productHubNavItem.style.display = 'none';
-    if (scientificNavItem) scientificNavItem.style.display = 'none';
-    if (compIntelNavItem) compIntelNavItem.style.display = 'none';
-    if (favoritesNavItem) favoritesNavItem.style.display = '';
-    if (personalGroup) personalGroup.style.display = '';
-    if (analyticsNavItem) analyticsNavItem.style.display = 'none';
-    if (systemNavGroup) systemNavGroup.style.display = 'none';
-
-    if (coBrandedNavItem) {
-      coBrandedNavItem.style.display = '';
+  // Set navigation items visibility based on department permissions matrix
+  const allNavItems = document.querySelectorAll('.sidebar .nav-item');
+  allNavItems.forEach(item => {
+    const route = item.getAttribute('data-route');
+    if (route && allowedRoutes.includes(route)) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
     }
-    const catGroupTitle = coBrandedNavItem ? coBrandedNavItem.closest('.nav-group')?.querySelector('.nav-group-title') : null;
-    if (catGroupTitle) catGroupTitle.innerText = "Partner Portal";
-  } else {
-    if (dashboardNavItem) dashboardNavItem.style.display = '';
-    if (overviewGroup) overviewGroup.style.display = '';
-    if (companyAssetsNavItem) companyAssetsNavItem.style.display = '';
-    if (productHubNavItem) productHubNavItem.style.display = '';
-    if (scientificNavItem) scientificNavItem.style.display = '';
-    if (compIntelNavItem) compIntelNavItem.style.display = '';
-    if (favoritesNavItem) favoritesNavItem.style.display = '';
-    if (personalGroup) personalGroup.style.display = '';
+  });
 
-    const catGroupTitle = coBrandedNavItem ? coBrandedNavItem.closest('.nav-group')?.querySelector('.nav-group-title') : null;
-    if (catGroupTitle) catGroupTitle.innerText = "Categories";
+  // Hide nav-groups where all children are hidden
+  const navGroups = document.querySelectorAll('.sidebar .nav-group');
+  navGroups.forEach(group => {
+    const items = group.querySelectorAll('.nav-item');
+    let hasVisible = false;
+    items.forEach(it => {
+      if (it.style.display !== 'none') hasVisible = true;
+    });
+    group.style.display = hasVisible ? '' : 'none';
+  });
+
+  // Group title update for Partner Portal vs Categories
+  const coBrandedNavItem = document.querySelector('.sidebar .nav-item[data-route="co-branded"]');
+  const catGroupTitle = coBrandedNavItem ? coBrandedNavItem.closest('.nav-group')?.querySelector('.nav-group-title') : null;
+  if (catGroupTitle) {
+    catGroupTitle.innerText = isPartner ? "Partner Portal" : "Categories";
   }
 }
 window.updateUserBadge = updateUserBadge;
@@ -1536,53 +1521,12 @@ function renderRoute(route) {
   workspaceViewport.innerHTML = '';
   suggestionsDropdown.style.display = 'none';
 
-  // Channel Partner access guard: strictly restricted to Dashboard, Co-Branded Assets, and Favorites ONLY!
-  const partnerAllowedRoutes = ['dashboard', 'co-branded', 'favorites'];
-  if (isChannelPartner() && !partnerAllowedRoutes.includes(route)) {
-    sidebarItems.forEach(item => {
-      if (item.getAttribute('data-route') === 'dashboard') {
-        item.classList.add('active');
-      } else {
-        item.classList.remove('active');
-      }
-    });
-    renderRoute('dashboard');
-    return;
-  }
+  // Department Route Guard
+  const userDept = getNormalizedDept();
+  const allowedRoutes = getAllowedRoutesForDepartment(userDept);
 
-  // Sections hidden across platform for now
-  const hiddenRoutes = ['campaigns', 'sales-enablement', 'videos', 'brand-assets', 'templates', 'newsletters'];
-  if (hiddenRoutes.includes(route)) {
-    sidebarItems.forEach(item => {
-      if (item.getAttribute('data-route') === 'dashboard') {
-        item.classList.add('active');
-      } else {
-        item.classList.remove('active');
-      }
-    });
-    renderRoute('dashboard');
-    return;
-  }
-
-  // Dashboard Analytics access guard: Marketing & Leadership only
-  if (route === 'analytics' && !canAccessAnalytics()) {
-    showToast("Access restricted: Dashboard Analytics is only accessible to Marketing and Leadership teams.");
-    sidebarItems.forEach(item => {
-      if (item.getAttribute('data-route') === 'dashboard') {
-        item.classList.add('active');
-      } else {
-        item.classList.remove('active');
-      }
-    });
-    renderRoute('dashboard');
-    return;
-  }
-
-  // Sales team access guard: strictly forbidden from accessing Co-Branded Assets
-  const userTeam = getCurrentUserTeam();
-  const isSales = (currentRole === 'sales' || userTeam === TEAMS.SALES);
-  if (route === 'co-branded' && isSales) {
-    showToast("Access restricted: Sales team cannot access Co-Branded Assets.");
+  if (!allowedRoutes.includes(route)) {
+    showToast(`Access restricted: The ${userDept} team does not have access to this section.`);
     sidebarItems.forEach(item => {
       if (item.getAttribute('data-route') === 'dashboard') {
         item.classList.add('active');
@@ -1613,23 +1557,17 @@ function renderRoute(route) {
     case 'competitive-intelligence':
       renderCompetitiveIntelligence();
       break;
-    case 'report-library':
-      renderReportLibrary();
-      break;
-    case 'publications':
-      renderPublications();
-      break;
-    case 'speakers':
-      renderSpeakerProfiles();
-      break;
-    case 'quiz':
-      renderQuizPage();
-      break;
     case 'favorites':
       renderFavorites();
       break;
     case 'analytics':
       renderAnalyticsDashboard();
+      break;
+    case 'access-control':
+      renderAccessControl();
+      break;
+    case 'login-audit':
+      renderLoginAudit();
       break;
     default:
       renderDashboard();
@@ -7880,5 +7818,393 @@ window.refreshCurrentView = function() {
     renderDashboard();
   } else {
     renderRoute(route);
+  }
+};
+
+// ==========================================
+// ACCESS CONTROL & GOVERNANCE VIEW
+// ==========================================
+function renderAccessControl() {
+  const currentDept = getNormalizedDept();
+  const matrixData = [
+    { name: "Dashboard", route: "dashboard", icon: "📊", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: true },
+    { name: "1Cell.Ai Assets", route: "company-assets", icon: "📁", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: false },
+    { name: "Product Hub", route: "products", icon: "🧬", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: false },
+    { name: "Scientific Resources", route: "cases", icon: "🔬", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: false },
+    { name: "Competitive Intelligence", route: "competitive-intelligence", icon: "⚡", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: false },
+    { name: "Cobranded Assets", route: "co-branded", icon: "🤝", admin: true, marketing: true, leadership: true, scientific: false, sales: false, partner: true },
+    { name: "Favorites", route: "favorites", icon: "⭐", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: true },
+    { name: "Dashboard Analytics", route: "analytics", icon: "📈", admin: true, marketing: true, leadership: true, scientific: false, sales: false, partner: false },
+    { name: "Access Control", route: "access-control", icon: "🛡️", admin: true, marketing: false, leadership: false, scientific: false, sales: false, partner: false },
+    { name: "Login Audit", route: "login-audit", icon: "🕒", admin: true, marketing: false, leadership: false, scientific: false, sales: false, partner: false }
+  ];
+
+  const deptSummaries = [
+    { name: "Admin", role: "admin", icon: "🛡️", color: "#6366f1", count: 10, email: "@1cell.ai only", desc: "Full administrative and governance authority across all 10 platform modules including audit logs and access control." },
+    { name: "Marketing", role: "marketing_admin", icon: "📢", color: "#0284c7", count: 8, email: "@1cell.ai only", desc: "Full marketing management, brand assets, product hub, scientific resources, competitive intel, cobranded collateral & analytics." },
+    { name: "Leadership", role: "leadership", icon: "👔", color: "#8b5cf6", count: 8, email: "@1cell.ai only", desc: "Executive oversight across all content libraries, cross-functional workspaces, cobranded collateral, and dashboard analytics." },
+    { name: "Scientific", role: "medical", icon: "🧬", color: "#10b981", count: 6, email: "@1cell.ai only", desc: "Genomic science and medical affairs focus: Product Hub, Scientific Resources, Competitive Intelligence, and Favorites." },
+    { name: "Sales", role: "sales", icon: "💼", color: "#f59e0b", count: 6, email: "@1cell.ai only", desc: "Commercial field enablement: Product Hub, Scientific Resources, Competitive Intelligence, and personal Favorites." },
+    { name: "Channel Partners", role: "channel_partner", icon: "🤝", color: "#06b6d4", count: 3, email: "Any hospital or official domain", desc: "Restricted partner portal: Dedicated partner dashboard, cobranded product collateral, and favorites only." }
+  ];
+
+  workspaceViewport.innerHTML = `
+    <div class="access-control-view animate-fade-in" style="padding: 24px; max-width: 1400px; margin: 0 auto;">
+      <!-- Page Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+            <span style="font-size: 26px;">🛡️</span>
+            <h1 style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; margin: 0; color: var(--text-primary);">Access Control & Governance Matrix</h1>
+            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; background: rgba(99, 102, 241, 0.15); color: #6366f1; padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3);">Enterprise Policy</span>
+          </div>
+          <p style="font-size: 14px; color: var(--text-secondary); margin: 0;">Department-wise route permissions, domain restriction policies, and governance matrix for 1Cell.Ai Content Hub.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-outline" onclick="window.navigateToRoute('login-audit')" style="display: flex; align-items: center; gap: 6px;">
+            <span>🕒 View Login Audit</span>
+          </button>
+          <button class="btn-primary" onclick="showToast('Access control policies are actively enforced.')" style="display: flex; align-items: center; gap: 6px;">
+            <span>✓ Active & Enforced</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Policy Summary Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(2, 132, 199, 0.15); color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 18px;">📧</div>
+            <div>
+              <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary);">Corporate Domain Rule</div>
+              <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">@1cell.ai Strictly Enforced</div>
+            </div>
+          </div>
+          <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.4;">Sales, Marketing, Leadership, Admin, and Scientific must authenticate via official @1cell.ai email.</div>
+        </div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 18px;">🤝</div>
+            <div>
+              <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary);">Channel Partner Domain</div>
+              <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Hospital / Partner Network</div>
+            </div>
+          </div>
+          <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.4;">Channel Partners can access with personal or official email; scoped strictly to Co-Branded Assets and Favorites.</div>
+        </div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 18px;">🔒</div>
+            <div>
+              <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary);">Authentication Secret</div>
+              <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Universal Master Key</div>
+            </div>
+          </div>
+          <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.4;">Active password is protected and unrevealed in all user inputs and placeholder text.</div>
+        </div>
+      </div>
+
+      <!-- Department Cards Grid -->
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; margin: 0 0 14px 0; color: var(--text-primary);">Department Permissions Breakdown</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 32px;">
+        ${deptSummaries.map(d => `
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 20px;">${d.icon}</span>
+                  <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--text-primary);">${d.name}</h3>
+                </div>
+                <span style="font-size: 11.5px; font-weight: 700; background: ${d.color}15; color: ${d.color}; border: 1px solid ${d.color}35; padding: 3px 9px; border-radius: 10px;">
+                  ${d.count} of 10 Modules
+                </span>
+              </div>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.45; margin: 0 0 12px 0;">${d.desc}</p>
+              <div style="font-size: 11.5px; color: var(--text-tertiary); display: flex; align-items: center; gap: 6px; margin-bottom: 14px;">
+                <span>🔑 Domain:</span>
+                <span style="font-weight: 600; color: var(--text-secondary);">${d.email}</span>
+              </div>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12px; font-weight: 600; color: ${currentDept.toLowerCase() === d.name.toLowerCase() ? '#10b981' : 'var(--text-tertiary)'};">
+                ${currentDept.toLowerCase() === d.name.toLowerCase() ? '✓ Currently Active' : 'Department Role'}
+              </span>
+              <button class="btn-outline" style="font-size: 11.5px; padding: 5px 10px; height: auto;" onclick="window.simulateRoleSwitch('${d.role}', '${d.name}')">
+                Preview as ${d.name} →
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Full Matrix Table -->
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; margin: 0 0 14px 0; color: var(--text-primary);">Role-Based Access Control (RBAC) Matrix</h2>
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm);">
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
+            <thead>
+              <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
+                <th style="padding: 14px 18px; font-weight: 700; color: var(--text-primary); min-width: 200px;">Platform Section</th>
+                <th style="padding: 14px 14px; font-weight: 700; text-align: center; color: #6366f1;">Admin</th>
+                <th style="padding: 14px 14px; font-weight: 700; text-align: center; color: #0284c7;">Marketing</th>
+                <th style="padding: 14px 14px; font-weight: 700; text-align: center; color: #8b5cf6;">Leadership</th>
+                <th style="padding: 14px 14px; font-weight: 700; text-align: center; color: #10b981;">Scientific</th>
+                <th style="padding: 14px 14px; font-weight: 700; text-align: center; color: #f59e0b;">Sales</th>
+                <th style="padding: 14px 14px; font-weight: 700; text-align: center; color: #06b6d4;">Channel Partners</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${matrixData.map((row, idx) => `
+                <tr style="border-bottom: 1px solid var(--border-color); background: ${idx % 2 === 0 ? 'transparent' : 'var(--bg-secondary)'}08;">
+                  <td style="padding: 14px 18px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                    <span>${row.icon}</span>
+                    <span>${row.name}</span>
+                  </td>
+                  <td style="padding: 14px 14px; text-align: center;">${renderBadge(row.admin)}</td>
+                  <td style="padding: 14px 14px; text-align: center;">${renderBadge(row.marketing)}</td>
+                  <td style="padding: 14px 14px; text-align: center;">${renderBadge(row.leadership)}</td>
+                  <td style="padding: 14px 14px; text-align: center;">${renderBadge(row.scientific)}</td>
+                  <td style="padding: 14px 14px; text-align: center;">${renderBadge(row.sales)}</td>
+                  <td style="padding: 14px 14px; text-align: center;">${renderBadge(row.partner)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  function renderBadge(allowed) {
+    if (allowed) {
+      return `<span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700; font-size: 13px;">✓</span>`;
+    }
+    return `<span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--bg-secondary); color: var(--text-tertiary); font-weight: 700; font-size: 13px;">—</span>`;
+  }
+}
+window.renderAccessControl = renderAccessControl;
+
+// Role preview simulator helper
+window.simulateRoleSwitch = function(role, dept) {
+  currentRole = role;
+  if (roleSelect) roleSelect.value = role;
+  try {
+    sessionStorage.setItem("authDept", dept);
+    localStorage.setItem("1cell_auth_dept", dept);
+  } catch (e) {}
+  updateUserBadge();
+  updateSidebarCategories();
+  renderAccessControl();
+  showToast(`Simulating view as: ${dept} (${userProfiles[role]?.role || role})`);
+};
+
+// ==========================================
+// LOGIN AUDIT TRAIL VIEW
+// ==========================================
+function renderLoginAudit() {
+  const allLogs = getLoginAuditLogs();
+  let filteredLogs = [...allLogs];
+
+  const totalLogins = allLogs.length;
+  const successfulLogins = allLogs.filter(l => l.status === 'Success').length;
+  const failedLogins = allLogs.filter(l => l.status === 'Failed').length;
+  const uniqueDepts = new Set(allLogs.map(l => l.department)).size;
+
+  workspaceViewport.innerHTML = `
+    <div class="login-audit-view animate-fade-in" style="padding: 24px; max-width: 1400px; margin: 0 auto;">
+      <!-- Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+            <span style="font-size: 26px;">🕒</span>
+            <h1 style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; margin: 0; color: var(--text-primary);">Login Audit & Security Logs</h1>
+            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">Live Surveillance</span>
+          </div>
+          <p style="font-size: 14px; color: var(--text-secondary); margin: 0;">Comprehensive audit logs tracking user authentications, department attribution, domain validation, and IP traces.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-outline" onclick="window.exportAuditCsv()" style="display: flex; align-items: center; gap: 6px;">
+            <span>📥 Export to CSV</span>
+          </button>
+          <button class="btn-outline" onclick="window.clearAuditLogs()" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3); display: flex; align-items: center; gap: 6px;">
+            <span>🗑️ Reset Logs</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 6px;">Total Authentication Events</div>
+          <div style="font-size: 28px; font-weight: 700; color: var(--text-primary); font-family: 'Outfit', sans-serif;">${totalLogins}</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Tracked logins & attempts</div>
+        </div>
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 6px;">Successful Sign-Ins</div>
+          <div style="font-size: 28px; font-weight: 700; color: #10b981; font-family: 'Outfit', sans-serif;">${successfulLogins}</div>
+          <div style="font-size: 12px; color: #10b981; margin-top: 4px;">✓ Authenticated sessions</div>
+        </div>
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 6px;">Failed / Blocked Attempts</div>
+          <div style="font-size: 28px; font-weight: 700; color: #ef4444; font-family: 'Outfit', sans-serif;">${failedLogins}</div>
+          <div style="font-size: 12px; color: #ef4444; margin-top: 4px;">Domain or credential rejects</div>
+        </div>
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 6px;">Active Departments</div>
+          <div style="font-size: 28px; font-weight: 700; color: #6366f1; font-family: 'Outfit', sans-serif;">${uniqueDepts}</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Internal teams & channel partners</div>
+        </div>
+      </div>
+
+      <!-- Filters Row -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; margin-bottom: 20px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; flex: 1;">
+          <input type="text" id="auditSearchInput" placeholder="Search by email, IP, or location..." oninput="window.applyAuditFilters()" style="min-width: 240px; height: 38px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 12px; font-size: 13.5px; background: var(--bg-secondary); color: var(--text-primary);">
+          
+          <select id="auditDeptFilter" onchange="window.applyAuditFilters()" style="height: 38px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 12px; font-size: 13.5px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer;">
+            <option value="ALL">All Departments</option>
+            <option value="Admin">Admin</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Leadership">Leadership</option>
+            <option value="Scientific">Scientific</option>
+            <option value="Sales">Sales</option>
+            <option value="Channel Partners">Channel Partners</option>
+          </select>
+
+          <select id="auditStatusFilter" onchange="window.applyAuditFilters()" style="height: 38px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 12px; font-size: 13.5px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer;">
+            <option value="ALL">All Statuses</option>
+            <option value="Success">Success</option>
+            <option value="Failed">Failed</option>
+          </select>
+        </div>
+        <div id="auditResultCount" style="font-size: 13px; color: var(--text-secondary); font-weight: 600;">Showing ${allLogs.length} events</div>
+      </div>
+
+      <!-- Logs Table -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm);">
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;" id="auditLogsTable">
+            <thead>
+              <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
+                <th style="padding: 12px 16px; font-weight: 700; color: var(--text-primary);">Event ID</th>
+                <th style="padding: 12px 16px; font-weight: 700; color: var(--text-primary);">Timestamp</th>
+                <th style="padding: 12px 16px; font-weight: 700; color: var(--text-primary);">Email / Identity</th>
+                <th style="padding: 12px 16px; font-weight: 700; color: var(--text-primary);">Department</th>
+                <th style="padding: 12px 16px; font-weight: 700; color: var(--text-primary);">Network IP / Origin</th>
+                <th style="padding: 12px 16px; font-weight: 700; color: var(--text-primary);">Status & Details</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogsTbody">
+              ${renderAuditTableRows(filteredLogs)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+window.renderLoginAudit = renderLoginAudit;
+
+function renderAuditTableRows(logs) {
+  if (!logs || logs.length === 0) {
+    return `
+      <tr>
+        <td colspan="6" style="padding: 32px; text-align: center; color: var(--text-tertiary);">
+          No audit logs matching current filter criteria.
+        </td>
+      </tr>
+    `;
+  }
+  return logs.map((log, idx) => {
+    const isSuccess = log.status === 'Success';
+    const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Just now';
+    return `
+      <tr style="border-bottom: 1px solid var(--border-color); background: ${idx % 2 === 0 ? 'transparent' : 'var(--bg-secondary)'}08;">
+        <td style="padding: 12px 16px; font-family: monospace; font-size: 12px; color: var(--text-tertiary);">${log.id || 'LOG-AUTO'}</td>
+        <td style="padding: 12px 16px; font-size: 12.5px; color: var(--text-secondary); white-space: nowrap;">${timeStr}</td>
+        <td style="padding: 12px 16px; font-weight: 600; color: var(--text-primary);">${log.email}</td>
+        <td style="padding: 12px 16px;">
+          <span style="font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+            ${log.department}
+          </span>
+        </td>
+        <td style="padding: 12px 16px; font-size: 12.5px; color: var(--text-secondary);">
+          <div>${log.ipAddress || '192.168.1.1'}</div>
+          <small style="color: var(--text-tertiary); font-size: 11px;">${log.location || 'Bengaluru, IN'}</small>
+        </td>
+        <td style="padding: 12px 16px;">
+          ${isSuccess
+            ? `<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.25);">✓ Success</span>`
+            : `<div style="display: inline-flex; flex-direction: column; gap: 2px;">
+                 <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #ef4444; background: rgba(239, 68, 68, 0.12); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.25); width: fit-content;">✕ Failed</span>
+                 <small style="color: #ef4444; font-size: 11px; margin-left: 2px;">${log.reason || 'Authentication rejected'}</small>
+               </div>`
+          }
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.applyAuditFilters = function() {
+  const query = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
+  const dept = document.getElementById('auditDeptFilter')?.value || 'ALL';
+  const status = document.getElementById('auditStatusFilter')?.value || 'ALL';
+
+  const allLogs = getLoginAuditLogs();
+  const filtered = allLogs.filter(log => {
+    if (dept !== 'ALL' && log.department.toLowerCase() !== dept.toLowerCase()) return false;
+    if (status !== 'ALL' && log.status !== status) return false;
+    if (query) {
+      const matchEmail = (log.email || '').toLowerCase().includes(query);
+      const matchIp = (log.ipAddress || '').toLowerCase().includes(query);
+      const matchLoc = (log.location || '').toLowerCase().includes(query);
+      const matchReason = (log.reason || '').toLowerCase().includes(query);
+      if (!matchEmail && !matchIp && !matchLoc && !matchReason) return false;
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById('auditLogsTbody');
+  if (tbody) tbody.innerHTML = renderAuditTableRows(filtered);
+
+  const countEl = document.getElementById('auditResultCount');
+  if (countEl) countEl.innerText = `Showing ${filtered.length} of ${allLogs.length} events`;
+};
+
+window.exportAuditCsv = function() {
+  const logs = getLoginAuditLogs();
+  const headers = ["Event ID", "Timestamp", "Email", "Department", "IP Address", "Location", "Status", "Reason"];
+  const rows = logs.map(l => [
+    `"${l.id || ''}"`,
+    `"${l.timestamp || ''}"`,
+    `"${l.email || ''}"`,
+    `"${l.department || ''}"`,
+    `"${l.ipAddress || ''}"`,
+    `"${l.location || ''}"`,
+    `"${l.status || ''}"`,
+    `"${(l.reason || '').replace(/"/g, '""')}"`
+  ]);
+
+  const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `1cell_login_audit_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("Exported Login Audit log CSV.");
+};
+
+window.clearAuditLogs = function() {
+  if (confirm("Are you sure you want to reset the login audit log history?")) {
+    try {
+      localStorage.removeItem('1cell_login_audit_logs_v1');
+    } catch (e) {}
+    renderLoginAudit();
+    showToast("Audit log history reset to baseline.");
   }
 };
