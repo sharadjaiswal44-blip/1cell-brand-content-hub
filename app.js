@@ -1982,7 +1982,8 @@ const DEFAULT_ANNOUNCEMENTS = [
     category: 'Award',
     postedBy: 'Marketing Team',
     date: '2026-10-01',
-    pinned: true
+    pinned: true,
+    link: 'https://1cell.ai/news/healthtech-startup-award-2026'
   },
   {
     id: 'ann-002',
@@ -1991,7 +1992,8 @@ const DEFAULT_ANNOUNCEMENTS = [
     category: 'Event',
     postedBy: 'Marketing Team',
     date: '2026-09-28',
-    pinned: false
+    pinned: false,
+    link: 'https://calendar.google.com/calendar/event?eid=1cell-townhall-q3'
   },
   {
     id: 'ann-003',
@@ -2000,7 +2002,8 @@ const DEFAULT_ANNOUNCEMENTS = [
     category: 'Update',
     postedBy: 'Marketing Team',
     date: '2026-09-20',
-    pinned: false
+    pinned: false,
+    link: '#company-assets'
   }
 ];
 
@@ -2019,6 +2022,20 @@ function getAnnouncements() {
   if (!Array.isArray(list)) {
     list = DEFAULT_ANNOUNCEMENTS.map(a => ({ ...a }));
     saveAnnouncements(list);
+  } else {
+    // If existing stored items don't have links yet, populate matching defaults
+    let updated = false;
+    list = list.map(item => {
+      if (!item.link) {
+        const def = DEFAULT_ANNOUNCEMENTS.find(d => d.id === item.id);
+        if (def && def.link) {
+          updated = true;
+          return { ...item, link: def.link };
+        }
+      }
+      return item;
+    });
+    if (updated) saveAnnouncements(list);
   }
   // Pinned first, then newest first
   return list.slice().sort((a, b) => {
@@ -2034,29 +2051,107 @@ function escapeAnnText(str) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+window.handleAnnouncementCardClick = function(event, url) {
+  if (!url) return;
+  // If user clicked a button or interactive child, don't trigger card navigation
+  if (event && event.target && (event.target.tagName === 'BUTTON' || event.target.closest('button') || event.target.closest('a'))) {
+    return;
+  }
+  const cleanUrl = String(url).trim();
+  if (cleanUrl.startsWith('#')) {
+    const route = cleanUrl.slice(1);
+    if (typeof window.navigateToRoute === 'function') {
+      window.navigateToRoute(route);
+      return;
+    }
+  }
+  if (cleanUrl.startsWith('route:')) {
+    const route = cleanUrl.replace('route:', '').trim();
+    if (typeof window.navigateToRoute === 'function') {
+      window.navigateToRoute(route);
+      return;
+    }
+  }
+
+  const knownRoutes = ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics', 'access-control', 'login-audit'];
+  if (knownRoutes.includes(cleanUrl.toLowerCase())) {
+    if (typeof window.navigateToRoute === 'function') {
+      window.navigateToRoute(cleanUrl.toLowerCase());
+      return;
+    }
+  }
+
+  let targetUrl = cleanUrl;
+  if (!/^https?:\/\//i.test(targetUrl) && !/^mailto:/i.test(targetUrl)) {
+    targetUrl = 'https://' + targetUrl;
+  }
+  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+};
+
 function renderAnnouncementCard(a, canManage, isPartner = false) {
   const cat = a.category || 'General';
   const catClass = 'ann-cat-' + cat.toLowerCase().replace(/[^a-z]/g, '');
   const editAction = isPartner ? `window.openPartnerAnnouncementModal('${escapeAnnText(a.id)}')` : `window.openAnnouncementModal('${escapeAnnText(a.id)}')`;
   const deleteAction = isPartner ? `window.deletePartnerAnnouncement('${escapeAnnText(a.id)}')` : `window.deleteAnnouncement('${escapeAnnText(a.id)}')`;
 
+  const hasLink = !!(a.link && String(a.link).trim());
+  const linkUrl = hasLink ? String(a.link).trim() : '';
+  const cardClickAction = hasLink ? `onclick="window.handleAnnouncementCardClick(event, '${escapeAnnText(linkUrl)}')"` : '';
+  const cardInteractiveClass = hasLink ? 'has-link' : '';
+  const cardTooltip = hasLink ? `title="Click to open attached link: ${escapeAnnText(linkUrl)}"` : '';
+
+  let displayLinkText = linkUrl;
+  if (displayLinkText.startsWith('#')) {
+    displayLinkText = 'Open ' + displayLinkText.slice(1).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  } else {
+    displayLinkText = displayLinkText.replace(/^https?:\/\//, '');
+  }
+
   return `
-    <div class="announcement-card ${a.pinned ? 'is-pinned' : ''}" id="ann-${escapeAnnText(a.id)}">
+    <div class="announcement-card ${a.pinned ? 'is-pinned' : ''} ${cardInteractiveClass}" id="ann-${escapeAnnText(a.id)}" ${cardClickAction} ${cardTooltip}>
       <div class="announcement-top">
         <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
           <span class="announcement-cat ${catClass}">${escapeAnnText(cat)}</span>
           ${a.pinned ? '<span class="announcement-pin">Pinned</span>' : ''}
+          ${hasLink ? `
+            <span class="announcement-link-badge" title="Attached link: ${escapeAnnText(linkUrl)}" style="display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700; color:var(--accent-color); background:rgba(2, 132, 199, 0.12); border:1px solid rgba(2, 132, 199, 0.25); padding:2px 7px; border-radius:4px;">
+              <span>Link</span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:11px; height:11px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </span>
+          ` : ''}
         </div>
-        <span class="announcement-date">${formatCardDateDDMMYYYY(a.date)}</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="announcement-date">${formatCardDateDDMMYYYY(a.date)}</span>
+          ${hasLink ? `
+            <span class="announcement-arrow-icon" style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:rgba(2, 132, 199, 0.1); color:var(--accent-color); transition:transform 0.2s ease, background 0.2s ease;" title="Attached link: ${escapeAnnText(linkUrl)}">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px; height:14px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </span>
+          ` : ''}
+        </div>
       </div>
       <h3 class="announcement-title">${escapeAnnText(a.title)}</h3>
       <p class="announcement-message">${escapeAnnText(a.message)}</p>
+      ${hasLink ? `
+        <div class="announcement-attached-link-row" style="margin-top:2px; display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--accent-color); text-decoration:none; width:fit-content;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:13px; height:13px; flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;">${escapeAnnText(displayLinkText)}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:11px; height:11px; flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+          </svg>
+        </div>
+      ` : ''}
       <div class="announcement-footer">
         <span class="announcement-author">Posted by <strong>${escapeAnnText(a.postedBy || 'Marketing Team')}</strong></span>
         ${canManage ? `
-          <div style="display:flex; gap:6px;">
-            <button class="btn-outline" style="padding:4px 12px; font-size:11.5px;" onclick="${editAction}">Edit</button>
-            <button class="btn-outline" style="padding:4px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="${deleteAction}">Delete</button>
+          <div style="display:flex; gap:6px;" onclick="event.stopPropagation();">
+            <button class="btn-outline" style="padding:4px 12px; font-size:11.5px;" onclick="event.stopPropagation(); ${editAction}">Edit</button>
+            <button class="btn-outline" style="padding:4px 12px; font-size:11.5px; color:#ef4444; border-color:#fca5a5;" onclick="event.stopPropagation(); ${deleteAction}">Delete</button>
           </div>
         ` : ''}
       </div>
@@ -2090,6 +2185,11 @@ function ensureAnnouncementModal() {
           <div class="form-group full-width">
             <label for="annMessage">Message *</label>
             <textarea id="annMessage" rows="5" required placeholder="Write the announcement details..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label for="annLink">Attached Link URL (Optional)</label>
+            <input type="text" id="annLink" placeholder="e.g. https://1cell.ai/... or #company-assets or #products">
+            <small style="font-size:11px; color:var(--text-tertiary); margin-top:3px; display:block;">Clicking the announcement card will open this link. An arrow icon will indicate an attached link.</small>
           </div>
           <div class="form-group">
             <label for="annCategory">Category</label>
@@ -2139,6 +2239,7 @@ window.openAnnouncementModal = function(annId) {
   document.getElementById('annId').value = existing ? existing.id : '';
   document.getElementById('annTitle').value = existing ? existing.title : '';
   document.getElementById('annMessage').value = existing ? existing.message : '';
+  document.getElementById('annLink').value = existing ? (existing.link || '') : '';
   document.getElementById('annCategory').value = existing ? (existing.category || 'General') : 'General';
   document.getElementById('annDate').value = existing ? (existing.date || today) : today;
   document.getElementById('annPostedBy').value = existing ? (existing.postedBy || '') : (getCurrentUserName() || 'Marketing Team');
@@ -2159,6 +2260,8 @@ window.saveAnnouncement = function() {
   const id = document.getElementById('annId').value;
   const title = document.getElementById('annTitle').value.trim();
   const message = document.getElementById('annMessage').value.trim();
+  const link = (document.getElementById('annLink')?.value || '').trim();
+
   if (!title || !message) {
     showToast('Please enter a title and message');
     return;
@@ -2167,6 +2270,7 @@ window.saveAnnouncement = function() {
     id: id || ('ann-' + Date.now()),
     title,
     message,
+    link: link || undefined,
     category: document.getElementById('annCategory').value || 'General',
     date: document.getElementById('annDate').value || new Date().toISOString().split('T')[0],
     postedBy: document.getElementById('annPostedBy').value.trim() || getCurrentUserName() || 'Marketing Team',
@@ -3999,6 +4103,22 @@ function getPartnerAnnouncements() {
       list = [];
     }
     savePartnerAnnouncements(list);
+  } else {
+    // If existing partner announcements don't have links yet, populate matching defaults
+    let updated = false;
+    if (db && Array.isArray(db.partnerAnnouncements)) {
+      list = list.map(item => {
+        if (!item.link) {
+          const def = db.partnerAnnouncements.find(d => d.id === item.id);
+          if (def && def.link) {
+            updated = true;
+            return { ...item, link: def.link };
+          }
+        }
+        return item;
+      });
+      if (updated) savePartnerAnnouncements(list);
+    }
   }
 
   return list.slice().sort((a, b) => {
@@ -4650,6 +4770,11 @@ function ensurePartnerAnnouncementModal() {
             <label for="ptnrAnnMessage">Announcement Message *</label>
             <textarea id="ptnrAnnMessage" rows="5" required placeholder="Write details for channel partners..."></textarea>
           </div>
+          <div class="form-group full-width">
+            <label for="ptnrAnnLink">Attached Link URL (Optional)</label>
+            <input type="text" id="ptnrAnnLink" placeholder="e.g. https://... or #co-branded">
+            <small style="font-size:11px; color:var(--text-tertiary); margin-top:3px; display:block;">Clicking the announcement card will open this link. An arrow icon will indicate an attached link.</small>
+          </div>
           <div class="form-group">
             <label for="ptnrAnnCategory">Category</label>
             <select id="ptnrAnnCategory">
@@ -4698,6 +4823,7 @@ window.openPartnerAnnouncementModal = function(annId = null) {
   document.getElementById('ptnrAnnId').value = existing ? existing.id : '';
   document.getElementById('ptnrAnnTitle').value = existing ? existing.title : '';
   document.getElementById('ptnrAnnMessage').value = existing ? existing.message : '';
+  document.getElementById('ptnrAnnLink').value = existing ? (existing.link || '') : '';
   document.getElementById('ptnrAnnCategory').value = existing ? (existing.category || 'Toolkit') : 'Toolkit';
   document.getElementById('ptnrAnnDate').value = existing ? (existing.date || today) : today;
   document.getElementById('ptnrAnnPostedBy').value = existing ? (existing.postedBy || '') : (getCurrentUserName() || 'Marketing Team');
@@ -4719,6 +4845,7 @@ window.savePartnerAnnouncement = function() {
   const id = document.getElementById('ptnrAnnId').value;
   const title = document.getElementById('ptnrAnnTitle').value.trim();
   const message = document.getElementById('ptnrAnnMessage').value.trim();
+  const link = (document.getElementById('ptnrAnnLink')?.value || '').trim();
 
   if (!title || !message) {
     showToast('Please enter an announcement title and message');
@@ -4729,6 +4856,7 @@ window.savePartnerAnnouncement = function() {
     id: id || ('ptnr-ann-' + Date.now()),
     title,
     message,
+    link: link || undefined,
     category: document.getElementById('ptnrAnnCategory').value || 'Toolkit',
     date: document.getElementById('ptnrAnnDate').value || new Date().toISOString().split('T')[0],
     postedBy: document.getElementById('ptnrAnnPostedBy').value.trim() || getCurrentUserName() || 'Marketing Team',

@@ -3275,12 +3275,32 @@ body.authenticated .login-overlay,
   border-left: 4px solid var(--brand-navy);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 .announcement-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
 .announcement-card.is-pinned {
   border-left-color: var(--brand-gold);
   background: linear-gradient(135deg, rgba(218, 165, 32, 0.07) 0%, var(--bg-secondary) 55%);
+}
+
+.announcement-card.has-link {
+  cursor: pointer;
+  position: relative;
+}
+.announcement-card.has-link:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 10px 24px -4px rgba(2, 132, 199, 0.2), 0 6px 12px -4px rgba(2, 132, 199, 0.12);
+  transform: translateY(-2px);
+}
+.announcement-card.has-link:hover .announcement-arrow-icon {
+  background: var(--accent-color) !important;
+  color: #ffffff !important;
+  transform: translate(2px, -2px);
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35);
+}
+.announcement-card.has-link:hover .announcement-attached-link-row {
+  color: #0284c7;
+  text-decoration: underline;
 }
 
 .announcement-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }

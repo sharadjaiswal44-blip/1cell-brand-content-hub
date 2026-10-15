@@ -3432,7 +3432,8 @@ const db = {
       targetPartner: "Apollo Hospitals",
       postedBy: "Marketing Admin",
       date: "2026-10-12",
-      pinned: true
+      pinned: true,
+      link: "#co-branded"
     },
     {
       id: "ptnr-ann-002",
@@ -3442,7 +3443,8 @@ const db = {
       targetPartner: "Dr. Lal PathLabs",
       postedBy: "Commercial Team",
       date: "2026-10-10",
-      pinned: true
+      pinned: true,
+      link: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaLalPathRequisitionProtocols"
     },
     {
       id: "ptnr-ann-003",
@@ -3452,7 +3454,8 @@ const db = {
       targetPartner: "All Partners",
       postedBy: "Marketing Admin",
       date: "2026-10-06",
-      pinned: false
+      pinned: false,
+      link: "#co-branded"
     },
     {
       id: "ptnr-ann-004",
@@ -3462,7 +3465,8 @@ const db = {
       targetPartner: "All Partners",
       postedBy: "Brand & Legal",
       date: "2026-09-29",
-      pinned: false
+      pinned: false,
+      link: "https://1cellai-my.sharepoint.com/:b:/g/personal/marketing_1cell_ai/EaCoBrandingCompliance2026"
     }
   ]
 };
