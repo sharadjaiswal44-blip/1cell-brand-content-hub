@@ -543,7 +543,7 @@ function persistFavorites() {
 // Resolve all favourited items that can be rendered as standard document cards
 function getAllFavoriteItems() {
   const coBranded = typeof getCoBrandedAssets === 'function' ? getCoBrandedAssets() : (db.coBrandedAssets || []);
-  const pool = [].concat(db.documents || [], db.newsletters || [], coBranded);
+  const pool = [].concat(db.documents || [], db.newsletters || [], coBranded, db.publications || []);
   const seen = new Set();
   return pool.filter(d => {
     if (!d || !userFavorites.has(d.id) || seen.has(d.id)) return false;
@@ -1117,12 +1117,12 @@ function init() {
 
   // Department-Level Access Permissions Matrix
   const DEPARTMENT_PERMISSIONS = {
-    'Admin': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics', 'access-control', 'login-audit'],
-    'Marketing': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics'],
-    'Leadership': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics'],
-    'Scientific': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'favorites'],
-    'Sales': ['dashboard', 'company-assets', 'products', 'cases', 'competitive-intelligence', 'favorites'],
-    'Channel Partners': ['dashboard', 'co-branded', 'favorites']
+    'Admin': ['dashboard', 'company-assets', 'products', 'cases', 'publications', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics', 'access-control', 'login-audit'],
+    'Marketing': ['dashboard', 'company-assets', 'products', 'cases', 'publications', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics'],
+    'Leadership': ['dashboard', 'company-assets', 'products', 'cases', 'publications', 'competitive-intelligence', 'co-branded', 'favorites', 'analytics'],
+    'Scientific': ['dashboard', 'company-assets', 'products', 'cases', 'publications', 'competitive-intelligence', 'favorites'],
+    'Sales': ['dashboard', 'company-assets', 'products', 'cases', 'publications', 'competitive-intelligence', 'favorites'],
+    'Channel Partners': ['dashboard', 'co-branded', 'publications', 'favorites']
   };
   window.DEPARTMENT_PERMISSIONS = DEPARTMENT_PERMISSIONS;
 
@@ -1554,6 +1554,9 @@ function renderRoute(route) {
     case 'cases':
       renderCaseLibrary();
       break;
+    case 'publications':
+      renderPublications();
+      break;
     case 'competitive-intelligence':
       renderCompetitiveIntelligence();
       break;
@@ -1821,6 +1824,9 @@ function renderChannelPartnerDashboard() {
         <button class="btn-primary" onclick="window.renderRoute('co-branded')" style="display:inline-flex; align-items:center; gap:6px;">
           <span>Explore Co-Branded Folders →</span>
         </button>
+        <button class="btn-outline" onclick="window.renderRoute('publications')" style="display:inline-flex; align-items:center; gap:6px;">
+          <span>📑 Publications & Posters →</span>
+        </button>
       </div>
     </div>
 
@@ -1906,8 +1912,11 @@ function renderDashboard() {
         <h1 class="welcome-title">1Cell.Ai Content Hub</h1>
         <p class="welcome-subtitle">Search, discover, and preview the latest approved company and product resources.</p>
       </div>
-      <div class="welcome-banner-actions">
+      <div class="welcome-banner-actions" style="display:flex; gap:10px; align-items:center;">
         ${actionsHtml}
+        <button class="btn-outline" onclick="window.renderRoute('publications')" style="display:inline-flex; align-items:center; gap:6px;">
+          <span>📑 Publications & Posters →</span>
+        </button>
       </div>
     </div>
 
@@ -3076,6 +3085,20 @@ function renderCaseLibrary() {
       </div>
     </div>
     `}
+
+    <div style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%); border: 1px solid rgba(2, 132, 199, 0.25); border-radius: var(--radius-md); padding: 12px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 22px;">📑</span>
+        <div>
+          <strong style="color: var(--text-primary); font-size: 13.5px;">1Cell.Ai Publications, Abstracts & Posters</strong>
+          <p style="margin: 0; font-size: 12px; color: var(--text-secondary);">Browse peer-reviewed papers, ASCO, ESMO & AACR conference abstracts and poster presentations.</p>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="window.navigateToRoute('publications')" style="padding: 6px 14px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+        <span>Browse Publications & Posters</span>
+        <span>→</span>
+      </button>
+    </div>
 
     <div class="scientific-filter-container">
       <div class="scientific-filter-top-row">
@@ -5103,46 +5126,454 @@ window.saveNewSampleReport = function() {
 };
 
 
-// 5. Publications Route
-function renderPublications() {
-  workspaceViewport.innerHTML = `
-${window.renderCategoryHeader('Peer-Reviewed Publications', 'A library of clinical validity studies, poster presentations, and journal abstracts.', 'publications')}
-    
-    <div>
-      ${db.publications.map(pub => `
-        <div class="pub-item" onclick="window.openSharePoint('${pub.id}')" style="cursor:pointer;" title="Click to view publication in SharePoint">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
-            <div class="pub-journal">${pub.journal} • Published ${pub.publishedDate}</div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-              <span class="badge badge-prod">${(db.products.find(p => p.id === pub.relatedProduct) || {}).name || '1Cell.Ai'}</span>
-            </div>
-          </div>
-          <h3 style="font-size:18px; font-weight:700; margin-bottom:8px;">${pub.title}</h3>
-          <div class="pub-authors">${pub.authors}</div>
-          <div class="pub-abstract-box"><strong>Abstract:</strong> ${pub.abstract}</div>
-          <div style="margin-bottom:12px;">
-            ${renderCardLastUpdatedRow(pub)}
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 12px;">
-            <div class="pub-citation"><strong>Citation:</strong> ${pub.citation}</div>
-            <div style="display:flex; gap:8px;">
-              ${isMarketingUser() ? `
-              <button class="btn-outline" style="padding:8px 14px; font-size:12px;" onclick="event.stopPropagation(); window.openEditAssetModal('${pub.id}')">Edit Link</button>
-              ` : ''}
-              <button class="btn-outline" style="padding:8px 16px; font-size:12px;" onclick="event.stopPropagation(); const matchedDoc = db.documents.find(d => d.title.toLowerCase().includes('${pub.title}'.toLowerCase().substring(0, 15))); window.previewDocument(matchedDoc ? matchedDoc.id : (db.documents[0] ? db.documents[0].id : 'doc-041'))">Preview Metadata</button>
-              <button class="btn-primary" style="padding:8px 16px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation(); window.openSharePoint('${pub.id}')">
-                <span>View</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                </svg>
-              </button>
-            </div>
+// ==========================================
+// 5. PUBLICATIONS, ABSTRACTS & POSTERS ROUTE
+// ==========================================
+let pubSearchQuery = '';
+let pubEventFilter = 'all'; // 'all' | 'ASCO' | 'ESMO' | 'AACR' | 'Other'
+let pubContentTypeFilter = 'all'; // 'all' | 'Abstract' | 'Journal' | 'Poster'
+let expandedAbstracts = new Set();
+
+window.searchPublications = function(query) {
+  pubSearchQuery = (query || '').trim();
+  renderPublications();
+  const inputEl = document.getElementById('publicationSearchInput');
+  if (inputEl) {
+    inputEl.focus();
+    inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length;
+  }
+};
+
+window.setPubFilter = function(filterType, value) {
+  if (filterType === 'event') pubEventFilter = value;
+  if (filterType === 'contentType') pubContentTypeFilter = value;
+  renderPublications();
+};
+
+window.resetPubFilters = function() {
+  pubSearchQuery = '';
+  pubEventFilter = 'all';
+  pubContentTypeFilter = 'all';
+  renderPublications();
+};
+
+window.toggleAbstractExpand = function(pubId) {
+  if (expandedAbstracts.has(pubId)) {
+    expandedAbstracts.delete(pubId);
+  } else {
+    expandedAbstracts.add(pubId);
+  }
+  renderPublications();
+};
+
+window.copyPublicationCitation = function(pubId) {
+  const pub = (db.publications || []).find(p => p.id === pubId);
+  if (!pub) return;
+  const textToCopy = pub.citation || `${pub.authors}. ${pub.title}. ${pub.journal || pub.eventName} (${pub.publishedDate}).`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      showToast('Citation copied to clipboard!');
+    }).catch(() => {
+      showToast('Citation copied: ' + textToCopy);
+    });
+  } else {
+    showToast('Citation: ' + textToCopy);
+  }
+};
+
+window.openPublicationModal = function(pubId) {
+  const pub = (db.publications || []).find(p => p.id === pubId);
+  if (!pub) return;
+
+  let modalEl = document.getElementById('publicationDetailsModal');
+  if (!modalEl) {
+    modalEl = document.createElement('div');
+    modalEl.id = 'publicationDetailsModal';
+    modalEl.className = 'modal';
+    document.body.appendChild(modalEl);
+  }
+
+  const matchedProduct = (db.products || []).find(p => p.id === pub.relatedProduct) || {};
+  const productName = matchedProduct.name || '1Cell.Ai Platform';
+
+  let eventBadgeClass = 'badge-event-other';
+  if (pub.eventType === 'ASCO') eventBadgeClass = 'badge-event-asco';
+  else if (pub.eventType === 'ESMO') eventBadgeClass = 'badge-event-esmo';
+  else if (pub.eventType === 'AACR') eventBadgeClass = 'badge-event-aacr';
+
+  let typeBadgeClass = 'badge-type-journal';
+  let typeIcon = '📖';
+  if (pub.contentType === 'Abstract') {
+    typeBadgeClass = 'badge-type-abstract';
+    typeIcon = '📝';
+  } else if (pub.contentType === 'Poster') {
+    typeBadgeClass = 'badge-type-poster';
+    typeIcon = '📊';
+  }
+
+  modalEl.innerHTML = `
+    <div class="modal-content" style="max-width: 760px; width: 92%; padding: 26px;">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:14px; margin-bottom:18px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">📑</span>
+          <div>
+            <h2 style="font-family:'Outfit', sans-serif; font-size:19px; font-weight:700; margin:0; color:var(--text-primary);">${pub.contentType || 'Publication'} Overview</h2>
+            <div style="font-size:12px; color:var(--text-tertiary); margin-top:2px;">1Cell.Ai Scientific & Clinical Evidence Archive</div>
           </div>
         </div>
-      `).join('')}
+        <button class="modal-close-btn" onclick="document.getElementById('publicationDetailsModal').classList.remove('active')" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-tertiary); line-height:1;">✕</button>
+      </div>
+
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <span class="badge ${typeBadgeClass}" style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:12px; font-size:12px;">
+            <span>${typeIcon}</span>
+            <span>${pub.contentType || 'Publication'}</span>
+          </span>
+          <span class="badge ${eventBadgeClass}" style="padding:4px 10px; border-radius:12px; font-size:12px;">
+            ${pub.eventType === 'Other' ? (pub.journal || 'Journal') : pub.eventType}
+          </span>
+          <span class="badge badge-prod" style="padding:4px 10px; border-radius:12px; font-size:12px;">
+            ${productName}
+          </span>
+          <span style="font-size:12px; font-weight:600; color:var(--text-tertiary); margin-left:auto; background:var(--bg-tertiary); padding:4px 9px; border-radius:6px;">
+            📅 ${pub.publishedDate || '2026'}
+          </span>
+        </div>
+
+        <h3 style="font-family:'Outfit',sans-serif; font-size:20px; font-weight:700; line-height:1.4; margin:0; color:var(--text-primary);">${escapeHtml(pub.title)}</h3>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:14px;">
+          <div>
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:3px;">Authors & Investigators</div>
+            <div style="font-size:13px; font-weight:600; color:var(--text-primary);">${escapeHtml(pub.authors || '1Cell.Ai Clinical Research Consortium')}</div>
+          </div>
+          <div>
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:3px;">Congress / Publication Forum</div>
+            <div style="font-size:13px; font-weight:600; color:var(--text-primary);">${escapeHtml(pub.eventName || pub.journal || 'Peer-Reviewed Literature')}</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:18px;">
+          <strong style="display:block; margin-bottom:8px; color:var(--text-primary); text-transform:uppercase; font-size:11.5px; letter-spacing:0.04em;">Full Scientific Abstract</strong>
+          <div style="font-size:13.5px; line-height:1.65; color:var(--text-secondary);">${escapeHtml(pub.abstract || 'Abstract summary available in the official publication link.')}</div>
+        </div>
+
+        <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:12px 14px; font-size:12.5px; color:var(--text-secondary); display:flex; align-items:center; gap:8px;">
+          <span style="font-weight:700; color:var(--text-primary);">Citation:</span>
+          <span style="font-style:italic;">${escapeHtml(pub.citation || 'N/A')}</span>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:22px; padding-top:16px; border-top:1px solid var(--border-color); flex-wrap:wrap; gap:10px;">
+        <button class="btn-outline" onclick="window.copyPublicationCitation('${pub.id}')" style="display:inline-flex; align-items:center; gap:6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+          </svg>
+          <span>Copy Citation</span>
+        </button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-outline" onclick="document.getElementById('publicationDetailsModal').classList.remove('active')">Close</button>
+          <a href="${escapeHtml(pub.link || '#')}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+            <span>Open Research URL</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:13px;height:13px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modalEl.classList.add('active');
+};
+
+function renderPublicationCard(pub) {
+  const isFav = userFavorites.has(pub.id);
+  const isExpanded = expandedAbstracts.has(pub.id);
+  const matchedProduct = (db.products || []).find(p => p.id === pub.relatedProduct) || {};
+  const productName = matchedProduct.name || '1Cell.Ai Platform';
+
+  let eventBadgeClass = 'badge-event-other';
+  let eventLabel = pub.eventName || pub.journal || 'Journal';
+  if (pub.eventType === 'ASCO') {
+    eventBadgeClass = 'badge-event-asco';
+    eventLabel = '🎯 ASCO';
+  } else if (pub.eventType === 'ESMO') {
+    eventBadgeClass = 'badge-event-esmo';
+    eventLabel = '🌍 ESMO';
+  } else if (pub.eventType === 'AACR') {
+    eventBadgeClass = 'badge-event-aacr';
+    eventLabel = '🔬 AACR';
+  } else {
+    eventLabel = '📚 ' + (pub.journal || 'Journal');
+  }
+
+  let typeBadgeClass = 'badge-type-journal';
+  let typeIcon = '📖';
+  if (pub.contentType === 'Abstract') {
+    typeBadgeClass = 'badge-type-abstract';
+    typeIcon = '📝';
+  } else if (pub.contentType === 'Poster') {
+    typeBadgeClass = 'badge-type-poster';
+    typeIcon = '📊';
+  }
+
+  const abstractText = pub.abstract || '';
+  const needsTruncate = abstractText.length > 210;
+  const displayText = (!isExpanded && needsTruncate) 
+    ? abstractText.substring(0, 205) + '...'
+    : abstractText;
+
+  return `
+    <div class="pub-card" id="${pub.id}">
+      <div class="pub-card-top">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span class="badge ${typeBadgeClass}" style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; padding:4px 10px; border-radius:12px;">
+            <span>${typeIcon}</span>
+            <span>${pub.contentType || 'Publication'}</span>
+          </span>
+          <span class="badge ${eventBadgeClass}" style="font-size:11.5px; padding:4px 10px; border-radius:12px;">
+            ${eventLabel}
+          </span>
+          <span class="badge badge-prod" style="font-size:11.5px; padding:4px 10px; border-radius:12px;">
+            ${productName}
+          </span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px; font-weight:600; color:var(--text-tertiary); background:var(--bg-tertiary); padding:3px 8px; border-radius:6px;">
+            📅 ${pub.publishedDate || '2026'}
+          </span>
+          <button class="card-action-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); window.toggleFavorite('${pub.id}')" title="${isFav ? 'Remove from bookmarks' : 'Bookmark publication'}" style="width:32px; height:32px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="${isFav ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px; height:16px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <h3 class="pub-card-title" onclick="window.openPublicationModal('${pub.id}')" style="cursor:pointer;" title="Click to view details">${escapeHtml(pub.title)}</h3>
+      
+      <div class="pub-card-authors">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:var(--text-tertiary);flex-shrink:0;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        </svg>
+        <span style="font-weight:500;">${escapeHtml(pub.authors || '1Cell.Ai Research Team')}</span>
+        <span style="color:var(--text-tertiary);">•</span>
+        <span style="color:var(--text-secondary);">${escapeHtml(pub.eventName || pub.journal || '')}</span>
+      </div>
+
+      <div class="pub-card-abstract">
+        <strong style="color:var(--text-primary); display:block; margin-bottom:4px; font-size:11.5px; text-transform:uppercase; letter-spacing:0.02em;">Abstract / Executive Summary:</strong>
+        <span>${escapeHtml(displayText)}</span>
+        ${needsTruncate ? `
+          <button onclick="event.stopPropagation(); window.toggleAbstractExpand('${pub.id}')" style="background:none; border:none; color:var(--accent-color); font-size:12px; font-weight:600; cursor:pointer; padding:0; margin-left:6px; text-decoration:underline;">
+            ${isExpanded ? 'Show Less' : 'Show Full Abstract'}
+          </button>
+        ` : ''}
+      </div>
+
+      <div class="pub-card-footer">
+        <div class="pub-card-citation">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:var(--text-tertiary);flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+          </svg>
+          <span><strong>Citation:</strong> ${escapeHtml(pub.citation || '')}</span>
+        </div>
+
+        <div class="pub-card-actions">
+          <button class="btn-outline" style="padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="event.stopPropagation(); window.copyPublicationCitation('${pub.id}')" title="Copy reference citation">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+            </svg>
+            <span>Copy Citation</span>
+          </button>
+          
+          <button class="btn-outline" style="padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="event.stopPropagation(); window.openPublicationModal('${pub.id}')" title="View complete metadata and details">
+            <span>Details</span>
+          </button>
+
+          <a href="${escapeHtml(pub.link || '#')}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="padding:6px 14px; font-size:12px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation();">
+            <span>View ${pub.contentType === 'Poster' ? 'Poster' : (pub.contentType === 'Abstract' ? 'Abstract' : 'Publication')}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </a>
+        </div>
+      </div>
     </div>
   `;
 }
+window.renderPublicationCard = renderPublicationCard;
+
+function renderPublications() {
+  const allPubs = db.publications || [];
+  
+  // Filtering logic
+  const filteredPubs = allPubs.filter(pub => {
+    // 1. Search publication title (and optionally authors/abstract/citation)
+    if (pubSearchQuery) {
+      const q = pubSearchQuery.toLowerCase().trim();
+      const matchTitle = (pub.title || '').toLowerCase().includes(q);
+      const matchAuthors = (pub.authors || '').toLowerCase().includes(q);
+      const matchAbstract = (pub.abstract || '').toLowerCase().includes(q);
+      const matchCitation = (pub.citation || '').toLowerCase().includes(q);
+      if (!matchTitle && !matchAuthors && !matchAbstract && !matchCitation) {
+        return false;
+      }
+    }
+
+    // 2. Filter by event (ASCO, ESMO, AACR, Other)
+    if (pubEventFilter !== 'all') {
+      if (pub.eventType !== pubEventFilter) return false;
+    }
+
+    // 3. Filter by content type (Abstract, Journal, Poster)
+    if (pubContentTypeFilter !== 'all') {
+      if (pub.contentType !== pubContentTypeFilter) return false;
+    }
+
+    return true;
+  });
+
+  const totalCount = allPubs.length;
+  const filteredCount = filteredPubs.length;
+  const hasActiveFilters = Boolean(pubSearchQuery || pubEventFilter !== 'all' || pubContentTypeFilter !== 'all');
+
+  // Counts for pills
+  const ascoCount = allPubs.filter(p => p.eventType === 'ASCO').length;
+  const esmoCount = allPubs.filter(p => p.eventType === 'ESMO').length;
+  const aacrCount = allPubs.filter(p => p.eventType === 'AACR').length;
+  const otherEventCount = allPubs.filter(p => p.eventType === 'Other').length;
+
+  const abstractCount = allPubs.filter(p => p.contentType === 'Abstract').length;
+  const journalCount = allPubs.filter(p => p.contentType === 'Journal').length;
+  const posterCount = allPubs.filter(p => p.contentType === 'Poster').length;
+
+  workspaceViewport.innerHTML = `
+    ${window.renderCategoryHeader ? window.renderCategoryHeader('1Cell.Ai Publications, Abstracts & Posters', 'A peer-reviewed scientific repository of clinical validations, conference abstracts, journal articles, and poster presentations across ASCO, ESMO, AACR, and major oncology forums.', 'publications') : `
+    <div class="welcome-banner">
+      <div>
+        <h1 class="welcome-title">1Cell.Ai Publications, Abstracts & Posters</h1>
+        <p class="welcome-subtitle">A peer-reviewed scientific repository of clinical validations, conference abstracts, journal articles, and poster presentations across ASCO, ESMO, AACR, and major oncology forums.</p>
+      </div>
+    </div>
+    `}
+
+    <!-- Publications Filter Bar -->
+    <div class="pub-filter-container">
+      <div class="pub-filter-top-row">
+        <!-- Search publication title box -->
+        <div class="pub-search-box">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input type="text" id="publicationSearchInput" placeholder="Search publication title, authors, keywords..." oninput="window.searchPublications(this.value)" value="${escapeHtml(pubSearchQuery)}" style="border:none;background:transparent;outline:none;width:100%;font-size:13px;color:var(--text-primary);">
+          <button id="pubSearchClearBtn" class="search-clear-btn" style="display:${pubSearchQuery ? 'inline-flex' : 'none'}; cursor:pointer; background:none; border:none;" onclick="document.getElementById('publicationSearchInput').value=''; window.searchPublications('');">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:14px; height:14px; color:var(--text-tertiary);">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Result count & reset -->
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span class="badge badge-prod" style="font-size:12px; padding:7px 14px;">
+            ${filteredCount} of ${totalCount} Research Items
+          </span>
+          ${hasActiveFilters ? `
+            <button class="btn-outline" onclick="window.resetPubFilters()" style="padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:4px;">
+              <span>✕ Reset Filters</span>
+            </button>
+          ` : ''}
+          ${isMarketingUser() ? `
+            <button class="btn-primary" onclick="window.triggerRegisterAssetModal('publications')" style="display:inline-flex; align-items:center; gap:6px; padding:7px 14px; font-size:12px; font-weight:600;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <span>+ Add Publication</span>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+
+      <!-- Select Dropdowns Row -->
+      <div class="pub-filter-selects-row">
+        <!-- Event Filter Dropdown -->
+        <div class="pub-select-group">
+          <label for="pubEventSelect">Event / Conference Filter</label>
+          <select id="pubEventSelect" onchange="window.setPubFilter('event', this.value)">
+            <option value="all" ${pubEventFilter === 'all' ? 'selected' : ''}>All Events & Journals (${totalCount})</option>
+            <option value="ASCO" ${pubEventFilter === 'ASCO' ? 'selected' : ''}>🎯 ASCO (American Society of Clinical Oncology) [${ascoCount}]</option>
+            <option value="ESMO" ${pubEventFilter === 'ESMO' ? 'selected' : ''}>🌍 ESMO (European Society for Medical Oncology) [${esmoCount}]</option>
+            <option value="AACR" ${pubEventFilter === 'AACR' ? 'selected' : ''}>🔬 AACR (American Association for Cancer Research) [${aacrCount}]</option>
+            <option value="Other" ${pubEventFilter === 'Other' ? 'selected' : ''}>📚 Peer-Reviewed Journals & Other [${otherEventCount}]</option>
+          </select>
+        </div>
+
+        <!-- Content Type Filter Dropdown -->
+        <div class="pub-select-group">
+          <label for="pubContentTypeSelect">Content Type Filter</label>
+          <select id="pubContentTypeSelect" onchange="window.setPubFilter('contentType', this.value)">
+            <option value="all" ${pubContentTypeFilter === 'all' ? 'selected' : ''}>All Content Types (${totalCount})</option>
+            <option value="Abstract" ${pubContentTypeFilter === 'Abstract' ? 'selected' : ''}>📝 Abstracts (${abstractCount})</option>
+            <option value="Journal" ${pubContentTypeFilter === 'Journal' ? 'selected' : ''}>📖 Journal Articles (${journalCount})</option>
+            <option value="Poster" ${pubContentTypeFilter === 'Poster' ? 'selected' : ''}>📊 Posters (${posterCount})</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Interactive Pills Row -->
+      <div class="pub-pills-row">
+        <span class="pub-pills-label">Event:</span>
+        <button class="pub-filter-pill ${pubEventFilter === 'all' ? 'active' : ''}" onclick="window.setPubFilter('event', 'all')">
+          All Events
+        </button>
+        <button class="pub-filter-pill ${pubEventFilter === 'ASCO' ? 'active' : ''}" onclick="window.setPubFilter('event', 'ASCO')">
+          🎯 ASCO (${ascoCount})
+        </button>
+        <button class="pub-filter-pill ${pubEventFilter === 'ESMO' ? 'active' : ''}" onclick="window.setPubFilter('event', 'ESMO')">
+          🌍 ESMO (${esmoCount})
+        </button>
+        <button class="pub-filter-pill ${pubEventFilter === 'AACR' ? 'active' : ''}" onclick="window.setPubFilter('event', 'AACR')">
+          🔬 AACR (${aacrCount})
+        </button>
+        <button class="pub-filter-pill ${pubEventFilter === 'Other' ? 'active' : ''}" onclick="window.setPubFilter('event', 'Other')">
+          📚 Journals (${otherEventCount})
+        </button>
+
+        <span class="pub-pills-label" style="margin-left:14px;">Type:</span>
+        <button class="pub-filter-pill ${pubContentTypeFilter === 'all' ? 'active' : ''}" onclick="window.setPubFilter('contentType', 'all')">
+          All Types
+        </button>
+        <button class="pub-filter-pill ${pubContentTypeFilter === 'Abstract' ? 'active' : ''}" onclick="window.setPubFilter('contentType', 'Abstract')">
+          📝 Abstract (${abstractCount})
+        </button>
+        <button class="pub-filter-pill ${pubContentTypeFilter === 'Journal' ? 'active' : ''}" onclick="window.setPubFilter('contentType', 'Journal')">
+          📖 Journal (${journalCount})
+        </button>
+        <button class="pub-filter-pill ${pubContentTypeFilter === 'Poster' ? 'active' : ''}" onclick="window.setPubFilter('contentType', 'Poster')">
+          📊 Poster (${posterCount})
+        </button>
+      </div>
+    </div>
+
+    <!-- Publications List Grid -->
+    ${filteredPubs.length > 0 ? `
+      <div class="pub-cards-grid">
+        ${filteredPubs.map(pub => renderPublicationCard(pub)).join('')}
+      </div>
+    ` : `
+      <div class="empty-state-box" style="padding:60px 20px; text-align:center; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-lg);">
+        <div style="font-size:36px; margin-bottom:12px;">📑</div>
+        <h3 style="font-size:18px; font-weight:700; margin-bottom:6px;">No research publications found</h3>
+        <p style="color:var(--text-secondary); max-width:480px; margin:0 auto 16px auto; font-size:13.5px;">No publication, abstract, or poster matching your current search title and filters. Try adjusting your query or resetting filters.</p>
+        <button class="btn-primary" onclick="window.resetPubFilters()" style="padding:8px 18px; font-size:13px; font-weight:600;">Reset All Filters</button>
+      </div>
+    `}
+  `;
+}
+window.renderPublications = renderPublications;
 
 // 6. Campaign Hub Route
 function renderCampaignHub() {
@@ -5421,11 +5852,11 @@ function renderFavorites() {
   const isPartner = isChannelPartner();
   const allFavs = getAllFavoriteItems();
   const favs = isPartner 
-    ? allFavs.filter(d => d.productId || d.isCoBranded || (d.id && d.id.startsWith('cobrand-')))
+    ? allFavs.filter(d => d.productId || d.isCoBranded || (d.id && d.id.startsWith('cobrand-')) || (d.id && d.id.startsWith('pub-')))
     : allFavs;
 
   const title = isPartner ? 'Channel Partner Bookmarks & Favourites' : 'Your Bookmarks & Favorites';
-  const subtitle = isPartner ? 'Quick access to co-branded clinical assets bookmarked for your accounts.' : 'Quick access list of assets pinned by your profile.';
+  const subtitle = isPartner ? 'Quick access to co-branded clinical assets and research publications bookmarked for your accounts.' : 'Quick access list of assets and scientific publications pinned by your profile.';
 
   if (favs.length === 0) {
     workspaceViewport.innerHTML = `
@@ -5435,7 +5866,7 @@ function renderFavorites() {
           <p class="welcome-subtitle">${subtitle}</p>
         </div>
       </div>
-      <p style="color:var(--text-tertiary); text-align:center; padding:80px;">No bookmarked items. Click the bookmark icon on any ${isPartner ? 'co-branded asset' : 'document'} card to pin it here.</p>
+      <p style="color:var(--text-tertiary); text-align:center; padding:80px;">No bookmarked items. Click the bookmark icon on any ${isPartner ? 'co-branded asset or research publication' : 'document or publication'} card to pin it here.</p>
     `;
     return;
   }
@@ -5450,6 +5881,9 @@ function renderFavorites() {
       ${favs.map(d => {
         if (d.id && d.id.startsWith('cobrand-')) {
           return renderCoBrandedCard(d);
+        }
+        if (d.id && d.id.startsWith('pub-')) {
+          return renderPublicationCard(d);
         }
         return renderDocumentCard(d);
       }).join('')}
@@ -7959,6 +8393,7 @@ function renderAccessControl() {
     { name: "1Cell.Ai Assets", route: "company-assets", icon: "📁", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: false },
     { name: "Product Hub", route: "products", icon: "🧬", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: false },
     { name: "Scientific Resources", route: "cases", icon: "🔬", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: false },
+    { name: "Publications & Posters", route: "publications", icon: "📑", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: true },
     { name: "Competitive Intelligence", route: "competitive-intelligence", icon: "⚡", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: false },
     { name: "Cobranded Assets", route: "co-branded", icon: "🤝", admin: true, marketing: true, leadership: true, scientific: false, sales: false, partner: true },
     { name: "Favorites", route: "favorites", icon: "⭐", admin: true, marketing: true, leadership: true, scientific: true, sales: true, partner: true },
@@ -7968,12 +8403,12 @@ function renderAccessControl() {
   ];
 
   const deptSummaries = [
-    { name: "Admin", role: "admin", icon: "🛡️", color: "#6366f1", count: 10, email: "@1cell.ai only", desc: "Full administrative and governance authority across all 10 platform modules including audit logs and access control." },
-    { name: "Marketing", role: "marketing_admin", icon: "📢", color: "#0284c7", count: 8, email: "@1cell.ai only", desc: "Full marketing management, brand assets, product hub, scientific resources, competitive intel, cobranded collateral & analytics." },
-    { name: "Leadership", role: "leadership", icon: "👔", color: "#8b5cf6", count: 8, email: "@1cell.ai only", desc: "Executive oversight across all content libraries, cross-functional workspaces, cobranded collateral, and dashboard analytics." },
-    { name: "Scientific", role: "medical", icon: "🧬", color: "#10b981", count: 6, email: "@1cell.ai only", desc: "Genomic science and medical affairs focus: Product Hub, Scientific Resources, Competitive Intelligence, and Favorites." },
-    { name: "Sales", role: "sales", icon: "💼", color: "#f59e0b", count: 6, email: "@1cell.ai only", desc: "Commercial field enablement: Product Hub, Scientific Resources, Competitive Intelligence, and personal Favorites." },
-    { name: "Channel Partners", role: "channel_partner", icon: "🤝", color: "#06b6d4", count: 3, email: "Any hospital or official domain", desc: "Restricted partner portal: Dedicated partner dashboard, cobranded product collateral, and favorites only." }
+    { name: "Admin", role: "admin", icon: "🛡️", color: "#6366f1", count: 11, email: "@1cell.ai only", desc: "Full administrative and governance authority across all 11 platform modules including audit logs and access control." },
+    { name: "Marketing", role: "marketing_admin", icon: "📢", color: "#0284c7", count: 9, email: "@1cell.ai only", desc: "Full marketing management, brand assets, product hub, scientific resources, publications & posters, competitive intel, cobranded collateral & analytics." },
+    { name: "Leadership", role: "leadership", icon: "👔", color: "#8b5cf6", count: 9, email: "@1cell.ai only", desc: "Executive oversight across all content libraries, publications archive, cross-functional workspaces, cobranded collateral, and dashboard analytics." },
+    { name: "Scientific", role: "medical", icon: "🧬", color: "#10b981", count: 7, email: "@1cell.ai only", desc: "Genomic science and medical affairs focus: Product Hub, Scientific Resources, Publications & Posters, Competitive Intelligence, and Favorites." },
+    { name: "Sales", role: "sales", icon: "💼", color: "#f59e0b", count: 7, email: "@1cell.ai only", desc: "Commercial field enablement: Product Hub, Scientific Resources, Publications & Posters, Competitive Intelligence, and personal Favorites." },
+    { name: "Channel Partners", role: "channel_partner", icon: "🤝", color: "#06b6d4", count: 4, email: "Any hospital or official domain", desc: "Restricted partner portal: Dedicated partner dashboard, cobranded product collateral, Publications & Posters archive, and personal favorites." }
   ];
 
   workspaceViewport.innerHTML = `
