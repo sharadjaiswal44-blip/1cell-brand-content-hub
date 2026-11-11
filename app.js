@@ -5132,6 +5132,7 @@ window.saveNewSampleReport = function() {
 let pubSearchQuery = '';
 let pubEventFilter = 'all'; // 'all' | 'ASCO' | 'ESMO' | 'AACR' | 'Other'
 let pubContentTypeFilter = 'all'; // 'all' | 'Abstract' | 'Journal' | 'Poster'
+let pubProductFilter = 'all'; // 'all' | 1cell product id
 let expandedAbstracts = new Set();
 
 window.searchPublications = function(query) {
@@ -5147,6 +5148,7 @@ window.searchPublications = function(query) {
 window.setPubFilter = function(filterType, value) {
   if (filterType === 'event') pubEventFilter = value;
   if (filterType === 'contentType') pubContentTypeFilter = value;
+  if (filterType === 'product') pubProductFilter = value;
   renderPublications();
 };
 
@@ -5154,6 +5156,7 @@ window.resetPubFilters = function() {
   pubSearchQuery = '';
   pubEventFilter = 'all';
   pubContentTypeFilter = 'all';
+  pubProductFilter = 'all';
   renderPublications();
 };
 
@@ -5290,110 +5293,41 @@ window.openPublicationModal = function(pubId) {
 
 function renderPublicationCard(pub) {
   const isFav = userFavorites.has(pub.id);
-  const isExpanded = expandedAbstracts.has(pub.id);
-  const matchedProduct = (db.products || []).find(p => p.id === pub.relatedProduct) || {};
-  const productName = matchedProduct.name || '1Cell.Ai Platform';
-
-  let eventBadgeClass = 'badge-event-other';
-  let eventLabel = pub.eventName || pub.journal || 'Journal';
-  if (pub.eventType === 'ASCO') {
-    eventBadgeClass = 'badge-event-asco';
-    eventLabel = '🎯 ASCO';
-  } else if (pub.eventType === 'ESMO') {
-    eventBadgeClass = 'badge-event-esmo';
-    eventLabel = '🌍 ESMO';
-  } else if (pub.eventType === 'AACR') {
-    eventBadgeClass = 'badge-event-aacr';
-    eventLabel = '🔬 AACR';
-  } else {
-    eventLabel = '📚 ' + (pub.journal || 'Journal');
-  }
-
-  let typeBadgeClass = 'badge-type-journal';
-  let typeIcon = '📖';
-  if (pub.contentType === 'Abstract') {
-    typeBadgeClass = 'badge-type-abstract';
-    typeIcon = '📝';
-  } else if (pub.contentType === 'Poster') {
-    typeBadgeClass = 'badge-type-poster';
-    typeIcon = '📊';
-  }
-
-  const abstractText = pub.abstract || '';
-  const needsTruncate = abstractText.length > 210;
-  const displayText = (!isExpanded && needsTruncate) 
-    ? abstractText.substring(0, 205) + '...'
-    : abstractText;
 
   return `
     <div class="pub-card" id="${pub.id}">
-      <div class="pub-card-top">
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <span class="badge ${typeBadgeClass}" style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; padding:4px 10px; border-radius:12px;">
-            <span>${typeIcon}</span>
-            <span>${pub.contentType || 'Publication'}</span>
-          </span>
-          <span class="badge ${eventBadgeClass}" style="font-size:11.5px; padding:4px 10px; border-radius:12px;">
-            ${eventLabel}
-          </span>
-          <span class="badge badge-prod" style="font-size:11.5px; padding:4px 10px; border-radius:12px;">
-            ${productName}
-          </span>
-        </div>
+      <div class="pub-card-top" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:12px; font-weight:600; color:var(--text-tertiary); background:var(--bg-tertiary); padding:3px 8px; border-radius:6px;">
+          <span style="font-size:12px; font-weight:600; color:var(--text-tertiary); background:var(--bg-tertiary); padding:4px 10px; border-radius:6px;">
             📅 ${pub.publishedDate || '2026'}
           </span>
-          <button class="card-action-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); window.toggleFavorite('${pub.id}')" title="${isFav ? 'Remove from bookmarks' : 'Bookmark publication'}" style="width:32px; height:32px;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="${isFav ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px; height:16px;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-            </svg>
-          </button>
+          <span style="font-size:12px; color:var(--text-secondary); font-weight:500;">
+            ${escapeHtml(pub.eventName || pub.journal || '')}
+          </span>
         </div>
+        <button class="card-action-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); window.toggleFavorite('${pub.id}')" title="${isFav ? 'Remove from bookmarks' : 'Bookmark publication'}" style="width:32px; height:32px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="${isFav ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px; height:16px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+          </svg>
+        </button>
       </div>
 
       <h3 class="pub-card-title" onclick="window.openPublicationModal('${pub.id}')" style="cursor:pointer;" title="Click to view details">${escapeHtml(pub.title)}</h3>
       
-      <div class="pub-card-authors">
+      <div class="pub-card-authors" style="margin-bottom:16px;">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:var(--text-tertiary);flex-shrink:0;">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
         </svg>
         <span style="font-weight:500;">${escapeHtml(pub.authors || '1Cell.Ai Research Team')}</span>
-        <span style="color:var(--text-tertiary);">•</span>
-        <span style="color:var(--text-secondary);">${escapeHtml(pub.eventName || pub.journal || '')}</span>
       </div>
 
-      <div class="pub-card-abstract">
-        <strong style="color:var(--text-primary); display:block; margin-bottom:4px; font-size:11.5px; text-transform:uppercase; letter-spacing:0.02em;">Abstract / Executive Summary:</strong>
-        <span>${escapeHtml(displayText)}</span>
-        ${needsTruncate ? `
-          <button onclick="event.stopPropagation(); window.toggleAbstractExpand('${pub.id}')" style="background:none; border:none; color:var(--accent-color); font-size:12px; font-weight:600; cursor:pointer; padding:0; margin-left:6px; text-decoration:underline;">
-            ${isExpanded ? 'Show Less' : 'Show Full Abstract'}
-          </button>
-        ` : ''}
-      </div>
-
-      <div class="pub-card-footer">
-        <div class="pub-card-citation">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;color:var(--text-tertiary);flex-shrink:0;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-          </svg>
-          <span><strong>Citation:</strong> ${escapeHtml(pub.citation || '')}</span>
-        </div>
-
-        <div class="pub-card-actions">
-          <button class="btn-outline" style="padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="event.stopPropagation(); window.copyPublicationCitation('${pub.id}')" title="Copy reference citation">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-            </svg>
-            <span>Copy Citation</span>
-          </button>
-          
-          <button class="btn-outline" style="padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:5px;" onclick="event.stopPropagation(); window.openPublicationModal('${pub.id}')" title="View complete metadata and details">
+      <div class="pub-card-footer" style="border-top:1px solid var(--border-color); padding-top:14px; margin-top:auto; display:flex; justify-content:flex-end; align-items:center;">
+        <div class="pub-card-actions" style="display:flex; align-items:center; gap:8px;">
+          <button class="btn-outline" style="padding:6px 14px; font-size:12.5px; display:inline-flex; align-items:center; gap:5px;" onclick="event.stopPropagation(); window.openPublicationModal('${pub.id}')" title="View complete metadata and details">
             <span>Details</span>
           </button>
 
-          <a href="${escapeHtml(pub.link || '#')}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="padding:6px 14px; font-size:12px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation();">
+          <a href="${escapeHtml(pub.link || '#')}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="padding:6px 16px; font-size:12.5px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" onclick="event.stopPropagation();">
             <span>View ${pub.contentType === 'Poster' ? 'Poster' : (pub.contentType === 'Abstract' ? 'Abstract' : 'Publication')}</span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -5423,12 +5357,17 @@ function renderPublications() {
       }
     }
 
-    // 2. Filter by event (ASCO, ESMO, AACR, Other)
+    // 2. Filter by 1Cell product
+    if (pubProductFilter !== 'all') {
+      if (pub.relatedProduct !== pubProductFilter) return false;
+    }
+
+    // 3. Filter by event (ASCO, ESMO, AACR, Other)
     if (pubEventFilter !== 'all') {
       if (pub.eventType !== pubEventFilter) return false;
     }
 
-    // 3. Filter by content type (Abstract, Journal, Poster)
+    // 4. Filter by content type (Abstract, Journal, Poster)
     if (pubContentTypeFilter !== 'all') {
       if (pub.contentType !== pubContentTypeFilter) return false;
     }
@@ -5438,9 +5377,9 @@ function renderPublications() {
 
   const totalCount = allPubs.length;
   const filteredCount = filteredPubs.length;
-  const hasActiveFilters = Boolean(pubSearchQuery || pubEventFilter !== 'all' || pubContentTypeFilter !== 'all');
+  const hasActiveFilters = Boolean(pubSearchQuery || pubEventFilter !== 'all' || pubContentTypeFilter !== 'all' || pubProductFilter !== 'all');
 
-  // Counts for pills
+  // Counts for pills & dropdowns
   const ascoCount = allPubs.filter(p => p.eventType === 'ASCO').length;
   const esmoCount = allPubs.filter(p => p.eventType === 'ESMO').length;
   const aacrCount = allPubs.filter(p => p.eventType === 'AACR').length;
@@ -5449,6 +5388,16 @@ function renderPublications() {
   const abstractCount = allPubs.filter(p => p.contentType === 'Abstract').length;
   const journalCount = allPubs.filter(p => p.contentType === 'Journal').length;
   const posterCount = allPubs.filter(p => p.contentType === 'Poster').length;
+
+  // Available products for dropdown filter
+  const productOrder = ['oncoindx', 'oncomonitor', 'oncoctc', 'oncoalibrex', 'oncopredikt', 'icore', 'primeplus', 'oncotarget', 'oncohrd'];
+  const availableProducts = (db.products || [])
+    .filter(p => productOrder.includes(p.id) || allPubs.some(pub => pub.relatedProduct === p.id))
+    .sort((a, b) => {
+      const countA = allPubs.filter(pub => pub.relatedProduct === a.id).length;
+      const countB = allPubs.filter(pub => pub.relatedProduct === b.id).length;
+      return countB - countA;
+    });
 
   workspaceViewport.innerHTML = `
     ${window.renderCategoryHeader ? window.renderCategoryHeader('1Cell.Ai Publications, Abstracts & Posters', 'A peer-reviewed scientific repository of clinical validations, conference abstracts, journal articles, and poster presentations across ASCO, ESMO, AACR, and major oncology forums.', 'publications') : `
@@ -5499,6 +5448,18 @@ function renderPublications() {
 
       <!-- Select Dropdowns Row -->
       <div class="pub-filter-selects-row">
+        <!-- 1Cell Product Filter Dropdown -->
+        <div class="pub-select-group">
+          <label for="pubProductSelect">Filter by 1Cell Product</label>
+          <select id="pubProductSelect" onchange="window.setPubFilter('product', this.value)">
+            <option value="all" ${pubProductFilter === 'all' ? 'selected' : ''}>All 1Cell Products (${totalCount})</option>
+            ${availableProducts.map(p => {
+              const count = allPubs.filter(pub => pub.relatedProduct === p.id).length;
+              return `<option value="${p.id}" ${pubProductFilter === p.id ? 'selected' : ''}>🧬 ${escapeHtml(p.name)} [${count}]</option>`;
+            }).join('')}
+          </select>
+        </div>
+
         <!-- Event Filter Dropdown -->
         <div class="pub-select-group">
           <label for="pubEventSelect">Event / Conference Filter</label>
@@ -5525,6 +5486,21 @@ function renderPublications() {
 
       <!-- Quick Interactive Pills Row -->
       <div class="pub-pills-row">
+        <span class="pub-pills-label">Product:</span>
+        <button class="pub-filter-pill ${pubProductFilter === 'all' ? 'active' : ''}" onclick="window.setPubFilter('product', 'all')">
+          All Products
+        </button>
+        ${availableProducts.filter(p => allPubs.some(pub => pub.relatedProduct === p.id)).map(p => {
+          const count = allPubs.filter(pub => pub.relatedProduct === p.id).length;
+          return `
+            <button class="pub-filter-pill ${pubProductFilter === p.id ? 'active' : ''}" onclick="window.setPubFilter('product', '${p.id}')">
+              ${escapeHtml(p.name)} (${count})
+            </button>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="pub-pills-row" style="margin-top:8px;">
         <span class="pub-pills-label">Event:</span>
         <button class="pub-filter-pill ${pubEventFilter === 'all' ? 'active' : ''}" onclick="window.setPubFilter('event', 'all')">
           All Events
