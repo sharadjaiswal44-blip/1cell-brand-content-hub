@@ -5299,7 +5299,7 @@ function renderPublicationCard(pub) {
       <div class="pub-card-top" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <div style="display:flex; align-items:center; gap:8px;">
           <span style="font-size:12px; font-weight:600; color:var(--text-tertiary); background:var(--bg-tertiary); padding:4px 10px; border-radius:6px;">
-            📅 ${pub.publishedDate || '2026'}
+            ${pub.publishedDate || '2026'}
           </span>
           <span style="font-size:12px; color:var(--text-secondary); font-weight:500;">
             ${escapeHtml(pub.eventName || pub.journal || '')}
@@ -5448,89 +5448,40 @@ function renderPublications() {
 
       <!-- Select Dropdowns Row -->
       <div class="pub-filter-selects-row">
-        <!-- 1Cell Product Filter Dropdown -->
+        <!-- Product Filter Dropdown -->
         <div class="pub-select-group">
-          <label for="pubProductSelect">Filter by 1Cell Product</label>
+          <label for="pubProductSelect">Product:</label>
           <select id="pubProductSelect" onchange="window.setPubFilter('product', this.value)">
-            <option value="all" ${pubProductFilter === 'all' ? 'selected' : ''}>All 1Cell Products (${totalCount})</option>
+            <option value="all" ${pubProductFilter === 'all' ? 'selected' : ''}>All Products (${totalCount})</option>
             ${availableProducts.map(p => {
               const count = allPubs.filter(pub => pub.relatedProduct === p.id).length;
-              return `<option value="${p.id}" ${pubProductFilter === p.id ? 'selected' : ''}>🧬 ${escapeHtml(p.name)} [${count}]</option>`;
+              return `<option value="${p.id}" ${pubProductFilter === p.id ? 'selected' : ''}>${escapeHtml(p.name)} (${count})</option>`;
             }).join('')}
           </select>
         </div>
 
         <!-- Event Filter Dropdown -->
         <div class="pub-select-group">
-          <label for="pubEventSelect">Event / Conference Filter</label>
+          <label for="pubEventSelect">Event:</label>
           <select id="pubEventSelect" onchange="window.setPubFilter('event', this.value)">
-            <option value="all" ${pubEventFilter === 'all' ? 'selected' : ''}>All Events & Journals (${totalCount})</option>
-            <option value="ASCO" ${pubEventFilter === 'ASCO' ? 'selected' : ''}>🎯 ASCO (American Society of Clinical Oncology) [${ascoCount}]</option>
-            <option value="ESMO" ${pubEventFilter === 'ESMO' ? 'selected' : ''}>🌍 ESMO (European Society for Medical Oncology) [${esmoCount}]</option>
-            <option value="AACR" ${pubEventFilter === 'AACR' ? 'selected' : ''}>🔬 AACR (American Association for Cancer Research) [${aacrCount}]</option>
-            <option value="Other" ${pubEventFilter === 'Other' ? 'selected' : ''}>📚 Peer-Reviewed Journals & Other [${otherEventCount}]</option>
+            <option value="all" ${pubEventFilter === 'all' ? 'selected' : ''}>All Events (${totalCount})</option>
+            <option value="ASCO" ${pubEventFilter === 'ASCO' ? 'selected' : ''}>ASCO (${ascoCount})</option>
+            <option value="ESMO" ${pubEventFilter === 'ESMO' ? 'selected' : ''}>ESMO (${esmoCount})</option>
+            <option value="AACR" ${pubEventFilter === 'AACR' ? 'selected' : ''}>AACR (${aacrCount})</option>
+            <option value="Other" ${pubEventFilter === 'Other' ? 'selected' : ''}>Peer-Reviewed Journals & Other (${otherEventCount})</option>
           </select>
         </div>
 
-        <!-- Content Type Filter Dropdown -->
+        <!-- Type Filter Dropdown -->
         <div class="pub-select-group">
-          <label for="pubContentTypeSelect">Content Type Filter</label>
+          <label for="pubContentTypeSelect">Type:</label>
           <select id="pubContentTypeSelect" onchange="window.setPubFilter('contentType', this.value)">
-            <option value="all" ${pubContentTypeFilter === 'all' ? 'selected' : ''}>All Content Types (${totalCount})</option>
-            <option value="Abstract" ${pubContentTypeFilter === 'Abstract' ? 'selected' : ''}>📝 Abstracts (${abstractCount})</option>
-            <option value="Journal" ${pubContentTypeFilter === 'Journal' ? 'selected' : ''}>📖 Journal Articles (${journalCount})</option>
-            <option value="Poster" ${pubContentTypeFilter === 'Poster' ? 'selected' : ''}>📊 Posters (${posterCount})</option>
+            <option value="all" ${pubContentTypeFilter === 'all' ? 'selected' : ''}>All Types (${totalCount})</option>
+            <option value="Abstract" ${pubContentTypeFilter === 'Abstract' ? 'selected' : ''}>Abstract (${abstractCount})</option>
+            <option value="Journal" ${pubContentTypeFilter === 'Journal' ? 'selected' : ''}>Journal (${journalCount})</option>
+            <option value="Poster" ${pubContentTypeFilter === 'Poster' ? 'selected' : ''}>Poster (${posterCount})</option>
           </select>
         </div>
-      </div>
-
-      <!-- Quick Interactive Pills Row -->
-      <div class="pub-pills-row">
-        <span class="pub-pills-label">Product:</span>
-        <button class="pub-filter-pill ${pubProductFilter === 'all' ? 'active' : ''}" onclick="window.setPubFilter('product', 'all')">
-          All Products
-        </button>
-        ${availableProducts.filter(p => allPubs.some(pub => pub.relatedProduct === p.id)).map(p => {
-          const count = allPubs.filter(pub => pub.relatedProduct === p.id).length;
-          return `
-            <button class="pub-filter-pill ${pubProductFilter === p.id ? 'active' : ''}" onclick="window.setPubFilter('product', '${p.id}')">
-              ${escapeHtml(p.name)} (${count})
-            </button>
-          `;
-        }).join('')}
-      </div>
-
-      <div class="pub-pills-row" style="margin-top:8px;">
-        <span class="pub-pills-label">Event:</span>
-        <button class="pub-filter-pill ${pubEventFilter === 'all' ? 'active' : ''}" onclick="window.setPubFilter('event', 'all')">
-          All Events
-        </button>
-        <button class="pub-filter-pill ${pubEventFilter === 'ASCO' ? 'active' : ''}" onclick="window.setPubFilter('event', 'ASCO')">
-          🎯 ASCO (${ascoCount})
-        </button>
-        <button class="pub-filter-pill ${pubEventFilter === 'ESMO' ? 'active' : ''}" onclick="window.setPubFilter('event', 'ESMO')">
-          🌍 ESMO (${esmoCount})
-        </button>
-        <button class="pub-filter-pill ${pubEventFilter === 'AACR' ? 'active' : ''}" onclick="window.setPubFilter('event', 'AACR')">
-          🔬 AACR (${aacrCount})
-        </button>
-        <button class="pub-filter-pill ${pubEventFilter === 'Other' ? 'active' : ''}" onclick="window.setPubFilter('event', 'Other')">
-          📚 Journals (${otherEventCount})
-        </button>
-
-        <span class="pub-pills-label" style="margin-left:14px;">Type:</span>
-        <button class="pub-filter-pill ${pubContentTypeFilter === 'all' ? 'active' : ''}" onclick="window.setPubFilter('contentType', 'all')">
-          All Types
-        </button>
-        <button class="pub-filter-pill ${pubContentTypeFilter === 'Abstract' ? 'active' : ''}" onclick="window.setPubFilter('contentType', 'Abstract')">
-          📝 Abstract (${abstractCount})
-        </button>
-        <button class="pub-filter-pill ${pubContentTypeFilter === 'Journal' ? 'active' : ''}" onclick="window.setPubFilter('contentType', 'Journal')">
-          📖 Journal (${journalCount})
-        </button>
-        <button class="pub-filter-pill ${pubContentTypeFilter === 'Poster' ? 'active' : ''}" onclick="window.setPubFilter('contentType', 'Poster')">
-          📊 Poster (${posterCount})
-        </button>
       </div>
     </div>
 
